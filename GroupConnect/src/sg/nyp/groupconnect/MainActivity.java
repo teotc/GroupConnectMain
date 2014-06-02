@@ -82,7 +82,7 @@ public class MainActivity extends FragmentActivity {
 	        
 	            
 	            if (mMap!=null){
-	              Marker hamburg = mMap.addMarker(new MarkerOptions().position(singapore)
+	              Marker sgp = mMap.addMarker(new MarkerOptions().position(singapore)
 	                  .title("Singapore"));
 	              Marker kiel = mMap.addMarker(new MarkerOptions()
 	                  .position(somewhere)
