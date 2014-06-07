@@ -1,8 +1,4 @@
-INDEX VERSION 1.126+C:\Users\TeoTC\Documents\GitHub\GroupConnectMain\GroupConnect\.metadata\.plugins\org.eclipse.jdt.core
-576050593.index
+INDEX VERSION 1.126+C:\Users\TeoTC\Documents\GitHub\GroupConnectMain\.metadata\.plugins\org.eclipse.jdt.core
 3718277120.index
-1852254799.index
-848856923.index
-1120563708.index
 98963842.index
-755123012.index
+848856923.index
