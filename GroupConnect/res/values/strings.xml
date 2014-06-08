@@ -6,5 +6,6 @@
     <string name="hello_world">Hello world!</string>
     <string name="contDesc_Search">Search</string>
     <string name="searchMenu_category">Category</string>
+    <string name="searchMenu_grpfilter">Group Filter</string>
 
 </resources>

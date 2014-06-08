@@ -327,6 +327,7 @@ containing a value of this type.
         public static final int zOrderOnTop=0x7f010010;
     }
     public static final class color {
+        public static final int avocado=0x7f05001a;
         public static final int common_action_bar_splitter=0x7f050009;
         /**  Sign-in Button Colors 
          */
@@ -339,8 +340,12 @@ containing a value of this type.
         public static final int common_signin_btn_light_text_disabled=0x7f050006;
         public static final int common_signin_btn_light_text_focused=0x7f050007;
         public static final int common_signin_btn_light_text_pressed=0x7f050005;
-        public static final int common_signin_btn_text_dark=0x7f050017;
-        public static final int common_signin_btn_text_light=0x7f050018;
+        public static final int common_signin_btn_text_dark=0x7f05001d;
+        public static final int common_signin_btn_text_light=0x7f05001e;
+        public static final int darker_gray=0x7f05001b;
+        public static final int gray_t_50=0x7f050017;
+        public static final int gray_t_70=0x7f050018;
+        public static final int lighter_gray=0x7f05001c;
         public static final int wallet_bright_foreground_disabled_holo_light=0x7f05000f;
         /** 
          Wallet colors to support consistent Wallet fragment holo dark UI in client application
@@ -359,8 +364,9 @@ containing a value of this type.
         public static final int wallet_hint_foreground_holo_light=0x7f050011;
         public static final int wallet_holo_blue_light=0x7f050015;
         public static final int wallet_link_text_light=0x7f050016;
-        public static final int wallet_primary_text_holo_light=0x7f050019;
-        public static final int wallet_secondary_text_holo_dark=0x7f05001a;
+        public static final int wallet_primary_text_holo_light=0x7f05001f;
+        public static final int wallet_secondary_text_holo_dark=0x7f050020;
+        public static final int white=0x7f050019;
     }
     public static final class dimen {
         /**  Default screen margins, per the Android Design guidelines. 
@@ -407,7 +413,7 @@ containing a value of this type.
         public static final int powered_by_google_light=0x7f02001f;
     }
     public static final class id {
-        public static final int action_settings=0x7f060018;
+        public static final int action_settings=0x7f06001e;
         public static final int book_now=0x7f060010;
         public static final int buyButton=0x7f06000a;
         public static final int buy_now=0x7f06000f;
@@ -417,20 +423,26 @@ containing a value of this type.
         public static final int holo_dark=0x7f060005;
         public static final int holo_light=0x7f060006;
         public static final int hybrid=0x7f060004;
-        public static final int imgBnSearch=0x7f060015;
-        public static final int linlaySearchMenu=0x7f060016;
-        public static final int map=0x7f060014;
+        public static final int imgBnSearch=0x7f060018;
+        public static final int linLayControls=0x7f060017;
+        public static final int map=0x7f060015;
         public static final int match_parent=0x7f06000c;
         public static final int monochrome=0x7f060013;
         public static final int none=0x7f060000;
         public static final int normal=0x7f060001;
         public static final int production=0x7f060007;
+        public static final int relLayFilterHolder=0x7f060019;
+        public static final int relLayMainCont=0x7f060014;
+        public static final int relLaySearchMenu=0x7f060016;
         public static final int sandbox=0x7f060008;
         public static final int satellite=0x7f060002;
         public static final int selectionDetails=0x7f06000b;
-        public static final int spCategory=0x7f060017;
+        public static final int spCategory=0x7f06001b;
+        public static final int spGrpFilter=0x7f06001d;
         public static final int strict_sandbox=0x7f060009;
         public static final int terrain=0x7f060003;
+        public static final int tvCategoryLb=0x7f06001a;
+        public static final int tvGrpFilterLb=0x7f06001c;
         public static final int wrap_content=0x7f06000d;
     }
     public static final class integer {
@@ -543,6 +555,7 @@ containing a value of this type.
         public static final int contDesc_Search=0x7f040023;
         public static final int hello_world=0x7f040022;
         public static final int searchMenu_category=0x7f040024;
+        public static final int searchMenu_grpfilter=0x7f040025;
         /**  Text on a placeholder buy button when Google Play services is not
          available or up-to-date 
          */

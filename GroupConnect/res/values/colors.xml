@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="gray_t_50">#7FC0C0C0</color>
+    <color name="gray_t_70">#B2C0C0C0</color>
+    <color name="white">#FFFFFF</color>
+    <color name="avocado">#999966</color>
+    <color name="darker_gray">#aaa</color>
+    <color name="lighter_gray">#ddd</color>
+
+</resources>
