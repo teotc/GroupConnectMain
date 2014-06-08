@@ -33,12 +33,21 @@
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>            
+            </intent-filter>
         </activity>
-        
+        <activity android:name="sg.nyp.groupconnect.PieChartBuilder" />
+        <activity android:name="org.achartengine.GraphicalActivity" />
+        <!-- Geraldine's API Key -->
+        <!--
+        	<meta-data
+            android:name="com.google.android.maps.v2.API_KEY"
+            android:value="AIzaSyDMBMbJCOTyWhp08XnGkDSeIF7AxB020AE" />
+        -->
+		
+		<!-- TC's API Key -->
         <meta-data
-                android:name="com.google.android.maps.v2.API_KEY"
-                android:value="AIzaSyAGoZpcDCxO4P59kUlAYDFhyxY4EZvVOQA" />
+            android:name="com.google.android.maps.v2.API_KEY"
+            android:value="AIzaSyAGoZpcDCxO4P59kUlAYDFhyxY4EZvVOQA" />
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />

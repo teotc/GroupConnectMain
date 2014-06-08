@@ -3,10 +3,14 @@ package sg.nyp.groupconnect;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.achartengine.*;
+import org.achartengine.chart.BarChart.*;
+import org.achartengine.renderer.*;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -16,10 +20,12 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
+import android.widget.Toast;
 
-import utilities.JSONParser;
+import utilities.*;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -27,13 +33,20 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MainActivity extends FragmentActivity {
-
+	
+	// Common
 	static final LatLng singapore = new LatLng(1.352083, 103.819836);
 	static final LatLng somewhere = new LatLng(1.352083, 90);
 	/* private GoogleMap map; */
-
 	private GoogleMap mMap;
+	
+	//Geraldine
+	private static final int SERIES_NR = 2;
+	static final LatLng cwp = new LatLng(1.436518, 103.786314);
+	static final LatLng nex = new LatLng(1.350541, 103.871890);
+	static final LatLng nyp = new LatLng(1.379622, 103.849887);
 
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -43,14 +56,16 @@ public class MainActivity extends FragmentActivity {
 		// Managed by TC
 		// Loads categories and group filters
 		generateControlsOverlay(savedInstanceState);
+		// Managed by Geraldine
+		infoWindowSetup(savedInstanceState);
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
 		setUpMapIfNeeded();
-		
-		//Load Category data
+
+		// Load Category data
 		new LoadCategories().execute();
 	}
 
@@ -98,17 +113,32 @@ public class MainActivity extends FragmentActivity {
 		// 103.819836)).title("Marker"));
 
 		if (mMap != null) {
-			Marker sgp = mMap.addMarker(new MarkerOptions().position(singapore)
-					.title("Singapore"));
-			Marker kiel = mMap.addMarker(new MarkerOptions()
-					.position(somewhere)
-					.title("Kiel")
-					.snippet("Kiel is cool")
+			Marker cwp1 = mMap.addMarker(new MarkerOptions()
+					.position(cwp)
+					.title("Causeway Point")
+					.snippet("Bar Graph")
 					.icon(BitmapDescriptorFactory
-							.fromResource(R.drawable.ic_launcher)));
+							.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+
+			Marker nex1 = mMap.addMarker(new MarkerOptions()
+					.position(nex)
+					.title("Serangoon Nex")
+					.snippet("Line Graph")
+					.icon(BitmapDescriptorFactory
+							.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+
+			Marker nyp1 = mMap
+					.addMarker(new MarkerOptions()
+							.position(nyp)
+							.title("Nanyang Polytechnic")
+							.snippet("Pie Chart")
+							.icon(BitmapDescriptorFactory
+									.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW)));
+			// .icon(BitmapDescriptorFactory
+			// .fromResource(R.drawable.ic_launcher)));
 
 			// Move the camera instantly to Singapore with a zoom of 15.
-			mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(singapore, 15));
+			mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(singapore, 8));
 
 			// Zoom in, animating the camera.
 			mMap.animateCamera(CameraUpdateFactory.zoomIn());
@@ -120,14 +150,45 @@ public class MainActivity extends FragmentActivity {
 		}
 	}
 
+	private void infoWindowSetup(Bundle savedInstanceState) {
+		mMap.setOnInfoWindowClickListener(new OnInfoWindowClickListener() {
+			@Override
+			public void onInfoWindowClick(Marker marker) {
+				AChartClasses ac = new AChartClasses();
+				if (marker.getTitle().equals("Causeway Point")) {
+					XYMultipleSeriesRenderer renderer = ac.getBarDemoRenderer();
+					ac.setChartSettings(renderer);
+					Intent intent = ChartFactory.getBarChartIntent(
+							MainActivity.this, ac.getBarDemoDataset(SERIES_NR), renderer,
+							Type.DEFAULT);
+					startActivity(intent);
+				} else if (marker.getTitle().equals("Serangoon Nex")) {
+					Intent intent = ChartFactory.getLineChartIntent(
+							MainActivity.this, ac.getDemoDataset(SERIES_NR),
+							ac.getDemoRenderer());
+					startActivity(intent);
+
+				} else if (marker.getTitle().equals("Nanyang Polytechnic")) {
+					Intent myIntent = new Intent(MainActivity.this,
+							PieChartBuilder.class);
+					startActivity(myIntent);
+
+				} else
+					Toast.makeText(MainActivity.this, "Wrong",
+							Toast.LENGTH_SHORT).show();
+
+			}
+		});
+	}
+
 	// Below has edited code w/ some comments removed/edited
 	// From http://www.mybringback.com/series/android-intermediate/
 
 	// Progress Dialog
 	private ProgressDialog pDialog;
 	// testing from a real server:
-	private static final String LOAD_CATEGORY_URL = "http://" +
-			"www.it3197Project.3eeweb.com/webservice/uigeneration/categories.php";
+	private static final String LOAD_CATEGORY_URL = "http://"
+			+ "www.it3197Project.3eeweb.com/webservice/uigeneration/categories.php";
 
 	// JSON IDS:
 	private static final String TAG_SUCCESS = "success";
@@ -208,7 +269,7 @@ public class MainActivity extends FragmentActivity {
 		// when parsing JSON stuff, we should probably
 		// try to catch any exceptions:
 		try {
-			
+
 			// mCategories will tell us how many mCategories are available
 			mCategories = json.getJSONArray(TAG_CATEGORIES);
 
@@ -260,8 +321,7 @@ public class MainActivity extends FragmentActivity {
 		final Spinner spCategory;
 		spCategory = (Spinner) findViewById(R.id.spCategory);
 
-		ArrayAdapter<HashMap<String, String>> ad 
-			= new ArrayAdapter<HashMap<String, String>>(
+		ArrayAdapter<HashMap<String, String>> ad = new ArrayAdapter<HashMap<String, String>>(
 				this, android.R.layout.simple_list_item_activated_1,
 				mCategoriesList);
 		spCategory.setAdapter(ad);
