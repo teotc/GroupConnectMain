@@ -3,26 +3,35 @@ package sg.nyp.groupconnect;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.achartengine.*;
-import org.achartengine.chart.BarChart.*;
-import org.achartengine.renderer.*;
+import org.achartengine.ChartFactory;
+import org.achartengine.chart.BarChart.Type;
+import org.achartengine.renderer.XYMultipleSeriesRenderer;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import utilities.AChartClasses;
+import utilities.JSONParser;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import utilities.*;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
@@ -33,20 +42,20 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MainActivity extends FragmentActivity {
-	
+
 	// Common
 	static final LatLng singapore = new LatLng(1.352083, 103.819836);
 	static final LatLng somewhere = new LatLng(1.352083, 90);
+	BroadcastReceiver networkStateReceiver;
 	/* private GoogleMap map; */
 	private GoogleMap mMap;
-	
-	//Geraldine
+
+	// Geraldine
 	private static final int SERIES_NR = 2;
 	static final LatLng cwp = new LatLng(1.436518, 103.786314);
 	static final LatLng nex = new LatLng(1.350541, 103.871890);
 	static final LatLng nyp = new LatLng(1.379622, 103.849887);
 
-	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -54,7 +63,7 @@ public class MainActivity extends FragmentActivity {
 		setUpMapIfNeeded();
 
 		// Managed by TC
-		// Loads categories and group filters
+		// Loads map controls overlay
 		generateControlsOverlay(savedInstanceState);
 		// Managed by Geraldine
 		infoWindowSetup(savedInstanceState);
@@ -65,8 +74,18 @@ public class MainActivity extends FragmentActivity {
 		super.onResume();
 		setUpMapIfNeeded();
 
-		// Load Category data
-		new LoadCategories().execute();
+		// Managed by TC
+		// Loads categories and group filters
+		loadServerInfo();
+
+	}
+	
+	@Override
+	protected void onStop() {
+		// TODO Auto-generated method stub
+		super.onStop();
+		// Prevent leakage
+		unregisterReceiver(networkStateReceiver);
 	}
 
 	/**
@@ -159,8 +178,8 @@ public class MainActivity extends FragmentActivity {
 					XYMultipleSeriesRenderer renderer = ac.getBarDemoRenderer();
 					ac.setChartSettings(renderer);
 					Intent intent = ChartFactory.getBarChartIntent(
-							MainActivity.this, ac.getBarDemoDataset(SERIES_NR), renderer,
-							Type.DEFAULT);
+							MainActivity.this, ac.getBarDemoDataset(SERIES_NR),
+							renderer, Type.DEFAULT);
 					startActivity(intent);
 				} else if (marker.getTitle().equals("Serangoon Nex")) {
 					Intent intent = ChartFactory.getLineChartIntent(
@@ -172,7 +191,7 @@ public class MainActivity extends FragmentActivity {
 					Intent myIntent = new Intent(MainActivity.this,
 							PieChartBuilder.class);
 					startActivity(myIntent);
-					
+
 				} else
 					Toast.makeText(MainActivity.this, "Wrong",
 							Toast.LENGTH_SHORT).show();
@@ -183,6 +202,14 @@ public class MainActivity extends FragmentActivity {
 
 	// Below has edited code w/ some comments removed/edited
 	// From http://www.mybringback.com/series/android-intermediate/
+
+	// private boolean isNetworkAvailable() {
+	// ConnectivityManager connectivityManager
+	// = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+	// NetworkInfo activeNetworkInfo = connectivityManager
+	// .getActiveNetworkInfo();
+	// return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+	// }
 
 	// Progress Dialog
 	private ProgressDialog pDialog;
@@ -254,10 +281,6 @@ public class MainActivity extends FragmentActivity {
 	public void updateJSONdata() {
 
 		// Instantiate the arraylist to contain all the JSON data.
-		// we are going to use a bunch of key-value pairs, referring
-		// to the json element name, and the content, for example,
-		// message it the tag, and "I'm awesome" as the content..
-
 		mCategoriesList = new ArrayList<HashMap<String, String>>();
 
 		// Bro, it's time to power up the J parser
@@ -290,8 +313,8 @@ public class MainActivity extends FragmentActivity {
 				// adding HashList to ArrayList
 				mCategoriesList.add(map);
 
-				// annndddd, our JSON data is up to date same with our array
-				// list
+				// annndddd, our JSON data is up to date
+				// same with our array list
 			}
 
 		} catch (JSONException e) {
@@ -325,6 +348,20 @@ public class MainActivity extends FragmentActivity {
 				this, android.R.layout.simple_list_item_activated_1,
 				mCategoriesList);
 		spCategory.setAdapter(ad);
+		
+		spCategory.setOnItemSelectedListener(new OnItemSelectedListener() {
+			@Override
+			public void onItemSelected(AdapterView<?> arg0, View arg1,
+					int arg2, long arg3) {
+				//mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(singapore, 8));
+				mMap.animateCamera(CameraUpdateFactory.zoomIn());
+				mMap.animateCamera(CameraUpdateFactory.zoomTo(12), 2000, null);
+			}
+			@Override
+			public void onNothingSelected(AdapterView<?> arg0) {
+				// TODO Auto-generated method stub
+			}
+		});
 
 		// Optional: when the user clicks a list item we
 		// could do something. However, we will choose
@@ -369,6 +406,29 @@ public class MainActivity extends FragmentActivity {
 			pDialog.dismiss();
 			updateList();
 		}
+	}
+
+	private void loadServerInfo() {
+		// Check for network
+		networkStateReceiver = new BroadcastReceiver() {
+			@Override
+			public void onReceive(Context context, Intent intent) {
+				boolean connected = intent.getBooleanExtra(
+						"EXTRA_NO_CONNECTIVITY", false);
+				// if connected load categories
+				if (!connected) {
+					new LoadCategories().execute();
+				} else {
+					Toast.makeText(MainActivity.this,
+							"No Network, New Categories not available",
+							Toast.LENGTH_LONG).show();
+				}
+				Log.w("Network Listener", "No Connected Networks");
+			}
+		};
+		IntentFilter filter = new IntentFilter(
+				ConnectivityManager.CONNECTIVITY_ACTION);
+		registerReceiver(networkStateReceiver, filter);
 	}
 
 }// MainActivity
