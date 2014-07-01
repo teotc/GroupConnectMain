@@ -29,6 +29,23 @@
         <activity
             android:name="sg.nyp.groupconnect.MainActivity"
             android:label="@string/app_name" >
+        </activity>
+        <activity
+            android:name="sg.nyp.groupconnect.LoginActivity"
+            android:label="@string/title_activity_login"
+            android:windowSoftInputMode="adjustResize|stateVisible" >
+        </activity>
+        <activity
+            android:name="sg.nyp.groupconnect.Menu"
+            android:label="@string/title_activity_menu" >
+        </activity>
+        <activity
+            android:name="sg.nyp.groupconnect.Register"
+            android:label="@string/title_activity_register" >
+        </activity>
+        <activity
+            android:name="sg.nyp.groupconnect.Login"
+            android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -41,16 +58,29 @@
         <!--
         	<meta-data
             android:name="com.google.android.maps.v2.API_KEY"
-            android:value="AIzaSyDMBMbJCOTyWhp08XnGkDSeIF7AxB020AE" />
+            android:value="AIzaSyDMBMbJCOTyWhp08XnGkDSeIF7AxB020AE" />
         -->
-		
-		<!-- TC's API Key -->
+        <!--
+        TC's API Key 
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
-            android:value="AIzaSyAGoZpcDCxO4P59kUlAYDFhyxY4EZvVOQA" />
+            android:value="AIzaSyAGoZpcDCxO4P59kUlAYDFhyxY4EZvVOQA" />
+        -->
+        <meta-data
+            android:name="com.google.android.maps.v2.API_KEY"
+            android:value="AIzaSyBgCqtWSR8uC54F9oejiOQ8WwwRKln7MtQ" />
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
+
+        <service android:name="sg.nyp.groupconnect.TestService" >
+        </service>
+
+        <receiver android:name="sg.nyp.groupconnect.ConnectivityReceiver" >
+            <intent-filter>
+                <action android:name="sg.nyp.groupconnect.NETWORK_CONNECTED_INTENT" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

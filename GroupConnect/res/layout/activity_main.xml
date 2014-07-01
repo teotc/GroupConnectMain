@@ -14,8 +14,8 @@
         android:id="@+id/relLaySearchMenu"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true" >
+        android:layout_centerInParent="true"
+        android:layout_marginTop="99dp" >
 
         <LinearLayout
             android:id="@+id/linLayControls"
@@ -30,7 +30,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:contentDescription="@string/contDesc_Search"
+                android:contentDescription="@string/title_search"
                 android:cropToPadding="true"
                 android:scaleType="fitXY"
                 android:src="@drawable/ic_menu_search" />
@@ -43,7 +43,7 @@
             android:layout_toLeftOf="@id/linLayControls"
             android:background="@drawable/layout_bg"
             android:padding="20dp"
-            android:visibility="gone" >
+            android:visibility="visible" >
 
             <TextView
                 android:id="@+id/tvCategoryLb"
@@ -56,7 +56,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/tvCategoryLb"
-                android:layout_marginLeft="20dp" />
+                android:layout_marginLeft="20dp"
+                android:background="@drawable/layout_bg" />
 
             <TextView
                 android:id="@+id/tvGrpFilterLb"
@@ -70,7 +71,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/tvGrpFilterLb"
-                android:layout_marginLeft="20dp" />
+                android:layout_marginLeft="20dp"
+                android:background="@drawable/layout_bg" />
         </RelativeLayout>
     </RelativeLayout>
 

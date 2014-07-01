@@ -2,6 +2,7 @@ package sg.nyp.groupconnect;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.achartengine.ChartFactory;
 import org.achartengine.chart.BarChart.Type;
@@ -10,6 +11,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import sg.nyp.groupconnect.db.DbAdaptor;
 import utilities.AChartClasses;
 import utilities.JSONParser;
 import android.app.ProgressDialog;
@@ -17,6 +19,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -50,6 +53,8 @@ public class MainActivity extends FragmentActivity {
 	/* private GoogleMap map; */
 	private GoogleMap mMap;
 
+	DbAdaptor myDB;
+
 	// Geraldine
 	private static final int SERIES_NR = 2;
 	static final LatLng cwp = new LatLng(1.436518, 103.786314);
@@ -76,16 +81,18 @@ public class MainActivity extends FragmentActivity {
 
 		// Managed by TC
 		// Loads categories and group filters
-		loadServerInfo();
+		// loadServerInfo();
+		new LoadCategories().execute();
+
+		myDB = new DbAdaptor(this);
+		myDB.open();
 
 	}
-	
+
 	@Override
 	protected void onStop() {
 		// TODO Auto-generated method stub
 		super.onStop();
-		// Prevent leakage
-		unregisterReceiver(networkStateReceiver);
 	}
 
 	/**
@@ -348,15 +355,17 @@ public class MainActivity extends FragmentActivity {
 				this, android.R.layout.simple_list_item_activated_1,
 				mCategoriesList);
 		spCategory.setAdapter(ad);
-		
+
 		spCategory.setOnItemSelectedListener(new OnItemSelectedListener() {
 			@Override
 			public void onItemSelected(AdapterView<?> arg0, View arg1,
 					int arg2, long arg3) {
-				//mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(singapore, 8));
+				// mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(singapore,
+				// 8));
 				mMap.animateCamera(CameraUpdateFactory.zoomIn());
 				mMap.animateCamera(CameraUpdateFactory.zoomTo(12), 2000, null);
 			}
+
 			@Override
 			public void onNothingSelected(AdapterView<?> arg0) {
 				// TODO Auto-generated method stub
@@ -408,27 +417,23 @@ public class MainActivity extends FragmentActivity {
 		}
 	}
 
-	private void loadServerInfo() {
-		// Check for network
-		networkStateReceiver = new BroadcastReceiver() {
-			@Override
-			public void onReceive(Context context, Intent intent) {
-				boolean connected = intent.getBooleanExtra(
-						"EXTRA_NO_CONNECTIVITY", false);
-				// if connected load categories
-				if (!connected) {
-					new LoadCategories().execute();
-				} else {
-					Toast.makeText(MainActivity.this,
-							"No Network, New Categories not available",
-							Toast.LENGTH_LONG).show();
-				}
-				Log.w("Network Listener", "No Connected Networks");
-			}
-		};
-		IntentFilter filter = new IntentFilter(
-				ConnectivityManager.CONNECTIVITY_ACTION);
-		registerReceiver(networkStateReceiver, filter);
-	}
+//	private void retrieveLongLatEntries() {
+//		List<String> longLatList = new ArrayList<String>();
+//
+//		Cursor myCursor;
+//		String myString = "";
+//
+//		myCursor = myDB.retrieveAllEntriesCursor();
+//
+//		if (myCursor != null && myCursor.getCount() > 0) {
+//			myCursor.moveToFirst();
+//			do {
+//				myString = myCursor.getString(myDB.COLUMN_LONGITUDE_ID) + ";"
+//						+ myCursor.getString(myDB.COLUMN_LATITUDE_ID) + ";"
+//						+ myCursor.getString(myDB.COLUMN_AREA_NAME_ID);
+//				longLatList.add(myString);
+//			} while (myCursor.moveToNext());
+//		}
+//	}
 
 }// MainActivity
