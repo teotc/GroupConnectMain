@@ -1,0 +1,139 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical">
+   
+    
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" 
+        android:layout_marginBottom="10dp"
+        android:orientation="horizontal">
+
+        <TextView
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="Title of the Room: " />
+   
+	    <TextView
+	        android:id="@+id/tvTitle"
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content"
+	        android:text="" />
+        
+    </LinearLayout>
+	    
+   	<LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" 
+        android:layout_marginBottom="10dp"
+        android:orientation="horizontal">
+
+	    <TextView
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="Category: " />
+	    
+	    <TextView
+	        android:id="@+id/tvCategory"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="" />
+        
+    </LinearLayout>
+    
+    
+    
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" 
+        android:layout_marginBottom="10dp"
+        android:orientation="horizontal">
+
+	    <TextView
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="Location: " />
+    
+	    <TextView
+	        android:id="@+id/tvLocation"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="" />
+        
+    </LinearLayout>
+    
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" 
+        android:layout_marginBottom="10dp"
+        android:orientation="horizontal">
+
+	<TextView
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="Educator: " />
+	
+	<TextView
+	        android:id="@+id/tvNoOfEducator"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="" />
+	
+	</LinearLayout>
+
+	<ListView
+	    android:id="@+id/educatorList"
+	    android:layout_width="match_parent" 
+	    android:layout_height="wrap_content">
+	</ListView>
+	
+	<LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" 
+        android:layout_marginBottom="10dp"
+        android:orientation="horizontal">
+
+	    <TextView
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="No. of Learner: " />
+
+	     <TextView
+	        android:id="@+id/tvNoOfLearner"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="" />
+        
+    </LinearLayout>
+	
+	<ListView
+	    android:id="@+id/learnerList"
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content" >
+	</ListView>
+     
+     <Button
+            android:id="@+id/btnDone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Done" />
+     
+     <Button
+            android:id="@+id/btnJoin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:text="Join" />
+     
+     <Button
+            android:id="@+id/btnUpdate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Update" />
+     
+     
+
+</LinearLayout>
+
+

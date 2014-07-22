@@ -1,11 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">GroupConnect</string>
+    <string name="app_name">Group Connect</string>
+
+    <string-array name="titles">
+        <item>Profile</item>
+        <item>Home</item>
+        <item>Favourite</item>
+        <item>Setting</item>
+        <item>Help</item>
+    </string-array>
+
+    <array name="icons">
+        <item>@drawable/profile</item>
+        <item>@drawable/home</item>
+        <item>@drawable/favorite</item>
+        <item>@drawable/setting</item>
+        <item>@drawable/help</item>
+    </array>
+
+    <string-array name="roles">
+        <item>Learner</item>
+        <item>Educator</item>
+    </string-array>
+    <string-array name="roles_extended">
+        <item>Learner</item>
+        <item>Educator</item>
+        <item>Organisation</item>
+    </string-array>
+    
+    <string-array name="spDistUnits">
+        <item>KM</item>
+        <item>M</item>
+    </string-array>
+
+    <string name="activity_room_info_title">Title: </string>
+    <string name="activity_room_info_category">Category: </string>
+    <string name="activity_room_info_location">Location: </string>
+    <string name="activity_room_info_educator">Educator: </string>
+    <string name="activity_room_info_learner">Learner: </string>
+    <string name="activity_room_info_done">Done: </string>
+    <string name="activity_room_info_join">Join: </string>
+    <string name="activity_room_info_update">Update: </string>
+    <string name="title_activity_fragment_grouplist">Groups</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
-    <string name="contDesc_Search">Search</string>
-    <string name="searchMenu_category">Category</string>
-    <string name="searchMenu_grpfilter">Group Filter</string>
+    <!-- Alfred -->
+    <string name="title_activity_room_info">RoomInfo</string>
+    <string name="title_activity_create_rm">CreateRm</string>
+    <string name="title_activity_room_details">Room Details</string>
+    <string name="title_activity_manage_room">ManageRoom</string>
+    <string name="title_activity_notification_display">NotificationDisplay</string>
 
 </resources>
