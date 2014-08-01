@@ -1,25 +1,31 @@
 package sg.nyp.groupconnect.utilities;
 
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.achartengine.ChartFactory;
 import org.achartengine.GraphicalView;
 import org.achartengine.model.CategorySeries;
 import org.achartengine.model.SeriesSelection;
 import org.achartengine.renderer.DefaultRenderer;
 import org.achartengine.renderer.SimpleSeriesRenderer;
-
-import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import sg.nyp.groupconnect.Map;
 import sg.nyp.groupconnect.R;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
@@ -29,8 +35,12 @@ import android.widget.Toast;
 
 public class VotingfPieChartBuilder extends Activity {
 	/** Colors to be used for the pie slices. */
-	private static int[] COLORS = new int[] { Color.GREEN, Color.BLUE,
-			Color.MAGENTA, Color.CYAN, Color.RED, Color.YELLOW };
+	private static int[] COLORS = new int[] { 
+		Color.rgb(22, 160, 133), Color.rgb(26, 188, 156), 
+		Color.rgb(39, 174, 96), Color.rgb(46, 204, 113), 
+		Color.rgb(241, 196, 15), Color.rgb(243, 156, 18), 
+		Color.rgb(230, 126, 34), Color.rgb(211, 84, 0), 
+		Color.rgb(231, 76, 60), Color.rgb(192, 57, 43)};
 	/** The main series that will include all the data. */
 	private CategorySeries mSeries = new CategorySeries("");
 	/** The main renderer for the main dataset. */
@@ -40,9 +50,15 @@ public class VotingfPieChartBuilder extends Activity {
 
 	private Bundle extras;
 
-	private String[] array = new String[5];
-	private String[] places = new String[5];
-	private Double[] percentage = new Double[5];
+	private String[] places;
+	private Double[] percentage;
+	private String highLocation;
+	private int highLocationId;
+	private int confirm;
+	private int num;
+
+	private int stat;
+	private String currentRoomId;
 
 	private Button btnFinal;
 
@@ -53,19 +69,23 @@ public class VotingfPieChartBuilder extends Activity {
 
 		extras = getIntent().getExtras();
 		if (extras != null) {
-			places = extras.getStringArray("PlacesArray");
-			array = extras.getStringArray("PercentageArray");
+			currentRoomId = extras.getString("CURRENT_ROOM_ID");
+			stat = extras.getInt("CREATOR_STATUS");
 		}
 
-		for (int i = 0; i < percentage.length; i++) {
-			percentage[i] = Double.parseDouble(array[i]);
-		}
+		ActionBar actionBar = getActionBar();
+		actionBar.setIcon(R.drawable.back);
+		actionBar.setHomeButtonEnabled(true);
+
+		btnFinal = (Button) findViewById(R.id.btnFinal);
+
+		if (stat != 1) {
+			btnFinal.setVisibility(View.GONE);
+		} else
+			btnFinal.setVisibility(View.VISIBLE);
 
 		TextView tw = (TextView) findViewById(R.id.Chart_Tittle);
 		tw.setText("Voting Result");
-
-		btnFinal = (Button) findViewById(R.id.btnFinal);
-		btnFinal.setVisibility(View.VISIBLE);
 
 		mRenderer.setZoomButtonsVisible(true);
 		mRenderer.setStartAngle(180);
@@ -77,14 +97,10 @@ public class VotingfPieChartBuilder extends Activity {
 		mRenderer.setLegendTextSize(25f);
 		mRenderer.setLabelsColor(Color.WHITE);
 		mRenderer.setLabelsTextSize(20f);
+		mRenderer.setPanEnabled(false);
 
-		for (int i = 0; i < percentage.length; i++) {
-			mSeries.add(places[i], percentage[i]);
-			SimpleSeriesRenderer renderer = new SimpleSeriesRenderer();
-			renderer.setColor(COLORS[(mSeries.getItemCount() - 1)
-					% COLORS.length]);
-			mRenderer.addSeriesRenderer(renderer);
-		}
+		new RetrieveResult().execute();
+
 	}
 
 	@Override
@@ -107,37 +123,12 @@ public class VotingfPieChartBuilder extends Activity {
 									i == seriesSelection.getPointIndex());
 						}
 						mChartView.repaint();
-						if (seriesSelection.getPointIndex() == 0) {
-							Toast.makeText(
-									VotingfPieChartBuilder.this,
-									seriesSelection.getValue()
-											+ " people voted for " + places[0]
-											+ ".", Toast.LENGTH_SHORT).show();
-						} else if (seriesSelection.getPointIndex() == 1) {
-							Toast.makeText(
-									VotingfPieChartBuilder.this,
-									seriesSelection.getValue()
-											+ " people voted for " + places[1]
-											+ ".", Toast.LENGTH_SHORT).show();
-						} else if (seriesSelection.getPointIndex() == 2) {
-							Toast.makeText(
-									VotingfPieChartBuilder.this,
-									seriesSelection.getValue()
-											+ " people voted for " + places[2]
-											+ ".", Toast.LENGTH_SHORT).show();
-						} else if (seriesSelection.getPointIndex() == 3) {
-							Toast.makeText(
-									VotingfPieChartBuilder.this,
-									seriesSelection.getValue()
-											+ " people voted for " + places[3]
-											+ ".", Toast.LENGTH_SHORT).show();
-						} else if (seriesSelection.getPointIndex() == 4) {
-							Toast.makeText(
-									VotingfPieChartBuilder.this,
-									seriesSelection.getValue()
-											+ " people voted for " + places[4]
-											+ ".", Toast.LENGTH_SHORT).show();
-						}
+						Toast.makeText(
+								VotingfPieChartBuilder.this,
+								seriesSelection.getValue()
+										+ " people voted for " + places[0]
+										+ ".", Toast.LENGTH_SHORT).show();
+
 					}
 				}
 			});
@@ -159,88 +150,16 @@ public class VotingfPieChartBuilder extends Activity {
 		alertDialogBuilder
 				.setMessage("Are you sure you want to finalize the location?")
 				.setCancelable(false)
-				.setNegativeButton("No",
-						new DialogInterface.OnClickListener() {
-							public void onClick(
-									DialogInterface dialog,
-									int id) {
-								dialog.cancel();
-							}
-						})
+				.setNegativeButton("No", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						dialog.cancel();
+					}
+				})
 				.setPositiveButton("Yes",
 						new DialogInterface.OnClickListener() {
-							public void onClick(
-									DialogInterface dialog,
-									int id) {
+							public void onClick(DialogInterface dialog, int id) {
+								new FinalizeLocation().execute();
 
-								double max = percentage[0];
-								int pos = 0;
-
-								for (int i = 0; i < percentage.length; i++) {
-									if (percentage[i] > max) {
-										max = percentage[i];
-										pos = i;
-									}
-								}
-								Map.mMap.clear();
-
-								switch (pos) {
-								case 0:
-									LatLng coordinate1 = new LatLng(1.325424, 103.932386);
-
-									Marker bcl = Map.mMap.addMarker(new MarkerOptions()
-											.position(coordinate1)
-											.title("Bedok Community Library")
-											.icon(BitmapDescriptorFactory
-													.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-									break;
-								case 1:
-									LatLng coordinate2 = new LatLng(1.333661, 103.854108);
-
-									Marker tppl = Map.mMap.addMarker(new MarkerOptions()
-											.position(coordinate2)
-											.title("Toa Payoh Public Library")
-											.icon(BitmapDescriptorFactory
-													.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-									break;
-								case 2:
-									LatLng coordinate3 = new LatLng(1.378967, 103.849988);
-
-									Marker amkpl = Map.mMap.addMarker(new MarkerOptions()
-											.position(coordinate3)
-											.title("Ang Mo Kio Public Library")
-											.icon(BitmapDescriptorFactory
-													.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-
-									break;
-								case 3:
-									LatLng coordinate4 = new LatLng(1.370730, 103.895307);
-
-									Marker hgpl = Map.mMap.addMarker(new MarkerOptions()
-											.position(coordinate4)
-											.title("Cheng San Public Library")
-											.icon(BitmapDescriptorFactory
-													.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-
-									break;
-								case 4:
-									LatLng coordinate5 = new LatLng(1.429764, 103.840375);
-
-									Marker ypl = Map.mMap.addMarker(new MarkerOptions()
-											.position(coordinate5)
-											.title("Yishun Public Library")
-											.icon(BitmapDescriptorFactory
-													.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-									break;
-								}
-								Map.mMap
-										.setOnInfoWindowClickListener(new OnInfoWindowClickListener() {
-											@Override
-											public void onInfoWindowClick(final Marker marker) {
-
-											}
-										});
-								VotingfPieChartBuilder.this.finish();
 							}
 						});
 
@@ -249,5 +168,241 @@ public class VotingfPieChartBuilder extends Activity {
 
 		// show it
 		alertDialog.show();
+	}
+
+	class RetrieveResult extends AsyncTask<String, String, String> {
+
+		/**
+		 * Before starting background thread Show Progress Dialog
+		 * */
+		boolean failure = false;
+		public int success;
+
+		// Database
+		private ProgressDialog pDialog;
+
+		JSONParser jsonParser = new JSONParser();
+
+		private static final String RETRIEVE_VOTE_URL = "http://www.it3197Project.3eeweb.com/grpConnect/statics/retrieveVoteResult.php";
+
+		private static final String TAG_SUCCESS = "success";
+		private static final String TAG_MESSAGE = "message";
+		private static final String TAG_ARRAY = "posts";
+
+		private static final String TAG_NUM = "num";
+		private static final String TAG_LOCATIONID = "locationId";
+		private static final String TAG_NAME = "name";
+		private static final String TAG_COUNTVALUE = "countValue";
+		private static final String TAG_STATUS = "status";
+		private static final String TAG_LOCATION = "location";
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			pDialog = new ProgressDialog(Map.context);
+			pDialog.setMessage("Retreiving data...");
+			pDialog.setIndeterminate(false);
+			pDialog.setCancelable(false);
+			pDialog.show();
+		}
+
+		@Override
+		protected String doInBackground(String... args) {
+			// Check for success tag
+
+			try {
+				// Building Parameters
+				List<NameValuePair> params = new ArrayList<NameValuePair>();
+				params.add(new BasicNameValuePair("roomId", currentRoomId));
+
+				// getting product details by making HTTP request
+				JSONObject json = jsonParser.makeHttpRequest(RETRIEVE_VOTE_URL,
+						"POST", params);
+
+				// json success tag
+				success = json.getInt(TAG_SUCCESS);
+
+				places = new String[json.getJSONArray(TAG_ARRAY).length()];
+				percentage = new Double[json.getJSONArray(TAG_ARRAY).length()];
+
+				int max = 0;
+
+				DecimalFormat df = new DecimalFormat("#.00");
+
+				for (int i = 0; i < json.getJSONArray(TAG_ARRAY).length(); i++) {
+
+					JSONObject c = json.getJSONArray(TAG_ARRAY)
+							.getJSONObject(i);
+
+					num = c.getInt(TAG_NUM);
+
+					if (num == 1) {
+						places[i] = c.getString(TAG_NAME);
+						
+						double score = (Double.parseDouble(Integer
+								.toString(c.getInt(TAG_COUNTVALUE))))
+								/ json.getJSONArray(TAG_ARRAY).length() * 100;
+						
+						percentage[i] = Double.parseDouble(df.format(score));
+
+						if (c.getString(TAG_STATUS).equals("final")) {
+							confirm = 1;
+						}
+
+						if (c.getInt(TAG_COUNTVALUE) > max) {
+							highLocationId = c.getInt(TAG_LOCATIONID);
+							max = c.getInt(TAG_COUNTVALUE);
+							highLocation = c.getString(TAG_LOCATION);
+							highLocationId = c.getInt(TAG_LOCATIONID);
+						}
+					}
+				}
+
+				if (success == 1) {
+					return json.getString(TAG_MESSAGE);
+				} else {
+					return json.getString(TAG_MESSAGE);
+
+				}
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+
+			return null;
+
+		}
+
+		/**
+		 * After completing background task Dismiss the progress dialog
+		 * **/
+		protected void onPostExecute(String file_url) {
+			// dismiss the dialog once product deleted
+			pDialog.dismiss();
+			for (int i = 0; i < percentage.length; i++) {
+				mSeries.add(places[i], percentage[i]);
+				SimpleSeriesRenderer renderer = new SimpleSeriesRenderer();
+				renderer.setColor(COLORS[(mSeries.getItemCount() - 1)
+						% COLORS.length]);
+				mRenderer.addSeriesRenderer(renderer);
+			}
+			mChartView.repaint();
+
+			if (num == 1) {
+				if (confirm == 1) {
+					btnFinal.setVisibility(View.GONE);
+				}
+
+			} else {
+				AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+						VotingfPieChartBuilder.this);
+
+				// set dialog message
+				alertDialogBuilder
+						.setMessage("Sorry. Voting have not start.")
+						.setCancelable(false)
+						.setNegativeButton("Okay",
+								new DialogInterface.OnClickListener() {
+									public void onClick(DialogInterface dialog,
+											int id) {
+										dialog.cancel();
+										VotingfPieChartBuilder.this.finish();
+									}
+								});
+
+				// create alert dialog
+				AlertDialog alertDialog = alertDialogBuilder.create();
+
+				// show it
+				alertDialog.show();
+			}
+
+		}
+	}
+
+	class FinalizeLocation extends AsyncTask<String, String, String> {
+
+		/**
+		 * Before starting background thread Show Progress Dialog
+		 * */
+		boolean failure = false;
+		public int success;
+
+		// Database
+		private ProgressDialog pDialog;
+
+		JSONParser jsonParser = new JSONParser();
+
+		private static final String RETRIEVE_VOTE_URL = "http://www.it3197Project.3eeweb.com/grpConnect/statics/updateVote.php";
+
+		private static final String TAG_SUCCESS = "success";
+		private static final String TAG_MESSAGE = "message";
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			pDialog = new ProgressDialog(Map.context);
+			pDialog.setMessage("Finalizing...");
+			pDialog.setIndeterminate(false);
+			pDialog.setCancelable(false);
+			pDialog.show();
+		}
+
+		@Override
+		protected String doInBackground(String... args) {
+			// Check for success tag
+
+			try {
+				// Building Parameters
+				List<NameValuePair> params = new ArrayList<NameValuePair>();
+				params.add(new BasicNameValuePair("locationId", Integer
+						.toString(highLocationId)));
+				params.add(new BasicNameValuePair("location", highLocation));
+				params.add(new BasicNameValuePair("roomId", currentRoomId));
+
+				// getting product details by making HTTP request
+				JSONObject json = jsonParser.makeHttpRequest(RETRIEVE_VOTE_URL,
+						"POST", params);
+
+				// json success tag
+				success = json.getInt(TAG_SUCCESS);
+
+				if (success == 1) {
+					return json.getString(TAG_MESSAGE);
+				} else {
+					return json.getString(TAG_MESSAGE);
+
+				}
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+
+			return null;
+
+		}
+
+		/**
+		 * After completing background task Dismiss the progress dialog
+		 * **/
+		protected void onPostExecute(String file_url) {
+			// dismiss the dialog once product deleted
+			pDialog.dismiss();
+			if (success == 1) {
+				btnFinal.setVisibility(View.GONE);
+				Toast.makeText(VotingfPieChartBuilder.this,
+						"You have finalize the location.", Toast.LENGTH_LONG)
+						.show();
+			}
+		}
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case android.R.id.home:
+			VotingfPieChartBuilder.this.finish();
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
 	}
 }

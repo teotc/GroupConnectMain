@@ -1,20 +1,32 @@
 package sg.nyp.groupconnect;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
-import org.json.*;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-import sg.nyp.groupconnect.utilities.*;
+import sg.nyp.groupconnect.notification.AppServices;
+import sg.nyp.groupconnect.utilities.JSONParser;
 
-import android.app.*;
-import android.content.*;
-import android.content.SharedPreferences.*;
-import android.os.*;
+import com.google.android.gcm.GCMRegistrar;
+
+import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
+import android.os.AsyncTask;
+import android.os.Bundle;
 import android.util.Log;
-import android.view.*;
-import android.widget.*;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
 import android.preference.PreferenceManager;
 import android.view.View.OnClickListener;
 
@@ -36,22 +48,21 @@ public class Login extends Activity implements OnClickListener {
 	private static final String TAG_MESSAGE = "message";
 	private static final String TAG_TYPE = "type";
 	private static final String TAG_ID = "id";
+	private static final String TAG_UUID = "device";
+	private static final String TAG_HOME = "homeLocation";
+
+	private static final String MEM_UPDATE_DEVICE_URL = "http://www.it3197Project.3eeweb.com/grpConnect/memUpdate.php";
+	static String deviceUUID = "";
+
+	public static void setDeviceUUID(String uuid) {
+		deviceUUID = uuid;
+
+	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_login);
-		
-		SharedPreferences sp = PreferenceManager
-				.getDefaultSharedPreferences(Login.this);
-		String username = sp.getString("username", null);
-		String password = sp.getString("password", null);
-
-		// if (username != null && password != null) {
-		// Intent i = new Intent(Login.this, MainActivity.class);
-		// finish();
-		// startActivity(i);
-		// }
 
 		// setup input fields
 		etUser = (EditText) findViewById(R.id.activity_login_etUser);
@@ -60,20 +71,35 @@ public class Login extends Activity implements OnClickListener {
 		// setup buttons
 		btnLogin = (Button) findViewById(R.id.activity_login_btnLogin);
 
+		// To prepare for push notification START
+
+		// this is a hack to force AsyncTask to be initialized on main thread.
+		// Without this things
+		// won't work correctly on older versions of Android (2.2, apilevel=8)
+
+		try {
+			Class.forName("android.os.AsyncTask");
+		} catch (Exception ignored) {
+		}
+
+		GCMRegistrar.checkDevice(this);
+		GCMRegistrar.checkManifest(this);
+
+		AppServices.loginAndRegisterForPush(this);
+
+		// To prepare for push notification END
+
 		// register listeners
 		btnLogin.setOnClickListener(this);
 
 	}
 
 	public void onClick(View v) {
-		// TODO Auto-generated method stub
-		switch (v.getId()) {
-		case R.id.activity_login_btnLogin:
-			new AttemptLogin().execute();
-			break;
 
-		default:
-			break;
+		int itemId = v.getId();
+		if (itemId == R.id.activity_login_btnLogin) {
+			new AttemptLogin().execute();
+
 		}
 	}
 
@@ -85,7 +111,7 @@ public class Login extends Activity implements OnClickListener {
 			pDialog = new ProgressDialog(Login.this);
 			pDialog.setMessage("Attempting login...");
 			pDialog.setIndeterminate(false);
-			pDialog.setCancelable(true);
+			pDialog.setCancelable(false);
 			pDialog.show();
 		}
 
@@ -118,20 +144,37 @@ public class Login extends Activity implements OnClickListener {
 					SharedPreferences sp = PreferenceManager
 							.getDefaultSharedPreferences(Login.this);
 					Editor edit = sp.edit();
-					edit.putString("password", password);
 					edit.putString("username", username);
 					String type = json.getString(TAG_TYPE);
 					edit.putString("type", type);
 					String id = json.getString(TAG_ID);
 					edit.putString("id", id);
+					String homeLocation = json.getString(TAG_HOME);
+					edit.putString("home", homeLocation);
+					String uuid = json.getString(TAG_UUID);
 					
-					edit.putString("interestedSub", json.getString("interestedSub"));
-					edit.putString("homeLocation", json.getString("homeLocation"));
-					
+					edit.putString("interestedSub",
+							json.getString("interestedSub"));
+					edit.putString("homeLocation",
+							json.getString("homeLocation"));
+
+					// edit.putString("device", uuid);
 					edit.commit();
+					// if (uuid.equals(""))
+					// {
+					updateUserDevice();
+					Log.i("Login",
+							"Hello: " + sp.getString("device", "No Device"));
+					// }
+					// else
+					// {
+					edit.commit();
+					// }
+
 					Intent i = new Intent(Login.this, MainActivity.class);
 					finish();
 					startActivity(i);
+
 					return json.getString(TAG_MESSAGE);
 				} else {
 					Log.d("Login Failure!", json.getString(TAG_MESSAGE));
@@ -156,6 +199,15 @@ public class Login extends Activity implements OnClickListener {
 
 	}
 
+	public void updateUserDevice() {
+
+		new MemDeviceUpdate().execute();
+		SharedPreferences sp1 = PreferenceManager
+				.getDefaultSharedPreferences(Login.this);
+		String hello = sp1.getString("device", "No Device");
+		Log.i("Login", "Hello: " + hello);
+	}
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 
@@ -172,8 +224,85 @@ public class Login extends Activity implements OnClickListener {
 		int id = item.getItemId();
 		if (id == R.id.action_settings) {
 			return true;
+		} else if (id == R.id.action_magiclogin_tc) {
+			etUser.setText("tc");
+			etPass.setText("tc");
+			new AttemptLogin().execute();
 		}
 		return super.onOptionsItemSelected(item);
+	}
+
+	class MemDeviceUpdate extends AsyncTask<String, String, String> {
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			/*
+			 * pDialog = new ProgressDialog(ManageRoom.this);
+			 * pDialog.setMessage("Updating...");
+			 * pDialog.setIndeterminate(false); pDialog.setCancelable(true);
+			 * pDialog.show();
+			 */
+		}
+
+		@Override
+		protected String doInBackground(String... args) {
+			// TODO Auto-generated method stub
+			// Check for success tag
+			int success;
+			SharedPreferences sp = PreferenceManager
+					.getDefaultSharedPreferences(Login.this);
+			Editor edit = sp.edit();
+			String post_memId = sp.getString("id", "No Id");
+			String post_device = deviceUUID;
+			Log.i("LoginUpdate", post_memId + " / " + post_device);
+
+			try {
+				// Building Parameters
+				List<NameValuePair> params = new ArrayList<NameValuePair>();
+				params.add(new BasicNameValuePair("id", post_memId));
+				params.add(new BasicNameValuePair("device", post_device));
+
+				Log.d("request!", "starting");
+
+				// Posting user data to script
+				JSONObject json = jsonParser.makeHttpRequest(
+						MEM_UPDATE_DEVICE_URL, "POST", params);
+
+				// full json response
+				Log.d("Post Comment attempt", json.toString());
+
+				// json success element
+				success = json.getInt(TAG_SUCCESS);
+				if (success == 1) {
+					Log.d("Comment Added!", json.toString());
+
+					edit.putString("device", post_device);
+					edit.commit();
+					return json.getString(TAG_MESSAGE);
+				} else {
+					Log.d("Comment Failure!", json.getString(TAG_MESSAGE));
+					return json.getString(TAG_MESSAGE);
+
+				}
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+
+			return null;
+
+		}
+
+		protected void onPostExecute(String file_url) {
+			// dismiss the dialog once product deleted
+			// pDialog.dismiss();
+			if (file_url != null) {
+				// Toast.makeText(ManageRoom.this, file_url,
+				// Toast.LENGTH_LONG).show();
+			}
+
+		}
+
 	}
 
 }

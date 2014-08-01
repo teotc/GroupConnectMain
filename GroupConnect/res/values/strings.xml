@@ -28,7 +28,6 @@
         <item>Educator</item>
         <item>Organisation</item>
     </string-array>
-    
     <string-array name="spDistUnits">
         <item>KM</item>
         <item>M</item>
@@ -51,5 +50,16 @@
     <string name="title_activity_room_details">Room Details</string>
     <string name="title_activity_manage_room">ManageRoom</string>
     <string name="title_activity_notification_display">NotificationDisplay</string>
+    <string name="title_activity_create_rm_step2">CreateRmStep2</string>
+    
+    <!-- Push Notification -->
+    <string name="send_notification">Send myself a Notification</string>
+    <string name="gcm_error">GCM error (%1$s).</string>
+    <string name="gcm_recoverable_error">GCM recoverable error (%1$s).</string>
+    <string name="gcm_deleted">GCM server deleted %1$d pending messages!</string>
+    <string name="gcm_registered">Device Registered: (%1$s).</string>
+    <string name="gcm_unregistered">Device Unregistered: (%1$s).</string>
+    <string name="gcm_alert_title">Message</string>
+    <string name="gcm_message">Message: (%1$s)</string>
 
 </resources>

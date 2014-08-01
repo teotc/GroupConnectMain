@@ -132,6 +132,22 @@
             android:layout_height="wrap_content"
             android:text="Update" />
      
+     <Button
+        android:id="@+id/vote"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:onClick="Vote"
+        android:text="Vote" />
+
+    <Button
+        android:id="@+id/viewResult"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:onClick="VoteResult"
+        android:text="View Vote Result" />
+     
      
 
 </LinearLayout>

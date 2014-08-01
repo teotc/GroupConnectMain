@@ -10,50 +10,35 @@
         class="com.google.android.gms.maps.SupportMapFragment" />
 
     <RelativeLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="30dp"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true" >
-
-        <Button
-            android:id="@+id/imgBnSearch"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:onClick="dialog"
-            android:background="@drawable/star" />
-    </RelativeLayout>
-
-    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent" >
 
         <SlidingDrawer
-            android:id="@+id/bottom"
+            android:id="@+id/slideDrawer"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
             android:layout_centerVertical="true"
             android:content="@+id/content"
-            android:handle="@+id/handle"
+            android:handle="@+id/btn"
             android:orientation="horizontal" >
 
             <Button
-                android:id="@+id/handle"
+                android:id="@+id/btn"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:background="@drawable/stat" />
+                android:background="@drawable/right" />
 
             <ScrollView
                 android:id="@id/content"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" >
+                android:layout_height="match_parent"
+                android:background="#1C1C1C" >
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="#1C1C1C"
                     android:orientation="vertical"
                     android:padding="10dp" >
 

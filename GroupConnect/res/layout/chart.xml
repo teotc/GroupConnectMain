@@ -15,6 +15,14 @@
         android:textColor="#FFFFFF"
         android:textSize="15dp" />
 
+    <Button
+        android:id="@+id/btnGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:onClick="Group"
+        android:text="Add to group" />
+
     <LinearLayout
         android:id="@+id/Chart_layout"
         android:layout_width="fill_parent"

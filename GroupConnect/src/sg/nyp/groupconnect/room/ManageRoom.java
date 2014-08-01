@@ -9,38 +9,30 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import sg.nyp.groupconnect.utilities.*;
 import sg.nyp.groupconnect.R;
 import sg.nyp.groupconnect.R.id;
 import sg.nyp.groupconnect.R.layout;
 import sg.nyp.groupconnect.R.menu;
+import sg.nyp.groupconnect.utilities.JSONParser;
 
 
 import android.app.Activity;
-import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
-import android.app.DialogFragment;
-import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-import android.os.Build;
-import android.preference.PreferenceManager;
 
 public class ManageRoom extends Activity {
 	

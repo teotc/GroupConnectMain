@@ -8,24 +8,20 @@ import sg.nyp.groupconnect.item.fragment_help;
 import sg.nyp.groupconnect.item.fragment_home;
 import sg.nyp.groupconnect.item.fragment_profile;
 import sg.nyp.groupconnect.item.fragment_setting;
-import sg.nyp.groupconnect.learner.Search_Group;
+import sg.nyp.groupconnect.room.RoomMap;
+import sg.nyp.groupconnect.room.RoomsRetrieve;
 import sg.nyp.groupconnect.service.GrpRmPullService;
 import sg.nyp.groupconnect.utilities.CustomAdapter;
 import sg.nyp.groupconnect.utilities.RowItem;
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.app.IntentService;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
@@ -34,7 +30,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.Toast;
 
 public class MainActivity extends Activity {
 
@@ -190,7 +185,7 @@ public class MainActivity extends Activity {
 		// Handle action bar actions click
 		switch (item.getItemId()) {
 		case R.id.groups:
-			intent = new Intent(MainActivity.this, Search_Group.class);
+			intent = new Intent(MainActivity.this, RoomsRetrieve.class);
 			startActivity(intent);
 			return true;
 		case R.id.map:
@@ -198,7 +193,7 @@ public class MainActivity extends Activity {
 			startActivity(intent);
 			return true;
 		case R.id.edu:
-			intent = new Intent(MainActivity.this, MapActivity.class);
+			intent = new Intent(MainActivity.this, RoomMap.class);
 			startActivity(intent);
 			return true;
 		default:

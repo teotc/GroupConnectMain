@@ -2,8 +2,6 @@ package sg.nyp.groupconnect.data;
 
 import sg.nyp.groupconnect.R;
 import sg.nyp.groupconnect.learner.GrpRoomListExt;
-import sg.nyp.groupconnect.learner.GrpRoomListing;
-
 import java.util.ArrayList;
 
 import android.content.Context;
@@ -49,12 +47,18 @@ public class GrpRoomListExtAdapter extends BaseAdapter {
 		TextView lmTitle = (TextView) v.findViewById(R.id.lmTitle);
 		TextView lmCategory = (TextView) v.findViewById(R.id.lmCategory);
 		TextView lmLocation = (TextView) v.findViewById(R.id.lmLocation);
+		TextView lmDist = (TextView) v.findViewById(R.id.lmDistance);
 
-		GrpRoomListing msg = _data.get(position);
+		GrpRoomListExt msg = _data.get(position);
+		
+		//double dist = Double.toString(msg.getDistance());
+		
+		double dist = (double) Math.ceil(msg.getDistance());
 		
 		lmTitle.setText(msg.getTitle());
 		lmCategory.setText("Subject: " + msg.getCategory());
 		lmLocation.setText(msg.getLocation());
+		lmDist.setText(Double.toString(dist)+ "m");
 
 		// image.setOnClickListener(new OnClickListener() {
 		//

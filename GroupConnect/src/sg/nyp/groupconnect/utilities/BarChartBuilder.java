@@ -1,8 +1,5 @@
 package sg.nyp.groupconnect.utilities;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.achartengine.ChartFactory;
 import org.achartengine.GraphicalView;
 import org.achartengine.chart.BarChart.Type;
@@ -11,22 +8,15 @@ import org.achartengine.model.SeriesSelection;
 import org.achartengine.model.XYMultipleSeriesDataset;
 import org.achartengine.renderer.XYMultipleSeriesRenderer;
 import org.achartengine.renderer.XYSeriesRenderer;
-import org.apache.http.NameValuePair;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import sg.nyp.groupconnect.R;
-import sg.nyp.groupconnect.entity.fakeGrades;
-import sg.nyp.groupconnect.entity.fakeMember;
-import sg.nyp.groupconnect.entity.fakeSubjects;
+import android.app.ActionBar;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.graphics.Color;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -36,38 +26,9 @@ public class BarChartBuilder extends Activity {
 
 	private String[] mMonth = new String[] { "result" };
 
-	private int nameId = 0;
 	private Bundle extras;
-	private ArrayList<fakeMember> arrayFakeMember = new ArrayList<fakeMember>();
-	private ArrayList<fakeGrades> arrayFakeGrade = new ArrayList<fakeGrades>();
-	private ArrayList<fakeSubjects> arrayFakeSubject = new ArrayList<fakeSubjects>();
-	private String category;
-	private int resultBefore = 0, resultAfter = 0, categoryId = 0;
-
-	// Database
-	private ProgressDialog pDialog;
-
-	JSONParser jsonParser = new JSONParser();
-
-	private static final String SUBJECT_URL = "http://www.it3197Project.3eeweb.com/grpConnect/retrieveSujects.php";
-	private static final String MEMBER_URL = "http://www.it3197Project.3eeweb.com/grpConnect/retrieveMemberRecord.php";
-	private static final String GRADE_URL = "http://www.it3197Project.3eeweb.com/grpConnect/retrieveMemberGrade.php";
-
-	private static final String TAG_SUCCESS = "success";
-	private static final String TAG_MESSAGE = "message";
-	private static final String TAG_ARRAY = "posts";
-
-	private static final String TAG_ID = "id";
-	private static final String TAG_NAME = "name";
-	private static final String TAG_LATITUDE = "latitude";
-	private static final String TAG_LONGITUDE = "longitude";
-	private static final String TAG_LOCATION = "location";
-	private static final String TAG_GENDER = "gender";
-
-	private static final String TAG_MEMBERID = "memberId";
-	private static final String TAG_SUBJECTID = "subjectId";
-	private static final String TAG_OLDGRADE = "oldGrade";
-	private static final String TAG_NEWGRADE = "newGrade";
+	private String category, name;
+	private double resultBefore = 0, resultAfter = 0;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -76,19 +37,32 @@ public class BarChartBuilder extends Activity {
 
 		extras = getIntent().getExtras();
 		if (extras != null) {
-			nameId = extras.getInt("NameId");
+			name = extras.getString("Name");
 			category = extras.getString("Category");
+			resultBefore= extras.getDouble("oldGrade");
+			resultAfter= extras.getDouble("newGrade");
 		}
-
-		new AttemptDetails().execute();
+		
+		ActionBar actionBar = getActionBar();
+		actionBar.setIcon(R.drawable.back);
+		actionBar.setHomeButtonEnabled(true);
+		
+		TextView tw = (TextView) findViewById(R.id.Chart_Tittle);
+		tw.setText(name + "'s "
+				+ category + " Result");
+		
+		OpenChart();
+		
+		Button btn = (Button) findViewById(R.id.btnGroup);
+		btn.setVisibility(View.GONE);
 	}
 
 	private void OpenChart() {
 		// Define the number of elements you want in the chart.
 		int z[] = { 0 };
 
-		int x[] = { resultBefore };
-		int y[] = { resultAfter };
+		double x[] = { resultBefore };
+		double y[] = { resultAfter };
 
 		// Create XY Series for X Series.
 		CategorySeries xSeries = new CategorySeries("Before");
@@ -138,6 +112,8 @@ public class BarChartBuilder extends Activity {
 		mRenderer.setYAxisMax(100);
 		mRenderer.setBarWidth(250f);
 
+		mRenderer.setZoomEnabled(false, false);
+		
 		mRenderer.setAxisTitleTextSize(20f);
 		mRenderer.setChartTitleTextSize(18f);
 		mRenderer.setLegendTextSize(20f);
@@ -199,256 +175,16 @@ public class BarChartBuilder extends Activity {
 		chart_container.addView(mChart);
 
 	}
-
-	private void alertDialog(String title, String message) {
-		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-
-		// set title
-		alertDialogBuilder.setTitle(title);
-
-		// set dialog message
-		alertDialogBuilder
-				.setMessage(message)
-				.setCancelable(false)
-				.setNegativeButton("Okay",
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								// if this button is clicked, just close
-								// the dialog box and do nothing
-								BarChartBuilder.this.finish();
-							}
-						});
-
-		// create alert dialog
-		AlertDialog alertDialog = alertDialogBuilder.create();
-
-		// show it
-		alertDialog.show();
+	
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+	    switch (item.getItemId()) {
+	        case android.R.id.home:
+	            BarChartBuilder.this.finish();
+	            return true;
+	        default:
+	            return super.onOptionsItemSelected(item);
+	    }
 	}
-
-	class AttemptDetails extends AsyncTask<String, String, String> {
-
-		/**
-		 * Before starting background thread Show Progress Dialog
-		 * */
-		boolean failure = false;
-		public int success;
-
-		@Override
-		protected void onPreExecute() {
-			super.onPreExecute();
-			pDialog = new ProgressDialog(BarChartBuilder.this);
-			pDialog.setMessage("Retreiving data...");
-			pDialog.setIndeterminate(false);
-			pDialog.setCancelable(true);
-			pDialog.show();
-		}
-
-		@Override
-		protected String doInBackground(String... args) {
-			// TODO Auto-generated method stub
-			// Check for success tag
-
-			try {
-				// Building Parameters
-				List<NameValuePair> params = new ArrayList<NameValuePair>();
-
-				// getting product details by making HTTP request
-				JSONObject json = jsonParser.makeHttpRequest(SUBJECT_URL,
-						"POST", params);
-
-				// json success tag
-				success = json.getInt(TAG_SUCCESS);
-				arrayFakeSubject.clear();
-
-				for (int i = 0; i < json.getJSONArray(TAG_ARRAY).length(); i++) {
-
-					JSONObject c = json.getJSONArray(TAG_ARRAY)
-							.getJSONObject(i);
-
-					fakeSubjects fs = new fakeSubjects(c.getInt(TAG_ID),
-							c.getString(TAG_NAME));
-					arrayFakeSubject.add(fs);
-				}
-				if (success == 1) {
-					return json.getString(TAG_MESSAGE);
-				} else {
-					return json.getString(TAG_MESSAGE);
-
-				}
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
-
-			return null;
-
-		}
-
-		/**
-		 * After completing background task Dismiss the progress dialog
-		 * **/
-		protected void onPostExecute(String file_url) {
-			new AttemptMember().execute();
-		}
-
-	}
-
-	class AttemptMember extends AsyncTask<String, String, String> {
-
-		/**
-		 * Before starting background thread Show Progress Dialog
-		 * */
-		boolean failure = false;
-		public int success;
-
-		@Override
-		protected void onPreExecute() {
-			super.onPreExecute();
-
-		}
-
-		@Override
-		protected String doInBackground(String... args) {
-			// TODO Auto-generated method stub
-			// Check for success tag
-
-			try {
-				// Building Parameters
-				List<NameValuePair> params1 = new ArrayList<NameValuePair>();
-
-				// getting product details by making HTTP request
-				JSONObject json1 = jsonParser.makeHttpRequest(MEMBER_URL,
-						"POST", params1);
-
-				// json success tag
-				success = json1.getInt(TAG_SUCCESS);
-				arrayFakeMember.clear();
-
-				for (int i = 0; i < json1.getJSONArray(TAG_ARRAY).length(); i++) {
-
-					JSONObject c = json1.getJSONArray(TAG_ARRAY).getJSONObject(
-							i);
-
-					fakeMember fm = new fakeMember(c.getInt(TAG_ID),
-							c.getString(TAG_NAME), c.getString(TAG_LOCATION),
-							c.getDouble(TAG_LATITUDE),
-							c.getDouble(TAG_LONGITUDE), c.getString(TAG_GENDER));
-					arrayFakeMember.add(fm);
-				}
-				if (success == 1) {
-					return json1.getString(TAG_MESSAGE);
-				} else {
-					return json1.getString(TAG_MESSAGE);
-
-				}
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
-
-			return null;
-
-		}
-
-		/**
-		 * After completing background task Dismiss the progress dialog
-		 * **/
-		protected void onPostExecute(String file_url) {
-			new AttemptGrade().execute();
-		}
-	}
-
-	class AttemptGrade extends AsyncTask<String, String, String> {
-
-		/**
-		 * Before starting background thread Show Progress Dialog
-		 * */
-		boolean failure = false;
-		public int success;
-
-		@Override
-		protected void onPreExecute() {
-			super.onPreExecute();
-
-		}
-
-		@Override
-		protected String doInBackground(String... args) {
-			// TODO Auto-generated method stub
-			// Check for success tag
-
-			try {
-				// Building Parameters
-				List<NameValuePair> params2 = new ArrayList<NameValuePair>();
-
-				// getting product details by making HTTP
-				// request
-				JSONObject json2 = jsonParser.makeHttpRequest(GRADE_URL,
-						"POST", params2);
-
-				// json success tag
-				success = json2.getInt(TAG_SUCCESS);
-				arrayFakeGrade.clear();
-
-				for (int i = 0; i < json2.getJSONArray(TAG_ARRAY).length(); i++) {
-
-					JSONObject c = json2.getJSONArray(TAG_ARRAY).getJSONObject(
-							i);
-
-					fakeGrades fg = new fakeGrades(c.getString(TAG_MEMBERID),
-							c.getString(TAG_SUBJECTID), c.getInt(TAG_OLDGRADE),
-							c.getInt(TAG_NEWGRADE));
-					arrayFakeGrade.add(fg);
-				}
-				if (success == 1) {
-					return json2.getString(TAG_MESSAGE);
-				} else {
-					return json2.getString(TAG_MESSAGE);
-
-				}
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
-			return null;
-
-		}
-
-		/**
-		 * After completing background task Dismiss the progress dialog
-		 * **/
-		protected void onPostExecute(String file_url) {
-			// dismiss the dialog once product deleted
-			pDialog.dismiss();
-			for (int i = 0; i < arrayFakeSubject.size(); i++) {
-				if (arrayFakeSubject.get(i).getName().equals(category)) {
-					categoryId = arrayFakeSubject.get(i).getId();
-				}
-			}
-			for (int j = 0; j < arrayFakeMember.size(); j++) {
-				if (arrayFakeMember.get(j).getId() == nameId) {
-					TextView tw = (TextView) findViewById(R.id.Chart_Tittle);
-					tw.setText(arrayFakeMember.get(j).getName() + "'s "
-							+ category + " Result");
-				}
-			}
-
-			for (int k = 0; k < arrayFakeGrade.size(); k++) {
-				if (arrayFakeGrade.get(k).getMemberId()
-						.equals(Integer.toString(nameId))
-						&& arrayFakeGrade.get(k).getSubjectId()
-								.equals(Integer.toString(categoryId))) {
-
-					resultBefore = arrayFakeGrade.get(k).getOldGrade();
-					resultAfter = arrayFakeGrade.get(k).getNewGrade();
-				}
-			}
-
-			if (resultBefore != 0 && resultAfter != 0) {
-				OpenChart();
-			} else
-				alertDialog("Sorry", "The person you selected did not study "
-						+ category);
-		}
-
-	}
-
 }

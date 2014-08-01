@@ -3,16 +3,20 @@ package sg.nyp.groupconnect.utilities;
 import org.achartengine.ChartFactory;
 import org.achartengine.GraphicalView;
 import org.achartengine.chart.PointStyle;
+
 import sg.nyp.groupconnect.R;
+
 import org.achartengine.model.SeriesSelection;
 import org.achartengine.model.XYMultipleSeriesDataset;
 import org.achartengine.model.XYSeries;
 import org.achartengine.renderer.XYMultipleSeriesRenderer;
 import org.achartengine.renderer.XYSeriesRenderer;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -30,6 +34,10 @@ public class LineChartBuilder extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.chart);
 
+		ActionBar actionBar = getActionBar();
+		actionBar.setIcon(R.drawable.back);
+		actionBar.setHomeButtonEnabled(true);
+		
 		OpenChart();
 	}
 
@@ -146,6 +154,17 @@ public class LineChartBuilder extends Activity {
 		// Add the graphical view mChart object into the Linear layout .
 		chart_container.addView(mChart);
 
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case android.R.id.home:
+			LineChartBuilder.this.finish();
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
 	}
 
 }
