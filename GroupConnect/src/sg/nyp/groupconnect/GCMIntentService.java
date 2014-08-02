@@ -1,4 +1,4 @@
-package sg.nyp.groupconnect.service;
+package sg.nyp.groupconnect;
 
 import android.app.Notification;
 import android.app.NotificationManager;

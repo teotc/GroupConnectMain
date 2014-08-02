@@ -15,7 +15,7 @@ import android.widget.Toast;
 public class GrpRmPullService extends IntentService {
 
 	private GrpRoomDbAdapter mDbHelper;
-	
+
 	// JSON parser class
 	JSONParser jsonParser = new JSONParser();
 
@@ -33,11 +33,14 @@ public class GrpRmPullService extends IntentService {
 	private static final String TAG_USERNAME = "username";
 	private static final String TAG_POSTS = "posts";
 
+	private static final String TAG = "GrpRmPullSvc";
+
 	private JSONArray mRooms = null;
 	private ArrayList<HashMap<String, String>> mRoomList;
 
 	String roomIdR, titleR, locationR, categoryR, noOfLearnerR, latLngR,
 			usernameR;
+
 	// double latR, lngR;
 	// LatLng retrievedLatLng;
 
@@ -49,7 +52,6 @@ public class GrpRmPullService extends IntentService {
 
 	@Override
 	public void onCreate() {
-		// TODO Auto-generated method stub
 		super.onCreate();
 		mDbHelper = new GrpRoomDbAdapter(this);
 		mDbHelper.open();
@@ -58,13 +60,13 @@ public class GrpRmPullService extends IntentService {
 	@Override
 	protected void onHandleIntent(Intent arg0) {
 		// Logging
-		Log.d("GrpRmPullService", "Intent handled");
+		Log.d(TAG, "Intent handled");
 
 		try {
 			new PullRooms().execute();
 
 		} catch (Exception e) {
-			Log.d("GrpRmPullService", "Unable to update database");
+			Log.d(TAG, "Unable to update database");
 			e.printStackTrace();
 		}
 	}
@@ -85,30 +87,18 @@ public class GrpRmPullService extends IntentService {
 		protected String doInBackground(String... args) {
 			try {
 				// getting product details by making HTTP request
-				Log.d("GrpRmPullService", "Getting data from webservice");
-				// Instantiate the arraylist to contain all the JSON data.
-				// we are going to use a bunch of key-value pairs, referring
-				// to the json element name, and the content, for example,
-				// message it the tag, and "I'm awesome" as the content..
+				Log.d(TAG, "Getting data from webservice");
+
 				mRoomList = new ArrayList<HashMap<String, String>>();
 
-				// Bro, it's time to power up the J parser
 				JSONParser jParser = new JSONParser();
-				// Feed the beast our comments url, and it spits us
-				// back a JSON object. Boo-yeah Jerome.
+
 				JSONObject json = jParser.getJSONFromUrl(ROOM_RETRIEVE_URL);
 
-				// when parsing JSON stuff, we should probably
-				// try to catch any exceptions:
 				try {
 
-					// I know I said we would check if "Posts were Avail." (success==1)
-					// before we tried to read the individual posts, but I lied...
-					// mComments will tell us how many "posts" or comments are
-					// available
 					mRooms = json.getJSONArray(TAG_POSTS);
 
-					// looping through all posts according to the json object returned
 					for (int i = 0; i < mRooms.length(); i++) {
 						JSONObject c = mRooms.getJSONObject(i);
 
@@ -121,8 +111,7 @@ public class GrpRmPullService extends IntentService {
 						latLngR = c.getString(TAG_LATLNG);
 						usernameR = c.getString(TAG_USERNAME);
 
-						Log.i("sg.nyp.groupconnect", "updateJSONdata(): roomIdR:"
-								+ roomIdR);
+						Log.d(TAG, "updJSONd(): rmId:" + roomIdR);
 
 						// creating new HashMap and store all data
 						HashMap<String, String> map = new HashMap<String, String>();

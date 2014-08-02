@@ -221,8 +221,10 @@ public class GrpRoomDbAdapter {
 
 	public Cursor checkRooms(ArrayList<HashMap<String, String>> mRoomList)
 			throws SQLException {
+		String SVC_TAG = "GrpRmPullSvc";
+		Log.d(SVC_TAG, "checkRooms()");
 
-		Log.d("GrpRmPullService", "checkRooms()");
+		String updateInfo = "";
 
 		roomList = new ArrayList<HashMap<String, String>>();
 		roomList = mRoomList;
@@ -244,7 +246,7 @@ public class GrpRoomDbAdapter {
 				KEY_LATLNG }, null, null, null, null, KEY_ROOM_ID + " ASC");
 
 		if (!(mCursor.moveToFirst()) || mCursor.getCount() == 0) {
-			Log.d("GrpRmPullService", "checkRooms(): No results in database");
+			Log.d(SVC_TAG, "chkRm(): No results in database");
 
 			// for (int i = 0; i < roomList.size(); i++) {
 			//
@@ -277,16 +279,15 @@ public class GrpRoomDbAdapter {
 				location = map.get(TAG_LOCATION);
 				latLng = map.get(TAG_LATLNG);
 
-				Log.d("GrpRmPullService",
-						"checkRooms(): Creating new records: " + room_id);
-
+				// Log.d("Record Update", "Created new record: " + room_id);
+				updateInfo += "\nCreated new record: " + room_id;
 				createRoom(room_id, title, category, noOfLearner, location,
 						latLng);
 			}
 
 		} else {
 			mCursor.moveToFirst();
-			Log.d("GrpRmPullService", "checkRooms(): Processing db results");
+			Log.d(SVC_TAG, "checkRooms(): Processing db results");
 			while (mCursor.moveToNext()) {
 				for (HashMap<String, String> map : roomList) {
 
@@ -297,60 +298,69 @@ public class GrpRoomDbAdapter {
 					location = map.get(TAG_LOCATION);
 					latLng = map.get(TAG_LATLNG);
 
-					Log.d("GrpRmPullService",
-							"checkRooms(): Room ID: " + room_id);
-					Log.d("GrpRmPullService",
-							"checkRooms(): Room ID (DB): "
-									+ mCursor.getLong(mCursor
-											.getColumnIndex(KEY_ROOM_ID)));
-
-					boolean vExist = false;
-					boolean wasUpdated = false;
-
 					if (Long.valueOf(
 							mCursor.getLong(mCursor.getColumnIndex(KEY_ROOM_ID)))
 							.equals(room_id)) {
-						vExist = true;
-						if (mCursor
-								.getString(mCursor.getColumnIndex(KEY_TITLE))
-								.equals(title)
-								&& mCursor.getString(
-										mCursor.getColumnIndex(KEY_CATEGORY))
-										.equals(category)
-								&& mCursor
-										.getString(
-												mCursor.getColumnIndex(KEY_NO_OF_LEARNER))
-										.equals(noOfLearner)
-								&& mCursor.getString(
-										mCursor.getColumnIndex(KEY_LOCATION))
-										.equals(location)
-								&& mCursor.getString(
-										mCursor.getColumnIndex(KEY_LATLNG))
-										.equals(latLng)) {
-							wasUpdated = false;
+
+						Log.d("GrpRmPullSvc",
+								"chkRm(): WS/DB: "
+										+ room_id
+										+ " / "
+										+ mCursor.getLong(mCursor
+												.getColumnIndex(KEY_ROOM_ID)));
+
+						boolean vExist = false;
+						boolean wasUpdated = false;
+
+						if (Long.valueOf(
+								mCursor.getLong(mCursor
+										.getColumnIndex(KEY_ROOM_ID))).equals(
+								room_id)) {
+							vExist = true;
+
+							if (!mCursor.getString(
+									mCursor.getColumnIndex(KEY_TITLE)).equals(
+									title)
+									|| !mCursor
+											.getString(
+													mCursor.getColumnIndex(KEY_CATEGORY))
+											.equals(category)
+									|| !mCursor
+											.getString(
+													mCursor.getColumnIndex(KEY_NO_OF_LEARNER))
+											.equals(noOfLearner)
+									|| !mCursor
+											.getString(
+													mCursor.getColumnIndex(KEY_LOCATION))
+											.equals(location)
+									|| !mCursor.getString(
+											mCursor.getColumnIndex(KEY_LATLNG))
+											.equals(latLng)) {
+								wasUpdated = true;
+							}
 						}
+
 						if (!wasUpdated && !vExist) {
 							createRoom(room_id, title, category, noOfLearner,
 									location, latLng);
-							Log.d("Record Update", "Created new record: "
-									+ room_id);
+							updateInfo += "\nCreated new record: " + room_id;
 						} else if (wasUpdated && vExist) {
 							updateRoom(room_id, title, category, noOfLearner,
 									location, latLng);
-							Log.d("Record Update", "Updated record: " + room_id);
+							updateInfo += "\nUpdated record: " + room_id;
 						} else {
-							Log.d("Record Update",
-									"No change to db for: "
-											+ room_id
-											+ " / "
-											+ mCursor.getLong(mCursor
-													.getColumnIndex(KEY_ROOM_ID)));
+							updateInfo += "\nNo Change(WS/DB): "
+									+ room_id
+									+ " / "
+									+ mCursor.getLong(mCursor
+											.getColumnIndex(KEY_ROOM_ID));
 						}
+
 					}
 				}
 			}
 		}
-
+		Log.d(SVC_TAG, "Updated record:\n" + updateInfo);
 		return mCursor;
 
 	}

@@ -1,5 +1,9 @@
 package sg.nyp.groupconnect.room;
 
+import static sg.nyp.groupconnect.notification.Util.DISPLAY_MESSAGE_ACTION;
+import static sg.nyp.groupconnect.notification.Util.EXTRA_MESSAGE;
+import static sg.nyp.groupconnect.notification.Util.TAG;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,7 +12,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,28 +22,29 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import sg.nyp.groupconnect.MainActivity;
 import sg.nyp.groupconnect.R;
-import sg.nyp.groupconnect.R.drawable;
-import sg.nyp.groupconnect.R.id;
-import sg.nyp.groupconnect.R.layout;
-import sg.nyp.groupconnect.R.menu;
 import sg.nyp.groupconnect.custom.CustomList;
+import sg.nyp.groupconnect.notification.AlertDialogManager;
+import sg.nyp.groupconnect.notification.AppServices;
+import sg.nyp.groupconnect.notification.WakeLocker;
 import sg.nyp.groupconnect.utilities.GeocodeJSONParser;
 import sg.nyp.groupconnect.utilities.JSONParser;
-
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.app.AlertDialog.Builder;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -55,7 +59,6 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.preference.PreferenceManager;
 
 public class CreateRmStep2 extends Activity {
 	// Variable
@@ -157,6 +160,8 @@ public class CreateRmStep2 extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_create_rm_step2);
 
+		new getUsersDataForPush().execute();
+
 		// Get the selected Location from MainActivity
 		// Intent intent = new Intent();
 		// location = this.getIntent().getStringExtra("location");
@@ -185,13 +190,13 @@ public class CreateRmStep2 extends Activity {
 		mem_username = sp.getString("username", "No Username");
 		mem_type = sp.getString("type", "No Type");
 		mem_home = sp.getString("home", "No Home Location Found");
-		mem_homeLatLng = sp.getString("homeLatLng", "No latlng value");
-
-		String tempArr[] = mem_homeLatLng.split(",");
-		homeLat = Double.parseDouble(tempArr[0]);
-		homeLng = Double.parseDouble(tempArr[1]);
-
-		Log.i("Special", String.valueOf(homeLat + "/" + homeLng));
+		// mem_homeLatLng = sp.getString("homeLatLng", "No latlng value");
+		//
+		// String tempArr[] = mem_homeLatLng.split(",");
+		// homeLat = Double.parseDouble(tempArr[0]);
+		// homeLng = Double.parseDouble(tempArr[1]);
+		//
+		// Log.i("Special", String.valueOf(homeLat + "/" + homeLng));
 		// GetData from CreateRm.java
 
 		// You can be pretty confident that the intent will not be null here.
@@ -240,6 +245,8 @@ public class CreateRmStep2 extends Activity {
 					// etCategory.getText().toString());
 					// Set the results to be returned to parent
 					// setResult(RESULT_OK, output);
+
+					checkPushSameInterest();
 
 					new createRoom().execute();
 					// Once the room is created successfully in Table 'Room'
@@ -325,7 +332,7 @@ public class CreateRmStep2 extends Activity {
 			}
 
 		});
-		
+
 		ActionBar actionBar = getActionBar();
 		actionBar.setIcon(R.drawable.back);
 		actionBar.setHomeButtonEnabled(true);
@@ -564,11 +571,11 @@ public class CreateRmStep2 extends Activity {
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
-			pDialog = new ProgressDialog(CreateRmStep2.this);
-			pDialog.setMessage("Posting Comment...");
-			pDialog.setIndeterminate(false);
-			pDialog.setCancelable(false);
-			pDialog.show();
+			// pDialog = new ProgressDialog(CreateRmStep2.this);
+			// pDialog.setMessage("Posting Comment...");
+			// pDialog.setIndeterminate(false);
+			// pDialog.setCancelable(false);
+			// pDialog.show();
 		}
 
 		@Override
@@ -631,11 +638,11 @@ public class CreateRmStep2 extends Activity {
 
 		protected void onPostExecute(String file_url) {
 			// dismiss the dialog once product deleted
-			pDialog.dismiss();
-			if (file_url != null) {
-				Toast.makeText(CreateRmStep2.this, file_url, Toast.LENGTH_LONG)
-						.show();
-			}
+			// pDialog.dismiss();
+			// if (file_url != null) {
+			// Toast.makeText(CreateRmStep2.this, file_url, Toast.LENGTH_LONG)
+			// .show();
+			// }
 
 		}
 
@@ -932,4 +939,174 @@ public class CreateRmStep2 extends Activity {
 			updateMap();
 		}
 	}
+
+	// TC - GCM interested members
+	String user_id;
+	String user_interestedSub;
+	String user_uuidR;
+
+	String TAG_USERID = "userId";
+	String TAG_INTERESTED_SUB = "interestedSub";
+	String TAG_UUID = "device";
+
+	JSONArray mRooms;
+
+	ArrayList<HashMap<String, String>> mUserList;
+	ArrayList<HashMap<String, String>> mPushToList;
+
+	String RETRIEVE_URL = "http://www.it3197Project.3eeweb.com/grpConnect/memRetrieveAll.php";
+
+	class getUsersDataForPush extends AsyncTask<String, String, String> {
+
+		boolean failure = false;
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+		}
+
+		@Override
+		protected String doInBackground(String... args) {
+			try {
+				mUserList = new ArrayList<HashMap<String, String>>();
+
+				JSONParser jParser = new JSONParser();
+				JSONObject json = jParser.getJSONFromUrl(RETRIEVE_URL);
+
+				try {
+
+					mRooms = json.getJSONArray(TAG_POSTS);
+
+					for (int i = 0; i < mRooms.length(); i++) {
+						JSONObject c = mRooms.getJSONObject(i);
+
+						user_id = c.getString(TAG_USERID);
+						Log.d("TC", "userid:" + user_id);
+						user_interestedSub = c.getString(TAG_INTERESTED_SUB);
+						Log.d("TC", "inst_sub:" + user_interestedSub);
+						user_uuidR = c.getString(TAG_UUID);
+
+						HashMap<String, String> map = new HashMap<String, String>();
+
+						map.put(TAG_USERID, user_id);
+						map.put(TAG_INTERESTED_SUB, user_interestedSub);
+						map.put(TAG_UUID, user_uuidR);
+
+						mUserList.add(map);
+					}
+
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return null;
+		}
+
+		protected void onPostExecute(String file_url) {
+			// NA
+		}
+	}
+
+	// TC - GCM interested members - push to interested members
+	private void checkPushSameInterest() {
+
+		SharedPreferences sp = PreferenceManager
+				.getDefaultSharedPreferences(getApplicationContext());
+		String mId = sp.getString("id", null);
+
+		mPushToList = new ArrayList<HashMap<String, String>>();
+
+		// Compare if the categories the same
+		for (HashMap<String, String> map : mUserList) {
+			user_id = map.get(TAG_USERID);
+			user_interestedSub = map.get(TAG_INTERESTED_SUB);
+			user_uuidR = map.get(TAG_UUID);
+
+			if (!user_id.equals(mId) && !mId.equals(null)) {
+				String[] parts = user_interestedSub.split(",");
+				if (parts.length != 0) {
+					for (int z = 0; z < parts.length; z++) {
+						String sub = parts[z];
+						if (sub.equalsIgnoreCase(category)) {
+							HashMap<String, String> userMap = new HashMap<String, String>();
+
+							userMap.put(TAG_USERID, user_id);
+							userMap.put(TAG_INTERESTED_SUB, user_interestedSub);
+							userMap.put(TAG_UUID, user_uuidR);
+
+							mPushToList.add(map);
+						}
+					}
+				}
+			}
+		}
+		// Notify users
+		try {
+			for (HashMap<String, String> map : mPushToList) {
+				user_id = map.get(TAG_USERID);
+				user_interestedSub = map.get(TAG_INTERESTED_SUB);
+				user_uuidR = map.get(TAG_UUID);
+
+				String notifyUserUUID = user_uuidR;
+				String nMessage = "A new room under " + category;
+				nMessage += " was created, click to view.";
+
+				//Thread.sleep(2500); // 2300
+
+				pushNotification(getApplicationContext(), nMessage,
+						notifyUserUUID, user_id);
+				Log.d("CrRm", "Device:" + user_uuidR);
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	static final String CLASS_TAG = "GrpConnCommon";
+
+	public void pushNotification(Context c, String msg, String device,
+			String user_id) {
+
+		Log.d(CLASS_TAG, user_id + " pushNotification - device: " + device);
+		AppServices.sendMyselfANotification(c, msg, device);
+		registerReceiver(notificationReceiver, new IntentFilter(
+				DISPLAY_MESSAGE_ACTION));
+	}
+
+	/**
+	 * Receives push Notifications
+	 * */
+	private final BroadcastReceiver notificationReceiver = new BroadcastReceiver() {
+		private AlertDialogManager alert = new AlertDialogManager();
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+
+			// Waking up mobile if it is sleeping
+			WakeLocker.acquire(getApplicationContext());
+
+			/**
+			 * Take some action upon receiving a push notification here!
+			 **/
+			String message = intent.getExtras().getString(EXTRA_MESSAGE);
+			if (message == null) {
+				message = "Empty Message";
+			}
+
+			Log.d(TAG, message);
+			// messageTextView.append("\n" + message);
+
+			alert.showAlertDialog(getApplicationContext(),
+					getString(R.string.gcm_alert_title), message);
+			Toast.makeText(getApplicationContext(),
+					getString(R.string.gcm_message, message), Toast.LENGTH_LONG)
+					.show();
+
+			WakeLocker.release();
+		}
+	};
 }

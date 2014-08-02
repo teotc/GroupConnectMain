@@ -152,7 +152,7 @@ public class Login extends Activity implements OnClickListener {
 					String homeLocation = json.getString(TAG_HOME);
 					edit.putString("home", homeLocation);
 					String uuid = json.getString(TAG_UUID);
-					
+
 					edit.putString("interestedSub",
 							json.getString("interestedSub"));
 					edit.putString("homeLocation",
@@ -227,6 +227,14 @@ public class Login extends Activity implements OnClickListener {
 		} else if (id == R.id.action_magiclogin_tc) {
 			etUser.setText("tc");
 			etPass.setText("tc");
+			new AttemptLogin().execute();
+		} else if (id == R.id.action_magiclogin_tom) {
+			etUser.setText("tom");
+			etPass.setText("1");
+			new AttemptLogin().execute();
+		} else if (id == R.id.action_magiclogin_alfred) {
+			etUser.setText("alfred");
+			etPass.setText("chan");
 			new AttemptLogin().execute();
 		}
 		return super.onOptionsItemSelected(item);

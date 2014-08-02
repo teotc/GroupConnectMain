@@ -209,6 +209,8 @@ public class fragment_home extends Fragment {
 		@Override
 		protected String doInBackground(String... args) {
 			
+			String info ="";
+			
 			mDbHelper = new GrpRoomDbAdapter(getActivity());
 			mDbHelper.open();
 			
@@ -287,7 +289,7 @@ public class fragment_home extends Fragment {
 				// String s = "Unable to locate your provided address, ";
 				// s+= "please check your address.";
 				// Toast.makeText(getActivity(), s, Toast.LENGTH_LONG).show();
-				Log.d("Geocode", "Geocode Failed");
+				Log.d("Geocode", "Geocode Failed due to:\n"+e);
 			}
 			
 			for (GrpRoomListExt r : roomLocationList) {
@@ -299,7 +301,7 @@ public class fragment_home extends Fragment {
 				locHome = new Location("User Home");
 				locHome.setLatitude(homeLatLng.latitude);
 				locHome.setLongitude(homeLatLng.longitude);
-				Log.d("Geocode", "Removed: " + r.getRoom_id());
+				
 
 				double dist = locHome.distanceTo(locRoom);
 
@@ -314,13 +316,13 @@ public class fragment_home extends Fragment {
 				// retval = Double.compare(DISTPREF / 1000, dist);
 				// }
 				
-				Log.d("Geocode", "Process Room ID: " + r.getRoom_id());
-				Log.d("Geocode", "Dist: " + dist);
-				
+				info += "\nrmID: " + r.getRoom_id();
 				if (retval < 0) {
-					Log.d("Geocode", "Removed: " + r.getRoom_id());
+					//Log.d("Geocode", "Removed: " + r.getRoom_id());
+					info += "\nRemoved: " + r.getRoom_id()+" Dist: " + dist;
 				} else{
-					Log.d("Geocode", "Added: " + r.getRoom_id());
+					//Log.d("Geocode", "Added: " + r.getRoom_id());
+					info += "\nAdded: " + r.getRoom_id()+" Dist: " + dist;
 					newRoomLocList.add(r);
 				}
 			}

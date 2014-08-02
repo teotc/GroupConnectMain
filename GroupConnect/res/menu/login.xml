@@ -12,5 +12,15 @@
         android:orderInCategory="100"
         android:showAsAction="never"
         android:title="Login as TC"/>
+    <item
+        android:id="@+id/action_magiclogin_tom"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:title="Login as Tom"/>
+    <item
+        android:id="@+id/action_magiclogin_alfred"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:title="Login as Alfred"/>
 
 </menu>

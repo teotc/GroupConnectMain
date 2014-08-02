@@ -142,7 +142,7 @@
         <service
             android:name="sg.nyp.groupconnect.service.GrpRmPullService"
             android:exported="false" />
-        <service android:name="sg.nyp.groupconnect.service.GCMIntentService" />
+        <service android:name="sg.nyp.groupconnect.GCMIntentService" />
         <!-- Receivers -->
         <receiver
             android:name="com.google.android.gcm.GCMBroadcastReceiver"
