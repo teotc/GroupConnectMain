@@ -13,15 +13,23 @@
         android:layout_marginTop="15dp"
         android:gravity="center"
         android:textColor="#FFFFFF"
-        android:textSize="15dp" />
+        android:textSize="25dp"
+        android:singleLine="false"/>
 
     <Button
         android:id="@+id/btnGroup"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="right"
+        android:layout_margin="5dp"
+        android:background="@drawable/button_okay_white"
+        android:drawableLeft="@drawable/add2"
+        android:drawablePadding="10dp"
         android:onClick="Group"
-        android:text="Add to group" />
+        android:paddingLeft="10dp"
+        android:paddingRight="15dp"
+        android:text="Add to group"
+        android:textColor="#FFFFFF" />
 
     <LinearLayout
         android:id="@+id/Chart_layout"
