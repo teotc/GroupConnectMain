@@ -116,7 +116,7 @@ public class ViewRoom extends Activity {
 				int size = json.getJSONArray(TAG_ARRAY).length();
 
 				member.clear();
-				
+
 				for (int j = 0; j < size; j++) {
 					JSONObject c1 = json.getJSONArray(TAG_ARRAY).getJSONObject(
 							j);
@@ -140,7 +140,6 @@ public class ViewRoom extends Activity {
 		}
 
 		protected void onPostExecute(String file_url) {
-			pDialog.dismiss();
 			tvTitle.setText(title);
 			tvCategory.setText(category);
 
@@ -150,6 +149,7 @@ public class ViewRoom extends Activity {
 
 			learnerlist = (ListView) findViewById(R.id.learnerList);
 			learnerlist.setAdapter(adapter);
+			pDialog.dismiss();
 		}
 	}
 }

@@ -19,6 +19,7 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 public class VoteLocation extends Activity {
 
@@ -49,6 +50,10 @@ public class VoteLocation extends Activity {
 
 		Setup();
 
+		TextView tv = (TextView) findViewById(R.id.textView1);
+		tv.setText("Assume: \nCurrentMemberId - " + currentMemberId
+				+ "\nCurrentRoomId - " + currentRoomId + "\nRoomLocation - "
+				+ roomLocation + "\nCreatorMemberId - " + creatorMemberId);
 	}
 
 	private void Setup() {
@@ -60,7 +65,7 @@ public class VoteLocation extends Activity {
 		}
 		if (check == 1 && roomLocation.equals("none")) {
 			new RetrieveMemberVote().execute();
-			
+
 		} else {
 			btnVote.setVisibility(View.GONE);
 			btnViewResult.setVisibility(View.GONE);
@@ -88,7 +93,7 @@ public class VoteLocation extends Activity {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (resultCode == 1) {
 			btnVote.setVisibility(View.GONE);
-	    }
+		}
 	}
 
 	public class RetrieveMemberVote extends AsyncTask<String, String, String> {
@@ -164,10 +169,10 @@ public class VoteLocation extends Activity {
 		 * After completing background task Dismiss the progress dialog
 		 * **/
 		protected void onPostExecute(String file_url) {
-			pDialog.dismiss(); 
-			if(num != 0){
-				 btnVote.setVisibility(View.GONE);
-			 }
+			pDialog.dismiss();
+			if (num != 0) {
+				btnVote.setVisibility(View.GONE);
+			}
 		}
 	}
 

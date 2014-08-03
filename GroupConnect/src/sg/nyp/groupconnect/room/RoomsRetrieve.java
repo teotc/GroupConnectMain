@@ -172,10 +172,10 @@ public class RoomsRetrieve extends Activity {
 			Log.d("GrpRmPullService",
 					"filldata(): count: " + mRMCursor.getCount());
 			while (mRMCursor.moveToNext()) {
-				Log.d("GrpRmPullService",
-						"filldata(): title: "
-								+ mRMCursor.getString(mRMCursor
-										.getColumnIndex(GrpRoomDbAdapter.KEY_TITLE)));
+				// Log.d("GrpRmPullService",
+				// "filldata(): title: "
+				// + mRMCursor.getString(mRMCursor
+				// .getColumnIndex(GrpRoomDbAdapter.KEY_TITLE)));
 				grpRmList = new GrpRoomListing(
 						mRMCursor.getLong(mRMCursor
 								.getColumnIndex(GrpRoomDbAdapter.KEY_ROOM_ID)),

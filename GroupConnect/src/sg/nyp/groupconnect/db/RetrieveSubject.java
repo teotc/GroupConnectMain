@@ -89,16 +89,15 @@ public class RetrieveSubject extends AsyncTask<String, String, String> {
 	 * After completing background task Dismiss the progress dialog
 	 * **/
 	protected void onPostExecute(String file_url) {
-		// dismiss the dialog once product deleted
-		pDialog.dismiss();
 		for (int i = 0; i < Map.arraySubject.size(); i++) {
 			RadioButton rdbtn = new RadioButton(Map.context);
 			rdbtn.setId(Map.arraySubject.get(i).getId());
 			rdbtn.setText(Map.arraySubject.get(i).getName());
 			rdbtn.setTextColor(Color.WHITE);
-			rdbtn.setTextSize(15f);
+			rdbtn.setTextSize(20f);
 			Map.rdGrp.addView(rdbtn);
 		}
+		pDialog.dismiss();
 
 	}
 

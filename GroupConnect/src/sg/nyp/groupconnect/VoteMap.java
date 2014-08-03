@@ -211,7 +211,7 @@ public class VoteMap extends FragmentActivity {
 		 * After completing background task Dismiss the progress dialog
 		 * **/
 		protected void onPostExecute(String file_url) {
-			pDialog.dismiss();
+
 
 			mMap.clear();
 			mMap.setOnInfoWindowClickListener(new OnInfoWindowClickListener() {
@@ -276,6 +276,8 @@ public class VoteMap extends FragmentActivity {
 						.icon(BitmapDescriptorFactory
 								.defaultMarker(BitmapDescriptorFactory.HUE_ROSE)));
 			}
+			
+			pDialog.dismiss();
 		}
 	}
 

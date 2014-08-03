@@ -50,7 +50,7 @@ public class Map extends FragmentActivity {
 	public static RadioGroup rdGrp;
 	public static String schoolCategory1, schoolCategory2, schoolCategory3;
 
-	private int subjectId;
+	public static int subjectId;
 
 	public static Context context;
 	

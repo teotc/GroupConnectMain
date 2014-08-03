@@ -85,14 +85,14 @@ public class BarChartBuilder extends Activity {
 		// Create XYSeriesRenderer to customize XSeries
 
 		XYSeriesRenderer Xrenderer = new XYSeriesRenderer();
-		Xrenderer.setColor(Color.GREEN);
+		Xrenderer.setColor(Color.rgb(27, 188, 155));
 		Xrenderer.setDisplayChartValues(true);
-		Xrenderer.setChartValuesTextSize(25);
+		Xrenderer.setChartValuesTextSize(25);	//TODO
 
 		XYSeriesRenderer Yrenderer = new XYSeriesRenderer();
-		Yrenderer.setColor(Color.CYAN);
+		Yrenderer.setColor(Color.rgb(52, 152, 219));
 		Yrenderer.setDisplayChartValues(true);
-		Yrenderer.setChartValuesTextSize(25);
+		Yrenderer.setChartValuesTextSize(25);	//TODO
 
 		// Create XYMultipleSeriesRenderer to customize the whole chart
 
@@ -114,10 +114,11 @@ public class BarChartBuilder extends Activity {
 
 		mRenderer.setZoomEnabled(false, false);
 		
-		mRenderer.setAxisTitleTextSize(20f);
-		mRenderer.setChartTitleTextSize(18f);
-		mRenderer.setLegendTextSize(20f);
-		mRenderer.setLabelsTextSize(15f);
+		//TODO
+		mRenderer.setAxisTitleTextSize(30f);
+		mRenderer.setChartTitleTextSize(26f);
+		mRenderer.setLegendTextSize(30f);
+		mRenderer.setLabelsTextSize(20f);
 		mRenderer.setXLabelsPadding(20f);
 		mRenderer.setYLabelsPadding(20f);
 
@@ -147,7 +148,6 @@ public class BarChartBuilder extends Activity {
 
 			@Override
 			public void onClick(View arg0) {
-				// TODO Auto-generated method stub
 
 				SeriesSelection series_selection = mChart
 						.getCurrentSeriesAndPoint();

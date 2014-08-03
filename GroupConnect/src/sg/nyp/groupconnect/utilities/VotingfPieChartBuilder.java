@@ -35,12 +35,7 @@ import android.widget.Toast;
 
 public class VotingfPieChartBuilder extends Activity {
 	/** Colors to be used for the pie slices. */
-	private static int[] COLORS = new int[] { 
-		Color.rgb(22, 160, 133), Color.rgb(26, 188, 156), 
-		Color.rgb(39, 174, 96), Color.rgb(46, 204, 113), 
-		Color.rgb(241, 196, 15), Color.rgb(243, 156, 18), 
-		Color.rgb(230, 126, 34), Color.rgb(211, 84, 0), 
-		Color.rgb(231, 76, 60), Color.rgb(192, 57, 43)};
+	private static int[] COLORS;;
 	/** The main series that will include all the data. */
 	private CategorySeries mSeries = new CategorySeries("");
 	/** The main renderer for the main dataset. */
@@ -93,11 +88,12 @@ public class VotingfPieChartBuilder extends Activity {
 		mRenderer.setApplyBackgroundColor(true);
 		mRenderer.setBackgroundColor(Color.BLACK);
 		mRenderer.setChartTitle("Total No. of Student in each grade.");
-		mRenderer.setChartTitleTextSize(25f);
-		mRenderer.setLegendTextSize(25f);
+		mRenderer.setChartTitleTextSize(40f);	//TODO
+		mRenderer.setLegendTextSize(40f);		//TODO
 		mRenderer.setLabelsColor(Color.WHITE);
-		mRenderer.setLabelsTextSize(20f);
+		mRenderer.setLabelsTextSize(30f);		//TODO
 		mRenderer.setPanEnabled(false);
+		mRenderer.setZoomEnabled(false);
 
 		new RetrieveResult().execute();
 
@@ -238,11 +234,11 @@ public class VotingfPieChartBuilder extends Activity {
 
 					if (num == 1) {
 						places[i] = c.getString(TAG_NAME);
-						
-						double score = (Double.parseDouble(Integer
-								.toString(c.getInt(TAG_COUNTVALUE))))
+
+						double score = (Double.parseDouble(Integer.toString(c
+								.getInt(TAG_COUNTVALUE))))
 								/ json.getJSONArray(TAG_ARRAY).length() * 100;
-						
+
 						percentage[i] = Double.parseDouble(df.format(score));
 
 						if (c.getString(TAG_STATUS).equals("final")) {
@@ -277,7 +273,54 @@ public class VotingfPieChartBuilder extends Activity {
 		 * **/
 		protected void onPostExecute(String file_url) {
 			// dismiss the dialog once product deleted
-			pDialog.dismiss();
+
+			if (percentage.length == 1) {
+				COLORS = new int[] { Color.rgb(38, 166, 91) };
+			} else if (percentage.length == 2) {
+				COLORS = new int[] { Color.rgb(38, 166, 91),
+						Color.rgb(192, 57, 43) };
+			} else if (percentage.length == 3) {
+				COLORS = new int[] { Color.rgb(38, 166, 91),
+						Color.rgb(247, 202, 24), Color.rgb(192, 57, 43) };
+			} else if (percentage.length == 4) {
+				COLORS = new int[] { Color.rgb(38, 166, 91),
+						Color.rgb(247, 202, 24), Color.rgb(232, 126, 4),
+						Color.rgb(192, 57, 43) };
+			} else if (percentage.length == 5) {
+				COLORS = new int[] { Color.rgb(38, 166, 91),
+						Color.rgb(144, 198, 149), Color.rgb(247, 202, 24),
+						Color.rgb(232, 126, 4), Color.rgb(192, 57, 43) };
+			} else if (percentage.length == 6) {
+				COLORS = new int[] { Color.rgb(38, 166, 91),
+						Color.rgb(144, 198, 149), Color.rgb(247, 202, 24),
+						Color.rgb(232, 126, 4), Color.rgb(192, 57, 43),
+						Color.rgb(217, 30, 24) };
+			} else if (percentage.length == 7) {
+				COLORS = new int[] { Color.rgb(38, 166, 91),
+						Color.rgb(144, 198, 149), Color.rgb(245, 215, 110),
+						Color.rgb(247, 202, 24), Color.rgb(232, 126, 4),
+						Color.rgb(192, 57, 43), Color.rgb(217, 30, 24) };
+			} else if (percentage.length == 8) {
+				COLORS = new int[] { Color.rgb(38, 166, 91),
+						Color.rgb(3, 166, 120), Color.rgb(144, 198, 149),
+						Color.rgb(245, 215, 110), Color.rgb(247, 202, 24),
+						Color.rgb(232, 126, 4), Color.rgb(192, 57, 43),
+						Color.rgb(217, 30, 24) };
+			} else if (percentage.length == 9) {
+				COLORS = new int[] { Color.rgb(38, 166, 91),
+						Color.rgb(3, 166, 120), Color.rgb(144, 198, 149),
+						Color.rgb(245, 215, 110), Color.rgb(247, 202, 24),
+						Color.rgb(232, 126, 4), Color.rgb(231, 76, 60),
+						Color.rgb(192, 57, 43), Color.rgb(217, 30, 24) };
+			} else if (percentage.length == 10) {
+				COLORS = new int[] { Color.rgb(38, 166, 91),
+						Color.rgb(3, 166, 120), Color.rgb(144, 198, 149),
+						Color.rgb(245, 215, 110), Color.rgb(247, 202, 24),
+						Color.rgb(232, 126, 4), Color.rgb(242, 120, 75),
+						Color.rgb(231, 76, 60), Color.rgb(192, 57, 43),
+						Color.rgb(217, 30, 24) };
+			}
+
 			for (int i = 0; i < percentage.length; i++) {
 				mSeries.add(places[i], percentage[i]);
 				SimpleSeriesRenderer renderer = new SimpleSeriesRenderer();
@@ -286,7 +329,9 @@ public class VotingfPieChartBuilder extends Activity {
 				mRenderer.addSeriesRenderer(renderer);
 			}
 			mChartView.repaint();
-
+			
+			pDialog.dismiss();
+			
 			if (num == 1) {
 				if (confirm == 1) {
 					btnFinal.setVisibility(View.GONE);

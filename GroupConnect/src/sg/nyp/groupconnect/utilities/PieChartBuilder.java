@@ -42,9 +42,9 @@ import android.widget.Toast;
 
 public class PieChartBuilder extends Activity {
 	/** Colors to be used for the pie slices. */
-	private static int[] COLORS = new int[] { Color.rgb(22, 160, 133),
-			Color.rgb(39, 174, 96), Color.rgb(211, 84, 0),
-			Color.rgb(230, 126, 34), Color.rgb(231, 76, 60) };
+	private static int[] COLORS = new int[] { Color.rgb(38, 166, 91),
+			Color.rgb(144, 198, 149), Color.rgb(247, 202, 24),
+			Color.rgb(232, 126, 4), Color.rgb(192, 57, 43) };
 	/** The main series that will include all the data. */
 	private CategorySeries mSeries = new CategorySeries("");
 	/** The main renderer for the main dataset. */
@@ -96,11 +96,12 @@ public class PieChartBuilder extends Activity {
 		mRenderer.setApplyBackgroundColor(true);
 		mRenderer.setBackgroundColor(Color.BLACK);
 		mRenderer.setChartTitle("Total No. of Student in each grade.");
-		mRenderer.setChartTitleTextSize(25f);
-		mRenderer.setLegendTextSize(25f);
+		mRenderer.setChartTitleTextSize(40f); 	//TODO
+		mRenderer.setLegendTextSize(40f);		//TODO
 		mRenderer.setLabelsColor(Color.WHITE);
-		mRenderer.setLabelsTextSize(20f);
+		mRenderer.setLabelsTextSize(30f);		//TODO
 		mRenderer.setPanEnabled(false);
+		mRenderer.setZoomEnabled(false);
 	}
 
 	@Override
@@ -374,9 +375,6 @@ public class PieChartBuilder extends Activity {
 		 * After completing background task Dismiss the progress dialog
 		 * **/
 		protected void onPostExecute(String file_url) {
-			// dismiss the dialog once product deleted
-			pDialog.dismiss();
-
 			String[] grades = new String[] { "Grade A", "Grade B", "Grade C",
 					"Grade D", "Grade F" };
 
@@ -414,6 +412,8 @@ public class PieChartBuilder extends Activity {
 				mRenderer.addSeriesRenderer(renderer);
 				mChartView.repaint();
 			}
+			// dismiss the dialog once product deleted
+			pDialog.dismiss();
 		}
 	}
 

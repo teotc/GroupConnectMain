@@ -51,7 +51,7 @@
     <string name="title_activity_manage_room">ManageRoom</string>
     <string name="title_activity_notification_display">NotificationDisplay</string>
     <string name="title_activity_create_rm_step2">CreateRmStep2</string>
-    
+
     <!-- Push Notification -->
     <string name="send_notification">Send myself a Notification</string>
     <string name="gcm_error">GCM error (%1$s).</string>
@@ -61,5 +61,25 @@
     <string name="gcm_unregistered">Device Unregistered: (%1$s).</string>
     <string name="gcm_alert_title">Message</string>
     <string name="gcm_message">Message: (%1$s)</string>
+
+    <!-- Profile Pref -->
+    <string name="frag_title_prof">Profile Settings</string>
+    <string name="diag_ttl_et_interestedSub">Enter an interest category</string>
+    <string name="diag_ttl_et_interestedSub_pos">Add</string>
+    <string name="summ_et_interestedSub">Select to add an interest</string>
+    <string name="ttl_et_interestedSub">Add Interest</string>
+    <string name="ttl_prof_interests">Your Interests</string>
+    <string name="diag_ttl_list_interests">Check to remove an Interest</string>
+
+    <string-array name="entries_list_preference">
+        <item>Alpha Option 01</item>
+        <item>Beta Option 02</item>
+        <item>Charlie Option 03</item>
+    </string-array>
+    <string-array name="entryvalues_list_preference">
+        <item>Alpha</item>
+        <item>Beta</item>
+        <item>Charlie</item>
+    </string-array>
 
 </resources>

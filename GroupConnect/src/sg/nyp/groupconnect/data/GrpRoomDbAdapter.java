@@ -298,64 +298,55 @@ public class GrpRoomDbAdapter {
 					location = map.get(TAG_LOCATION);
 					latLng = map.get(TAG_LATLNG);
 
+					Log.d("GrpRmPullService", "checkRooms(): Room ID: "
+							+ room_id);
+					Log.d("GrpRmPullService",
+							"checkRooms(): Room ID (DB): "
+									+ mCursor.getLong(mCursor
+											.getColumnIndex(KEY_ROOM_ID)));
+
+					boolean vExist = false;
+					boolean wasUpdated = false;
+
 					if (Long.valueOf(
 							mCursor.getLong(mCursor.getColumnIndex(KEY_ROOM_ID)))
 							.equals(room_id)) {
-
-						Log.d("GrpRmPullSvc",
-								"chkRm(): WS/DB: "
-										+ room_id
-										+ " / "
-										+ mCursor.getLong(mCursor
-												.getColumnIndex(KEY_ROOM_ID)));
-
-						boolean vExist = false;
-						boolean wasUpdated = false;
-
-						if (Long.valueOf(
-								mCursor.getLong(mCursor
-										.getColumnIndex(KEY_ROOM_ID))).equals(
-								room_id)) {
-							vExist = true;
-
-							if (!mCursor.getString(
-									mCursor.getColumnIndex(KEY_TITLE)).equals(
-									title)
-									|| !mCursor
-											.getString(
-													mCursor.getColumnIndex(KEY_CATEGORY))
-											.equals(category)
-									|| !mCursor
-											.getString(
-													mCursor.getColumnIndex(KEY_NO_OF_LEARNER))
-											.equals(noOfLearner)
-									|| !mCursor
-											.getString(
-													mCursor.getColumnIndex(KEY_LOCATION))
-											.equals(location)
-									|| !mCursor.getString(
-											mCursor.getColumnIndex(KEY_LATLNG))
-											.equals(latLng)) {
-								wasUpdated = true;
-							}
+						vExist = true;
+						if (mCursor
+								.getString(mCursor.getColumnIndex(KEY_TITLE))
+								.equals(title)
+								&& mCursor.getString(
+										mCursor.getColumnIndex(KEY_CATEGORY))
+										.equals(category)
+								&& mCursor
+										.getString(
+												mCursor.getColumnIndex(KEY_NO_OF_LEARNER))
+										.equals(noOfLearner)
+								&& mCursor.getString(
+										mCursor.getColumnIndex(KEY_LOCATION))
+										.equals(location)
+								&& mCursor.getString(
+										mCursor.getColumnIndex(KEY_LATLNG))
+										.equals(latLng)) {
+							wasUpdated = false;
 						}
-
 						if (!wasUpdated && !vExist) {
 							createRoom(room_id, title, category, noOfLearner,
 									location, latLng);
-							updateInfo += "\nCreated new record: " + room_id;
+							Log.d("Record Update", "Created new record: "
+									+ room_id);
 						} else if (wasUpdated && vExist) {
 							updateRoom(room_id, title, category, noOfLearner,
 									location, latLng);
-							updateInfo += "\nUpdated record: " + room_id;
+							Log.d("Record Update", "Updated record: " + room_id);
 						} else {
-							updateInfo += "\nNo Change(WS/DB): "
-									+ room_id
-									+ " / "
-									+ mCursor.getLong(mCursor
-											.getColumnIndex(KEY_ROOM_ID));
+							Log.d("Record Update",
+									"No change to db for: "
+											+ room_id
+											+ " / "
+											+ mCursor.getLong(mCursor
+													.getColumnIndex(KEY_ROOM_ID)));
 						}
-
 					}
 				}
 			}
