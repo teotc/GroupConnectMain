@@ -1,65 +1,61 @@
 package sg.nyp.groupconnect.item;
 
 import java.util.ArrayList;
-import java.util.List;
-
 import sg.nyp.groupconnect.R;
-import sg.nyp.groupconnect.data.GrpRoomDbAdapter;
-import sg.nyp.groupconnect.data.GrpRoomListExtAdapter;
+import sg.nyp.groupconnect.data.*;
 import sg.nyp.groupconnect.learner.GrpRoomListExt;
-import sg.nyp.groupconnect.learner.GrpRoomListing;
+import sg.nyp.groupconnect.room.NearbyRooms;
 import android.annotation.SuppressLint;
-import android.app.Dialog;
-import android.app.Fragment;
-import android.content.SharedPreferences;
+import android.app.*;
+import android.content.*;
 import android.database.Cursor;
-import android.location.Address;
-import android.location.Geocoder;
-import android.location.Location;
-import android.os.AsyncTask;
-import android.os.Bundle;
+import android.os.*;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
+import android.view.*;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.ListView;
-import android.widget.NumberPicker;
-import android.widget.Spinner;
-import android.widget.TextView;
+import android.widget.*;
 import com.google.android.gms.maps.model.LatLng;
 
 @SuppressLint("NewApi")
 public class fragment_home extends Fragment {
 
 	SharedPreferences sp;
-	String homeLocation = null;
+	String homeLocTextAddr = null;
 	int DISTPREF = 5000; // metres
 	int DISTPREF_UNIT = 0; // m
 
+	private static final String TAG = "GrpConnFragHome";
+
 	ListView eduSuggestLV;
+	Button frag_bnnearbyrooms;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		View rootView = inflater.inflate(R.layout.fragment_home, container,
 				false);
-		// Get ListView object from xml
-		ListView listView = (ListView) rootView.findViewById(R.id.listView1);
 
 		eduSuggestLV = (ListView) rootView.findViewById(R.id.eduSuggestLV);
+		frag_bnnearbyrooms = (Button) rootView
+				.findViewById(R.id.frag_bnnearbyrooms);
+
 		TextView homeLoc = (TextView) rootView
 				.findViewById(R.id.fgh_tvHomeLocation);
-		// ImageButton bnSetDist = (ImageButton) rootView
-		// .findViewById(R.id.fgh_bnSetDist);
 
 		sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
-		homeLocation = sp.getString("homeLocation", null);
-		Log.i("Geocode","Home:"+homeLocation);
-		homeLoc.setText(homeLocation);
+		homeLocTextAddr = sp.getString("homeLocation", null);
+		Log.i("Geocode", "Home:" + homeLocTextAddr);
+		homeLoc.setText(homeLocTextAddr);
+
+		frag_bnnearbyrooms.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				Intent i = new Intent(getActivity(), NearbyRooms.class);
+				startActivity(i);
+			}
+		});
 
 		// DISTPREF = sp.getInt("DISTPREF", 5000); // DISTPREF_UNIT
 		// DISTPREF_UNIT = sp.getInt("DISTPREF", 0);
@@ -70,35 +66,8 @@ public class fragment_home extends Fragment {
 		// // show();
 		// }
 		// });
-		CompareRoomDistance crd = new CompareRoomDistance();
-		crd.execute();
+		//new CompareRoomDistance().execute();
 
-		// Defined Array values to show in ListView
-		String[] values = new String[] { "Joined Group 1", "Joined Group 2",
-				"Joined Group 3", "Joined Group 4", "Joined Group 5",
-				"Joined Group 6", "Joined Group 7", "Joined Group 8",
-				"Joined Group 9" };
-
-		// Define a new Adapter
-		// First parameter - Context
-		// Second parameter - Layout for the row
-		// Third parameter - ID of the TextView to which the data is written
-		// Forth - the Array of data
-
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-				rootView.getContext(), android.R.layout.simple_list_item_1,
-				android.R.id.text1, values);
-
-		/*
-		 * eduSuggestLV.setAdapter(new GrpRoomListExtAdapter(roomLocationList,
-		 * getActivity()));
-		 */
-		// for (GrpRoomListExt x : roomLocationList) {
-		// Log.d("TEST", "x: " + x.getLocation() + "\n" + x.getTitle());
-		// }
-
-		// Assign adapter to ListView
-		listView.setAdapter(adapter);
 		return rootView;
 	}
 
@@ -113,7 +82,7 @@ public class fragment_home extends Fragment {
 		Button dist_cancel = (Button) d.findViewById(R.id.diag_dist_cancel);
 		spUnit = (Spinner) d.findViewById(R.id.diag_dist_spUnit);
 
-		String[] unitArray = new String[] { "M", "KM" };
+		// String[] unitArray = new String[] { "M", "KM" };
 
 		// Selection of the spinner
 		spUnit = (Spinner) d.findViewById(R.id.diag_dist_spUnit);
@@ -178,168 +147,78 @@ public class fragment_home extends Fragment {
 
 	public void updateLV() {
 		eduSuggestLV.setAdapter(null);
-		eduSuggestLV.setAdapter(new GrpRoomListExtAdapter(roomLocationList,
+		eduSuggestLV.setAdapter(new GrpRoomListExtAdapter(roomList2,
 				getActivity()));
 	}
 
-	// Database access
-	public static final String KEY_ROOM_ID = "room_id";
-	public static final String KEY_TITLE = "title";
-	public static final String KEY_CATEGORY = "category";
-	public static final String KEY_NO_OF_LEARNER = "noOfLearner";
-	public static final String KEY_LOCATION = "location";
-	public static final String KEY_LATLNG = "latlng";
-	public static final String KEY_USERNAME = "username";
 	private GrpRoomDbAdapter mDbHelper;
 
-	private ArrayList<GrpRoomListing> details;
-	ArrayList<GrpRoomListExt> roomLocationList;
-	ArrayList<GrpRoomListExt> newRoomLocList;
+	// fillData() variables
+	String title = null, location = null, category = null;
+	long noOfLearner = 0, room_id = 0;
+	double distance, lat, lng;
 
-	double latR, lngR;
-	LatLng roomLatLng;
+	private ArrayList<GrpRoomListExt> details;
+	private ArrayList<GrpRoomListExt> roomList2;
+
+	String info = null;
 
 	class CompareRoomDistance extends AsyncTask<String, String, String> {
 
 		@Override
-		protected void onPreExecute() {
-			super.onPreExecute();
-		}
+		protected String doInBackground(String... params) {
 
-		@Override
-		protected String doInBackground(String... args) {
-			
-			String info ="";
-			
-			mDbHelper = new GrpRoomDbAdapter(getActivity());
-			mDbHelper.open();
-			
-			Geocoder coder = new Geocoder(getActivity());
-			List<Address> address;
+			details = new ArrayList<GrpRoomListExt>();
+			Cursor mRMCursor = mDbHelper.fetchRoomsWDistance(DISTPREF);
+			if (mRMCursor.getCount() != 0) {
+				// mRMCursor.moveToFirst();
+				Log.d("GrpRmPullService",
+						"filldata(): count: " + mRMCursor.getCount());
+				while (mRMCursor.moveToNext()) {
 
-			String homeAddress = homeLocation;
-			LatLng homeLatLng = null;
-			
-			Location locRoom = new Location("");
-			Location locHome;
-			
-			newRoomLocList = new ArrayList<GrpRoomListExt>();
-			roomLocationList = new ArrayList<GrpRoomListExt>();
+					room_id = GrpRoomDbAdapter.getLong(mRMCursor,
+							GrpRoomDbAdapter.KEY_ROOM_ID);
+					title = GrpRoomDbAdapter.getString(mRMCursor,
+							GrpRoomDbAdapter.KEY_TITLE);
+					category = GrpRoomDbAdapter.getString(mRMCursor,
+							GrpRoomDbAdapter.KEY_CATEGORY);
+					noOfLearner = GrpRoomDbAdapter.getLong(mRMCursor,
+							GrpRoomDbAdapter.KEY_NO_OF_LEARNER);
+					location = GrpRoomDbAdapter.getString(mRMCursor,
+							GrpRoomDbAdapter.KEY_LOCATION);
+					distance = GrpRoomDbAdapter.getLong(mRMCursor,
+							GrpRoomDbAdapter.KEY_DISTANCE);
 
-			GrpRoomListing grpRmList;
-			Cursor mCursor = mDbHelper.fetchAllRooms();
-			details = new ArrayList<GrpRoomListing>();
-			while (mCursor.moveToNext()) {
-				grpRmList = new GrpRoomListing(
-						mCursor.getLong(mCursor
-								.getColumnIndex(GrpRoomDbAdapter.KEY_ROOM_ID)),
-						mCursor.getString(mCursor
-								.getColumnIndex(GrpRoomDbAdapter.KEY_TITLE)),
-						mCursor.getString(mCursor
-								.getColumnIndex(GrpRoomDbAdapter.KEY_CATEGORY)),
-						mCursor.getLong(mCursor
-								.getColumnIndex(GrpRoomDbAdapter.KEY_NO_OF_LEARNER)),
-						mCursor.getString(mCursor
-								.getColumnIndex(GrpRoomDbAdapter.KEY_LOCATION)),
-						mCursor.getString(mCursor
-								.getColumnIndex(GrpRoomDbAdapter.KEY_LATLNG)));
-				details.add(grpRmList);
-			}
-			
-			for (int i = 0; i < details.size(); i++) {
-				if (!details.get(i).getLatlng().equals("")
-						&& !details.get(i).getLatlng().equals(null)
-						&& !details.get(i).getLatlng().equals("undefined")) {
-					String latLng = details.get(i).getLatlng();
-					long room_id = details.get(i).getRoom_id();
+					lat = GrpRoomDbAdapter.getLong(mRMCursor,
+							GrpRoomDbAdapter.KEY_LAT);
+					lng = GrpRoomDbAdapter.getLong(mRMCursor,
+							GrpRoomDbAdapter.KEY_LNG);
 
-					Log.d("Geocode", "db LatLng: " + latLng);
-
-					// Split lat Lng
-					String[] parts = latLng.split(",");
-					latR = Double.parseDouble(parts[0]);
-					lngR = Double.parseDouble(parts[1]);
-
-					roomLatLng = new LatLng(latR, lngR);
-
-					roomLocationList.add(new GrpRoomListExt(room_id, details
-							.get(i).getTitle(), details.get(i).getCategory(),
-							details.get(i).getNoOfLearner(), details.get(i)
-									.getLocation(), details.get(i).getLatlng(),
-							roomLatLng, 0));
-				}
-			}
-			
-			try {
-
-				address = coder.getFromLocationName(homeAddress, 5);
-				Log.d("Geocode", "Home Address: " + homeAddress);
-				if (address == null) {
-					// return null;
-				}
-				Address location = address.get(0);
-
-				homeLatLng = new LatLng(location.getLatitude(),
-						location.getLongitude());
-				
-				Log.d("Geocode", "Home LatLng: " + homeLatLng.toString());
-				Log.d("Geocode", "----- ");
-				// return p1;
-			} catch (Exception e) {
-				// String s = "Unable to locate your provided address, ";
-				// s+= "please check your address.";
-				// Toast.makeText(getActivity(), s, Toast.LENGTH_LONG).show();
-				Log.d("Geocode", "Geocode Failed due to:\n"+e);
-			}
-			
-			for (GrpRoomListExt r : roomLocationList) {
-
-				locRoom = new Location("Room " + r.getRoom_id());
-				locRoom.setLatitude(r.getRoomLatLng().latitude);
-				locRoom.setLongitude(r.getRoomLatLng().longitude);
-
-				locHome = new Location("User Home");
-				locHome.setLatitude(homeLatLng.latitude);
-				locHome.setLongitude(homeLatLng.longitude);
-				
-
-				double dist = locHome.distanceTo(locRoom);
-
-				r.setDistance(dist);
-
-				int retval;
-
-				// if (DISTPREF_UNIT == 0) {
-				retval = Double.compare(DISTPREF, dist);
-				// }
-				// else {
-				// retval = Double.compare(DISTPREF / 1000, dist);
-				// }
-				
-				info += "\nrmID: " + r.getRoom_id();
-				if (retval < 0) {
-					//Log.d("Geocode", "Removed: " + r.getRoom_id());
-					info += "\nRemoved: " + r.getRoom_id()+" Dist: " + dist;
-				} else{
-					//Log.d("Geocode", "Added: " + r.getRoom_id());
-					info += "\nAdded: " + r.getRoom_id()+" Dist: " + dist;
-					newRoomLocList.add(r);
+					details.add(new GrpRoomListExt(room_id, title, category,
+							noOfLearner, location, null, new LatLng(lat, lng),
+							distance));
 				}
 			}
 
 			return null;
 		}
 
-		/**
-		 * After completing background task Dismiss the progress dialog
-		 * **/
-		protected void onPostExecute(String file_url) {
-			// dismiss the dialog once product deleted
-			// pDialog.dismiss();
-			eduSuggestLV.setAdapter(new GrpRoomListExtAdapter(newRoomLocList,
+		@Override
+		protected void onPostExecute(String result) {
+			super.onPostExecute(result);
+			eduSuggestLV.setAdapter(new GrpRoomListExtAdapter(details,
 					getActivity()));
+			Log.d(TAG + " Geocode", info);
+		}
+	}
+
+	public class DataReadyReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			Log.d(TAG, "Executing CompareRoomDistance");
+			new CompareRoomDistance().execute();
 		}
 
 	}
-
 }

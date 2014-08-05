@@ -32,6 +32,8 @@
         <item>KM</item>
         <item>M</item>
     </string-array>
+    
+    <string name="title_activity_nearbyrm">Nearby Rooms</string>
 
     <string name="activity_room_info_title">Title: </string>
     <string name="activity_room_info_category">Category: </string>

@@ -30,15 +30,26 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="Your Joined Group"
+        android:text="Dashboard"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
-    <ListView
-        android:id="@+id/listView1"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:layout_weight="0.4" >
-    </ListView>
+        android:layout_weight="0.4"
+        android:orientation="vertical" >
+
+        <Button
+            android:id="@+id/frag_bnnearbyrooms"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginBottom="7dp"
+            android:background="@drawable/border_for_imageview"
+            android:text="Show nearby rooms" />
+    </RelativeLayout>
 
     <TextView
         android:id="@+id/textView2"
@@ -70,12 +81,14 @@
             android:layout_weight="0.8"
             android:textAppearance="?android:attr/textAppearanceSmall" />
 
-        <!-- <ImageButton
+        <!--
+             <ImageButton
             android:id="@+id/fgh_bnSetDist"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="0.1"
-            android:background="@drawable/setting" /> -->
+            android:background="@drawable/setting" />
+        -->
     </LinearLayout>
 
     <ListView

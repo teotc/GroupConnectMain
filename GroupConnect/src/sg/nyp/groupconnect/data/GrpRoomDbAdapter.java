@@ -17,10 +17,11 @@
 package sg.nyp.groupconnect.data;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
+import sg.nyp.groupconnect.learner.GrpRoomListExt;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
@@ -40,7 +41,10 @@ public class GrpRoomDbAdapter {
 	public static final String KEY_CATEGORY = "category";
 	public static final String KEY_NO_OF_LEARNER = "noOfLearner";
 	public static final String KEY_LOCATION = "location";
-	public static final String KEY_LATLNG = "latlng";
+
+	public static final String KEY_LAT = "lat";
+	public static final String KEY_LNG = "lng";
+	public static final String KEY_DISTANCE = "distance";
 
 	private static final String TAG = "GrpRoomDbAdapter";
 	private DatabaseHelper mDbHelper;
@@ -52,8 +56,11 @@ public class GrpRoomDbAdapter {
 	private static final String DATABASE_CREATE = "CREATE TABLE room (room_id INTEGER UNIQUE, "
 			+ "title TEXT NOT NULL, "
 			+ "category TEXT NOT NULL, "
-			+ "noOfLearner TEXT NOT NULL, "
+			+ "noOfLearner INTEGER NOT NULL, "
 			+ "location TEXT, "
+			+ "lat DOUBLE, "
+			+ "lng DOUBLE, "
+			+ "distance DOUBLE, "
 			+ "latlng TEXT NOT NULL " + ");";
 
 	private static class DatabaseHelper extends SQLiteOpenHelper {
@@ -129,14 +136,17 @@ public class GrpRoomDbAdapter {
 	 */
 
 	public long createRoom(long room_id, String title, String category,
-			String noOfLearner, String location, String latlng) {
+			long noOfLearner, String location, double lat, double lng,
+			double distance) {
 		ContentValues cv = new ContentValues();
 		cv.put(KEY_ROOM_ID, room_id);
 		cv.put(KEY_TITLE, title);
 		cv.put(KEY_CATEGORY, category);
 		cv.put(KEY_NO_OF_LEARNER, noOfLearner);
 		cv.put(KEY_LOCATION, location);
-		cv.put(KEY_LATLNG, latlng);
+		cv.put(KEY_DISTANCE, distance);
+		cv.put(KEY_LAT, lat);
+		cv.put(KEY_LNG, lng);
 
 		return mDb.insert(DATABASE_TABLE, null, cv);
 	}
@@ -164,8 +174,8 @@ public class GrpRoomDbAdapter {
 	 */
 	public Cursor fetchAllRooms() {
 		return mDb.query(DATABASE_TABLE, new String[] { KEY_ROOM_ID, KEY_TITLE,
-				KEY_CATEGORY, KEY_NO_OF_LEARNER, KEY_LOCATION, KEY_LATLNG },
-				null, null, null, null, null);
+				KEY_CATEGORY, KEY_NO_OF_LEARNER, KEY_LOCATION, KEY_DISTANCE,
+				KEY_LAT, KEY_LNG }, null, null, null, null, null);
 	}
 
 	/**
@@ -182,8 +192,33 @@ public class GrpRoomDbAdapter {
 		Cursor mCursor =
 
 		mDb.query(true, DATABASE_TABLE, new String[] { KEY_ROOM_ID, KEY_TITLE,
-				KEY_CATEGORY, KEY_NO_OF_LEARNER, KEY_LOCATION, KEY_LATLNG },
-				KEY_ROOM_ID + "=" + room_id, null, null, null, null, null);
+				KEY_CATEGORY, KEY_NO_OF_LEARNER, KEY_LOCATION, KEY_DISTANCE,
+				KEY_LAT, KEY_LNG }, KEY_ROOM_ID + "=" + room_id, null, null,
+				null, null, null);
+		if (mCursor != null) {
+			mCursor.moveToFirst();
+		}
+		return mCursor;
+
+	}
+	
+	/**
+	 * Return a Cursor positioned at the note that matches the given rowId
+	 * 
+	 * @param rowId
+	 *            id of note to retrieve
+	 * @return Cursor positioned to matching note, if found
+	 * @throws SQLException
+	 *             if note could not be found/retrieved
+	 */
+	public Cursor fetchRoomsWDistance(long distance) throws SQLException {
+
+		Cursor mCursor =
+
+		mDb.query(true, DATABASE_TABLE, new String[] { KEY_ROOM_ID, KEY_TITLE,
+				KEY_CATEGORY, KEY_NO_OF_LEARNER, KEY_LOCATION, KEY_DISTANCE,
+				KEY_LAT, KEY_LNG }, KEY_DISTANCE + "<" + distance, null, null,
+				null, null, null);
 		if (mCursor != null) {
 			mCursor.moveToFirst();
 		}
@@ -205,98 +240,70 @@ public class GrpRoomDbAdapter {
 	 * @return true if the note was successfully updated, false otherwise
 	 */
 	public boolean updateRoom(long room_id, String title, String category,
-			String noOfLearner, String location, String latlng) {
+			long noOfLearner, String location, double lat, double lng,
+			double distance) {
 		ContentValues cv = new ContentValues();
+		cv.put(KEY_ROOM_ID, room_id);
 		cv.put(KEY_TITLE, title);
 		cv.put(KEY_CATEGORY, category);
 		cv.put(KEY_NO_OF_LEARNER, noOfLearner);
 		cv.put(KEY_LOCATION, location);
-		cv.put(KEY_LATLNG, latlng);
+		cv.put(KEY_DISTANCE, distance);
+		cv.put(KEY_LAT, lat);
+		cv.put(KEY_LNG, lng);
 
 		return mDb
 				.update(DATABASE_TABLE, cv, KEY_ROOM_ID + "=" + room_id, null) > 0;
 	}
 
-	private ArrayList<HashMap<String, String>> roomList;
-
-	public Cursor checkRooms(ArrayList<HashMap<String, String>> mRoomList)
+	public void checkRooms(ArrayList<GrpRoomListExt> mRoomList)
 			throws SQLException {
 		String SVC_TAG = "GrpRmPullSvc";
 		Log.d(SVC_TAG, "checkRooms()");
 
 		String updateInfo = "";
 
-		roomList = new ArrayList<HashMap<String, String>>();
-		roomList = mRoomList;
-
-		final String TAG_ROOMID = "room_id";
-		final String TAG_TITLE = "title";
-		final String TAG_CATEGORY = "category";
-		final String TAG_NOOFLEARNER = "noOfLearner";
-		final String TAG_LOCATION = "location";
-		final String TAG_LATLNG = "latLng";
-		final String TAG_USERNAME = "username";
-		// final String TAG_POSTS = "posts"; // TAG_ROOMS = "rooms";
-
-		String title = null, location = null, category = null, noOfLearner = null, latLng = null, username = null;
-		long room_id = 0;
+		String title = null, location = null, category = null;
+		long noOfLearner = 0, room_id = 0;
+		double distance, lat, lng;
 
 		Cursor mCursor = mDb.query(DATABASE_TABLE, new String[] { KEY_ROOM_ID,
 				KEY_TITLE, KEY_CATEGORY, KEY_NO_OF_LEARNER, KEY_LOCATION,
-				KEY_LATLNG }, null, null, null, null, KEY_ROOM_ID + " ASC");
+				KEY_DISTANCE, KEY_LAT, KEY_LNG }, null, null, null, null,
+				KEY_ROOM_ID + " ASC");
 
 		if (!(mCursor.moveToFirst()) || mCursor.getCount() == 0) {
 			Log.d(SVC_TAG, "chkRm(): No results in database");
 
-			// for (int i = 0; i < roomList.size(); i++) {
-			//
-			// room_id = Long.parseLong(mRoomList.get(i).get(TAG_ROOMID));
-			// title = mRoomList.get(i).get(TAG_TITLE);
-			// category = mRoomList.get(i).get(TAG_CATEGORY);
-			// noOfLearner = mRoomList.get(i).get(TAG_NOOFLEARNER);
-			// location = mRoomList.get(i).get(TAG_LOCATION);
-			// latLng = mRoomList.get(i).get(TAG_LATLNG);
-			// username = mRoomList.get(i).get(TAG_USERNAME);
-			//
-			// Log.d("GrpRmPullService",
-			// "checkRooms(): Creating new records: " + room_id);
-			//
-			// Log.d("GrpRmPullService", "Processing checkRooms(): Username: "
-			// + username);
-			// // Log.d("GrpRmPullService",
-			// // "Processing checkRooms(): Username: map: "
-			// // + map.get(TAG_USERNAME));
-			//
-			// createRoom(room_id, title, category, noOfLearner, location,
-			// latLng, username);
-			// }
+			for (GrpRoomListExt r : mRoomList) {
+				room_id = r.getRoom_id();
+				title = r.getTitle();
+				category = r.getCategory();
+				noOfLearner = r.getNoOfLearner();
+				location = r.getLocation();
+				distance = r.getDistance();
+				lat = r.getRoomLatLng().latitude;
+				lng = r.getRoomLatLng().longitude;
 
-			for (HashMap<String, String> map : roomList) {
-				room_id = Long.parseLong(map.get(TAG_ROOMID));
-				title = map.get(TAG_TITLE);
-				category = map.get(TAG_CATEGORY);
-				noOfLearner = map.get(TAG_NOOFLEARNER);
-				location = map.get(TAG_LOCATION);
-				latLng = map.get(TAG_LATLNG);
-
-				// Log.d("Record Update", "Created new record: " + room_id);
 				updateInfo += "\nCreated new record: " + room_id;
 				createRoom(room_id, title, category, noOfLearner, location,
-						latLng);
+						lat, lng, distance);
 			}
 
 		} else {
 			mCursor.moveToFirst();
 			Log.d(SVC_TAG, "checkRooms(): Processing db results");
 			while (mCursor.moveToNext()) {
-				for (HashMap<String, String> map : roomList) {
+				for (GrpRoomListExt r : mRoomList) {
 
-					room_id = Long.parseLong(map.get(TAG_ROOMID));
-					title = map.get(TAG_TITLE);
-					category = map.get(TAG_CATEGORY);
-					noOfLearner = map.get(TAG_NOOFLEARNER);
-					location = map.get(TAG_LOCATION);
-					latLng = map.get(TAG_LATLNG);
+					room_id = r.getRoom_id();
+					title = r.getTitle();
+					category = r.getCategory();
+					noOfLearner = r.getNoOfLearner();
+					location = r.getLocation();
+					distance = r.getDistance();
+					lat = r.getRoomLatLng().latitude;
+					lng = r.getRoomLatLng().longitude;
 
 					Log.d("GrpRmPullService", "checkRooms(): Room ID: "
 							+ room_id);
@@ -307,6 +314,9 @@ public class GrpRoomDbAdapter {
 
 					boolean vExist = false;
 					boolean wasUpdated = false;
+
+					long db_room_id = getLong(mCursor, KEY_ROOM_ID);
+					Log.d(SVC_TAG, "Test static" + Long.toString(db_room_id));
 
 					if (Long.valueOf(
 							mCursor.getLong(mCursor.getColumnIndex(KEY_ROOM_ID)))
@@ -326,18 +336,24 @@ public class GrpRoomDbAdapter {
 										mCursor.getColumnIndex(KEY_LOCATION))
 										.equals(location)
 								&& mCursor.getString(
-										mCursor.getColumnIndex(KEY_LATLNG))
-										.equals(latLng)) {
+										mCursor.getColumnIndex(KEY_LAT))
+										.equals(lat)
+								&& mCursor.getString(
+										mCursor.getColumnIndex(KEY_LNG))
+										.equals(lng)
+								&& mCursor.getString(
+										mCursor.getColumnIndex(KEY_DISTANCE))
+										.equals(distance)) {
 							wasUpdated = false;
 						}
 						if (!wasUpdated && !vExist) {
 							createRoom(room_id, title, category, noOfLearner,
-									location, latLng);
+									location, lat, lng, distance);
 							Log.d("Record Update", "Created new record: "
 									+ room_id);
 						} else if (wasUpdated && vExist) {
 							updateRoom(room_id, title, category, noOfLearner,
-									location, latLng);
+									location, lat, lng, distance);
 							Log.d("Record Update", "Updated record: " + room_id);
 						} else {
 							Log.d("Record Update",
@@ -352,7 +368,18 @@ public class GrpRoomDbAdapter {
 			}
 		}
 		Log.d(SVC_TAG, "Updated record:\n" + updateInfo);
-		return mCursor;
+		
+		Intent intent = new Intent("DataReady");
+		// add data to the intent
+		intent.setAction("sg.nyp.groupconnect.item.DataReadyReceiver");
+		mCtx.sendBroadcast(intent);
 
+	}
+
+	public static long getLong(Cursor mCursor, String keyID) {
+		return Long.valueOf(mCursor.getLong(mCursor.getColumnIndex(keyID)));
+	}
+	public static String getString(Cursor mCursor, String keyID) {
+		return mCursor.getString(mCursor.getColumnIndex(keyID));
 	}
 }

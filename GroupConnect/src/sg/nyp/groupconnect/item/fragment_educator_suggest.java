@@ -19,7 +19,7 @@ public class fragment_educator_suggest extends Fragment {
 		View rootView = inflater.inflate(R.layout.fragment_home, container,
 				false);
 		// Get ListView object from xml
-		ListView listView = (ListView) rootView.findViewById(R.id.listView1);
+		//ListView listView = (ListView) rootView.findViewById(R.id.listView1);
 
 		// Defined Array values to show in ListView
 		String[] values = new String[] { "Joined Group 1", "Joined Group 2",
@@ -38,7 +38,7 @@ public class fragment_educator_suggest extends Fragment {
 				android.R.id.text1, values);
 
 		// Assign adapter to ListView
-		listView.setAdapter(adapter);
+		//listView.setAdapter(adapter);
 		return rootView;
 	}
 }

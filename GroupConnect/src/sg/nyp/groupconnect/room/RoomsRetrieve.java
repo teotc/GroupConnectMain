@@ -2,14 +2,15 @@ package sg.nyp.groupconnect.room;
 
 import java.util.ArrayList;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import sg.nyp.groupconnect.R;
 import sg.nyp.groupconnect.data.*;
-import sg.nyp.groupconnect.learner.GrpRoomListing;
-import sg.nyp.groupconnect.room.*;
+import sg.nyp.groupconnect.learner.GrpRoomListExt;
 import android.app.*;
 import android.content.Intent;
 import android.database.Cursor;
-import android.os.Bundle;
+import android.os.*;
 import android.util.Log;
 import android.view.*;
 import android.view.ContextMenu.*;
@@ -19,33 +20,31 @@ import android.widget.AdapterView.*;
 public class RoomsRetrieve extends Activity {
 
 	// Database access
-	public static final String KEY_ROOM_ID = "room_id";
-	public static final String KEY_TITLE = "title";
-	public static final String KEY_CATEGORY = "category";
-	public static final String KEY_NO_OF_LEARNER = "noOfLearner";
-	public static final String KEY_LOCATION = "location";
-	public static final String KEY_LATLNG = "latlng";
-	public static final String KEY_USERNAME = "username";
 	private GrpRoomDbAdapter mDbHelper;
 
 	// UI
 	private ListView roomList;
-	private ArrayList<GrpRoomListing> details;
+	private ArrayList<GrpRoomListExt> details;
 	private AdapterView.AdapterContextMenuInfo info;
 
 	// Others
 	private Intent intent;
+	
+	// fillData() variables
+	String title = null, location = null, category = null;
+	long noOfLearner = 0, room_id = 0;
+	double distance, lat, lng;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.search_group);
+		setContentView(R.layout.activity_rooms_retrieve);
 
 		mDbHelper = new GrpRoomDbAdapter(this);
 		mDbHelper.open();
 
 		roomList = (ListView) findViewById(R.id.GroupList);
-		fillData();
+		new fillData().execute();
 
 		registerForContextMenu(roomList);
 
@@ -145,56 +144,65 @@ public class RoomsRetrieve extends Activity {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		// TODO Auto-generated method stub
 		getMenuInflater().inflate(R.menu.search_group, menu);
 		return super.onCreateOptionsMenu(menu);
 	}
 
 	@Override
 	protected void onPause() {
-		// TODO Auto-generated method stub
 		super.onPause();
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
-		fillData();
+		new fillData().execute();
 	}
 
-	private void fillData() {
+	class fillData extends AsyncTask<String, String, String> {
 
-		GrpRoomListing grpRmList;
-		details = new ArrayList<GrpRoomListing>();
-		Cursor mRMCursor = mDbHelper.fetchAllRooms();
-		if (mRMCursor.getCount() != 0) {
-			// mRMCursor.moveToFirst();
-			Log.d("GrpRmPullService",
-					"filldata(): count: " + mRMCursor.getCount());
-			while (mRMCursor.moveToNext()) {
-				// Log.d("GrpRmPullService",
-				// "filldata(): title: "
-				// + mRMCursor.getString(mRMCursor
-				// .getColumnIndex(GrpRoomDbAdapter.KEY_TITLE)));
-				grpRmList = new GrpRoomListing(
-						mRMCursor.getLong(mRMCursor
-								.getColumnIndex(GrpRoomDbAdapter.KEY_ROOM_ID)),
-						mRMCursor.getString(mRMCursor
-								.getColumnIndex(GrpRoomDbAdapter.KEY_TITLE)),
-						mRMCursor.getString(mRMCursor
-								.getColumnIndex(GrpRoomDbAdapter.KEY_CATEGORY)),
-						mRMCursor.getLong(mRMCursor
-								.getColumnIndex(GrpRoomDbAdapter.KEY_NO_OF_LEARNER)),
-						mRMCursor.getString(mRMCursor
-								.getColumnIndex(GrpRoomDbAdapter.KEY_LOCATION)),
-						mRMCursor.getString(mRMCursor
-								.getColumnIndex(GrpRoomDbAdapter.KEY_LATLNG)));
-				details.add(grpRmList);
+		@Override
+		protected String doInBackground(String... params) {
+
+			details = new ArrayList<GrpRoomListExt>();
+			Cursor mRMCursor = mDbHelper.fetchAllRooms();
+			if (mRMCursor.getCount() != 0) {
+				// mRMCursor.moveToFirst();
+				Log.d("GrpRmPullService",
+						"filldata(): count: " + mRMCursor.getCount());
+				while (mRMCursor.moveToNext()) {
+
+					room_id = GrpRoomDbAdapter.getLong(mRMCursor,
+							GrpRoomDbAdapter.KEY_ROOM_ID);
+					title = GrpRoomDbAdapter.getString(mRMCursor,
+							GrpRoomDbAdapter.KEY_TITLE);
+					category = GrpRoomDbAdapter.getString(mRMCursor,
+							GrpRoomDbAdapter.KEY_CATEGORY);
+					noOfLearner = GrpRoomDbAdapter.getLong(mRMCursor,
+							GrpRoomDbAdapter.KEY_NO_OF_LEARNER);
+					location = GrpRoomDbAdapter.getString(mRMCursor,
+							GrpRoomDbAdapter.KEY_LOCATION);
+					distance = GrpRoomDbAdapter.getLong(mRMCursor,
+							GrpRoomDbAdapter.KEY_DISTANCE);
+
+					lat = GrpRoomDbAdapter.getLong(mRMCursor,
+							GrpRoomDbAdapter.KEY_LAT);
+					lng = GrpRoomDbAdapter.getLong(mRMCursor,
+							GrpRoomDbAdapter.KEY_LNG);
+
+					details.add(new GrpRoomListExt(room_id, title, category,
+							noOfLearner, location, null, new LatLng(lat, lng),
+							distance));
+				}
 			}
-			roomList.setAdapter(new GrpRoomListAdapter(details,
-					RoomsRetrieve.this));
-		} else {
+			return null;
+		}
 
+		@Override
+		protected void onPostExecute(String result) {
+			super.onPostExecute(result);
+			roomList.setAdapter(new GrpRoomListExtAdapter(details,
+					RoomsRetrieve.this));
 		}
 	}
 }
