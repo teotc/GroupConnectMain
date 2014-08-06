@@ -1,7 +1,8 @@
 package sg.nyp.groupconnect.data;
 
 import sg.nyp.groupconnect.R;
-import sg.nyp.groupconnect.learner.GrpRoomListExt;
+import sg.nyp.groupconnect.entity.GrpRoomListExt;
+
 import java.util.ArrayList;
 
 import android.content.Context;

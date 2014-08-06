@@ -1,9 +1,13 @@
 package sg.nyp.groupconnect.item;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import sg.nyp.groupconnect.R;
 import sg.nyp.groupconnect.data.*;
-import sg.nyp.groupconnect.learner.GrpRoomListExt;
+import sg.nyp.groupconnect.entity.DistanceSorter;
+import sg.nyp.groupconnect.entity.GrpRoomListExt;
 import sg.nyp.groupconnect.room.NearbyRooms;
 import android.annotation.SuppressLint;
 import android.app.*;
@@ -49,7 +53,7 @@ public class fragment_home extends Fragment {
 		homeLocTextAddr = sp.getString("home", "Error in retrieving location");
 		Log.i("Geocode", "Home:" + homeLocTextAddr);
 		homeLoc.setText(homeLocTextAddr);
-		
+
 		mDbHelper = new GrpRoomDbAdapter(getActivity());
 		mDbHelper.open();
 
@@ -61,25 +65,13 @@ public class fragment_home extends Fragment {
 				startActivity(i);
 			}
 		});
-
-		// DISTPREF = sp.getInt("DISTPREF", 5000); // DISTPREF_UNIT
-		// DISTPREF_UNIT = sp.getInt("DISTPREF", 0);
-
-		// bnSetDist.setOnClickListener(new OnClickListener() {
-		// @Override
-		// public void onClick(View v) {
-		// // show();
-		// }
-		// });
-		// new CompareRoomDistance().execute();
-
 		return rootView;
 	}
 
 	@Override
 	public void onPause() {
 		super.onPause();
-		//getActivity().unregisterReceiver(dataDone);
+		// getActivity().unregisterReceiver(dataDone);
 	}
 
 	@Override
@@ -96,90 +88,22 @@ public class fragment_home extends Fragment {
 		};
 		IntentFilter intf = new IntentFilter("sg.nyp.groupconnect.DATADONE");
 		getActivity().registerReceiver(dataDone, intf);
-		
-		if(details != null){
-			updateLV();
+
+		if (details != null) {
+			Log.d(TAG, "Loading LV");
+			new CompareRoomDistance().execute();
 		}
-		
-		//new CompareRoomDistance().execute();
 	}
 
-	Spinner spUnit;
-
-	public void show() {
-
-		final Dialog d = new Dialog(getActivity());
-		d.setTitle("Choose a boundary");
-		d.setContentView(R.layout.dialog_distpicker);
-		Button dist_set = (Button) d.findViewById(R.id.diag_dist_set);
-		Button dist_cancel = (Button) d.findViewById(R.id.diag_dist_cancel);
-		spUnit = (Spinner) d.findViewById(R.id.diag_dist_spUnit);
-
-		// String[] unitArray = new String[] { "M", "KM" };
-
-		// Selection of the spinner
-		spUnit = (Spinner) d.findViewById(R.id.diag_dist_spUnit);
-
-		// Application of the Array to the Spinner
-		ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(
-				d.getContext(), android.R.layout.simple_spinner_item,
-				getResources().getStringArray(R.array.spDistUnits));
-		spinnerArrayAdapter
-				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		spUnit.setAdapter(spinnerArrayAdapter);
-
-		// String[] unitArray = getActivity().getResources().getStringArray(
-		// R.array.spDistUnits);
-		// ArrayList<String> units = new ArrayList<String>(
-		// Arrays.asList(unitArray));
-		//
-		// spUnit = new Spinner(getActivity());
-		// ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(
-		// getActivity(), android.R.layout.simple_spinner_item,
-		// units);
-		// spinnerArrayAdapter
-		// .setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		// spUnit.setAdapter(spinnerArrayAdapter);
-
-		// spUnit.setSelection(DISTPREF_UNIT);
-
-		// Set up Numberpicker
-		final NumberPicker np = (NumberPicker) d
-				.findViewById(R.id.diag_dist_npDist);
-		np.setMaxValue(9999);
-		np.setMinValue(1); // min value 1
-		np.setWrapSelectorWheel(false);
-		// np.setValue(DISTPREF);
-		// np.setOnValueChangedListener(this);
-
-		dist_set.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				// tv.setText(String.valueOf(np.getValue())); //set the value to
-				// textview
-
-				// SharedPreferences sp = PreferenceManager
-				// .getDefaultSharedPreferences(getActivity());
-				// Editor edit = sp.edit();
-				// edit.putInt("DISTPREF", np.getValue());
-				// edit.putInt("DISTPREF_UNIT",
-				// spUnit.getSelectedItemPosition());
-				// edit.commit();
-				d.dismiss();
-			}
-		});
-		dist_cancel.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				d.dismiss(); // dismiss the dialog
-			}
-		});
-		d.show();
-
+	@Override
+	public void onActivityCreated(Bundle savedInstanceState) {
+		// TODO Auto-generated method stub
+		super.onActivityCreated(savedInstanceState);
+		new CompareRoomDistance().execute();
 	}
 
 	public void updateLV() {
-		eduSuggestLV.setAdapter(null);
+		// eduSuggestLV.setAdapter(null);
 		eduSuggestLV.setAdapter(new GrpRoomListExtAdapter(details,
 				getActivity()));
 	}
@@ -192,7 +116,6 @@ public class fragment_home extends Fragment {
 	double distance, lat, lng;
 
 	private ArrayList<GrpRoomListExt> details;
-	private ArrayList<GrpRoomListExt> roomList2;
 
 	class CompareRoomDistance extends AsyncTask<String, String, String> {
 
@@ -228,6 +151,7 @@ public class fragment_home extends Fragment {
 					details.add(new GrpRoomListExt(room_id, title, category,
 							noOfLearner, location, null, new LatLng(lat, lng),
 							distance));
+					Collections.sort(details, new DistanceSorter());
 				}
 			} else {
 				Log.d(TAG, "No results in cursor");
@@ -240,8 +164,7 @@ public class fragment_home extends Fragment {
 		@Override
 		protected void onPostExecute(String result) {
 			super.onPostExecute(result);
-			eduSuggestLV.setAdapter(new GrpRoomListExtAdapter(details,
-					getActivity()));
+			updateLV();
 			Log.d(TAG + " Geocode", "Done");
 		}
 	}

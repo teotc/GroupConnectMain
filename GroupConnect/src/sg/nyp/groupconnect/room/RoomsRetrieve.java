@@ -6,7 +6,7 @@ import com.google.android.gms.maps.model.LatLng;
 
 import sg.nyp.groupconnect.R;
 import sg.nyp.groupconnect.data.*;
-import sg.nyp.groupconnect.learner.GrpRoomListExt;
+import sg.nyp.groupconnect.entity.GrpRoomListExt;
 import android.app.*;
 import android.content.Intent;
 import android.database.Cursor;

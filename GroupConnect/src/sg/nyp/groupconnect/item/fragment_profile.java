@@ -17,6 +17,7 @@ import sg.nyp.groupconnect.R;
 import sg.nyp.groupconnect.room.CreateRmStep2;
 import sg.nyp.groupconnect.utilities.JSONParser;
 import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
@@ -29,6 +30,12 @@ import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.NumberPicker;
+import android.widget.Spinner;
 
 @SuppressLint("NewApi")
 public class fragment_profile extends PreferenceFragment implements
@@ -127,12 +134,16 @@ public class fragment_profile extends PreferenceFragment implements
 
 	class getCateFromWS extends AsyncTask<String, String, String> {
 
-		// private ArrayList<HashMap<String, String>> mCateList;
+		@Override
+		protected void onPreExecute() {
+			// TODO Auto-generated method stub
+			super.onPreExecute();
 
-		// String cate_id;
+			mslpInterests = (MultiSelectListPreference) findPreference("mslp_listSub");
+			mslpInterests.setEnabled(false);
+		}
+
 		String cate_name;
-
-		// String cate_typeId;
 
 		@Override
 		protected String doInBackground(String... args) {
@@ -224,18 +235,17 @@ public class fragment_profile extends PreferenceFragment implements
 
 	private void interestSetUp() {
 
-		mslpInterests = (MultiSelectListPreference) this
-				.findPreference("mslp_listSub");
+//		mslpInterests = (MultiSelectListPreference) this
+//				.findPreference("mslp_listSub");
 		mslpInterests.setPersistent(false);
-		
+
 		// Object defaultValue = insSelected;
 
 		for (String s : insSelected) {
 			Log.d(TAG, "insSelected: " + s);
 		}
-		
-		
-		//Log.d(TAG, "mslpInterests: " + mslpInterests.getValues());
+
+		// Log.d(TAG, "mslpInterests: " + mslpInterests.getValues());
 
 		for (String s : mCateList) {
 			Log.d(TAG, "mCatelist: " + s);
@@ -245,8 +255,8 @@ public class fragment_profile extends PreferenceFragment implements
 				.size()]));
 		mslpInterests.setEntryValues(mCateList
 				.toArray(new CharSequence[mCateList.size()]));
-		
-		//Log.d(TAG, "mslpInterests: " + mslpInterests.getValues());
+
+		// Log.d(TAG, "mslpInterests: " + mslpInterests.getValues());
 		mslpInterests.setSummary(interest);
 
 		mslpInterests
@@ -261,6 +271,7 @@ public class fragment_profile extends PreferenceFragment implements
 						return false;
 					}
 				});
+		mslpInterests.setEnabled(true);
 
 	}
 
@@ -312,6 +323,91 @@ public class fragment_profile extends PreferenceFragment implements
 	//
 	// }
 	// }
+
+	// DISTPREF = sp.getInt("DISTPREF", 5000); // DISTPREF_UNIT
+	// DISTPREF_UNIT = sp.getInt("DISTPREF", 0);
+
+	// bnSetDist.setOnClickListener(new OnClickListener() {
+	// @Override
+	// public void onClick(View v) {
+	// // show();
+	// }
+	// });
+	// new CompareRoomDistance().execute();
+
+	Spinner spUnit;
+
+	public void show() {
+
+		final Dialog d = new Dialog(getActivity());
+		d.setTitle("Choose a boundary");
+		d.setContentView(R.layout.dialog_distpicker);
+		Button dist_set = (Button) d.findViewById(R.id.diag_dist_set);
+		Button dist_cancel = (Button) d.findViewById(R.id.diag_dist_cancel);
+		spUnit = (Spinner) d.findViewById(R.id.diag_dist_spUnit);
+
+		// String[] unitArray = new String[] { "M", "KM" };
+
+		// Selection of the spinner
+		spUnit = (Spinner) d.findViewById(R.id.diag_dist_spUnit);
+
+		// Application of the Array to the Spinner
+		ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(
+				d.getContext(), android.R.layout.simple_spinner_item,
+				getResources().getStringArray(R.array.spDistUnits));
+		spinnerArrayAdapter
+				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		spUnit.setAdapter(spinnerArrayAdapter);
+
+		// String[] unitArray = getActivity().getResources().getStringArray(
+		// R.array.spDistUnits);
+		// ArrayList<String> units = new ArrayList<String>(
+		// Arrays.asList(unitArray));
+		//
+		// spUnit = new Spinner(getActivity());
+		// ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(
+		// getActivity(), android.R.layout.simple_spinner_item,
+		// units);
+		// spinnerArrayAdapter
+		// .setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		// spUnit.setAdapter(spinnerArrayAdapter);
+
+		// spUnit.setSelection(DISTPREF_UNIT);
+
+		// Set up Numberpicker
+		final NumberPicker np = (NumberPicker) d
+				.findViewById(R.id.diag_dist_npDist);
+		np.setMaxValue(9999);
+		np.setMinValue(1); // min value 1
+		np.setWrapSelectorWheel(false);
+		// np.setValue(DISTPREF);
+		// np.setOnValueChangedListener(this);
+
+		dist_set.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				// tv.setText(String.valueOf(np.getValue())); //set the value to
+				// textview
+
+				// SharedPreferences sp = PreferenceManager
+				// .getDefaultSharedPreferences(getActivity());
+				// Editor edit = sp.edit();
+				// edit.putInt("DISTPREF", np.getValue());
+				// edit.putInt("DISTPREF_UNIT",
+				// spUnit.getSelectedItemPosition());
+				// edit.commit();
+				d.dismiss();
+			}
+		});
+		dist_cancel.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				d.dismiss(); // dismiss the dialog
+			}
+		});
+		d.show();
+
+	}
 
 	Collection<String> union(Collection<String> coll1, Collection<String> coll2) {
 		Set<String> union = new HashSet<String>(coll1);

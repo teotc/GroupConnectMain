@@ -1,7 +1,7 @@
 package sg.nyp.groupconnect.data;
 
 import sg.nyp.groupconnect.R;
-import sg.nyp.groupconnect.learner.GrpRoomListing;
+import sg.nyp.groupconnect.entity.GrpRoomListing;
 
 import java.util.ArrayList;
 

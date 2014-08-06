@@ -1,4 +1,4 @@
-package sg.nyp.groupconnect.learner;
+package sg.nyp.groupconnect.entity;
 
 public class GrpRoomListing {
 	

@@ -5,7 +5,7 @@ import java.util.*;
 import org.json.*;
 
 import sg.nyp.groupconnect.data.GrpRoomDbAdapter;
-import sg.nyp.groupconnect.learner.GrpRoomListExt;
+import sg.nyp.groupconnect.entity.GrpRoomListExt;
 import sg.nyp.groupconnect.utilities.JSONParser;
 import android.app.IntentService;
 import android.content.*;

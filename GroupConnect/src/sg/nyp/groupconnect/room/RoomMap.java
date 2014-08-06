@@ -129,7 +129,7 @@ public class RoomMap extends FragmentActivity implements
 	double lat, lng;
 	Marker temp;
 	// / To get the location data
-	Geocoder geocoder = new Geocoder(this, Locale.ENGLISH);
+	Geocoder geocoder;
 	String addressString = "";
 	boolean getCurrentUserLocation = true;
 
@@ -159,6 +159,8 @@ public class RoomMap extends FragmentActivity implements
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_room_map);
+		
+		geocoder = new Geocoder(this, Locale.ENGLISH);
 
 		// You can be pretty confident that the intent will not be null here.
 		Intent intent = getIntent();
