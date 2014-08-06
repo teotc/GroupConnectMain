@@ -27,6 +27,7 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+import android.view.View;
 
 public class GrpRoomDbAdapter {
 
@@ -58,10 +59,7 @@ public class GrpRoomDbAdapter {
 			+ "category TEXT NOT NULL, "
 			+ "noOfLearner INTEGER NOT NULL, "
 			+ "location TEXT, "
-			+ "lat DOUBLE, "
-			+ "lng DOUBLE, "
-			+ "distance DOUBLE, "
-			+ "latlng TEXT NOT NULL " + ");";
+			+ "lat DOUBLE, " + "lng DOUBLE, " + "distance DOUBLE " + ");";
 
 	private static class DatabaseHelper extends SQLiteOpenHelper {
 
@@ -201,7 +199,7 @@ public class GrpRoomDbAdapter {
 		return mCursor;
 
 	}
-	
+
 	/**
 	 * Return a Cursor positioned at the note that matches the given rowId
 	 * 
@@ -305,22 +303,18 @@ public class GrpRoomDbAdapter {
 					lat = r.getRoomLatLng().latitude;
 					lng = r.getRoomLatLng().longitude;
 
-					Log.d("GrpRmPullService", "checkRooms(): Room ID: "
-							+ room_id);
 					Log.d("GrpRmPullService",
-							"checkRooms(): Room ID (DB): "
-									+ mCursor.getLong(mCursor
-											.getColumnIndex(KEY_ROOM_ID)));
+							"chkRm(): RmID: "
+									+ room_id
+									+ ", DB:"
+									+ Long.toString(getLong(mCursor,
+											KEY_ROOM_ID)));
 
 					boolean vExist = false;
 					boolean wasUpdated = false;
 
-					long db_room_id = getLong(mCursor, KEY_ROOM_ID);
-					Log.d(SVC_TAG, "Test static" + Long.toString(db_room_id));
-
-					if (Long.valueOf(
-							mCursor.getLong(mCursor.getColumnIndex(KEY_ROOM_ID)))
-							.equals(room_id)) {
+					if (Long.valueOf(getLong(mCursor, KEY_ROOM_ID)).equals(
+							room_id)) {
 						vExist = true;
 						if (mCursor
 								.getString(mCursor.getColumnIndex(KEY_TITLE))
@@ -368,17 +362,25 @@ public class GrpRoomDbAdapter {
 			}
 		}
 		Log.d(SVC_TAG, "Updated record:\n" + updateInfo);
-		
-		Intent intent = new Intent("DataReady");
-		// add data to the intent
-		intent.setAction("sg.nyp.groupconnect.item.DataReadyReceiver");
-		mCtx.sendBroadcast(intent);
 
+		 broadcastIntent();
+	}
+
+	public void broadcastIntent() {
+		Log.d(TAG, "Intent Broadcasted");
+		Intent intent = new Intent();
+		intent.setAction("sg.nyp.groupconnect.DATADONE");
+		mCtx.sendBroadcast(intent);
 	}
 
 	public static long getLong(Cursor mCursor, String keyID) {
 		return Long.valueOf(mCursor.getLong(mCursor.getColumnIndex(keyID)));
 	}
+	
+	public static Double getDouble(Cursor mCursor, String keyID) {
+		return Double.valueOf(mCursor.getDouble(mCursor.getColumnIndex(keyID)));
+	}
+
 	public static String getString(Cursor mCursor, String keyID) {
 		return mCursor.getString(mCursor.getColumnIndex(keyID));
 	}

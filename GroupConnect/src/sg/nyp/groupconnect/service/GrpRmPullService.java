@@ -52,7 +52,7 @@ public class GrpRmPullService extends IntentService {
 
 		sp = PreferenceManager
 				.getDefaultSharedPreferences(getApplicationContext());
-		homeLocTextAddr = sp.getString("homeLocation", null);
+		homeLocTextAddr = sp.getString("home", null);
 
 		mDbHelper = new GrpRoomDbAdapter(this);
 		mDbHelper.open();
@@ -186,17 +186,19 @@ public class GrpRmPullService extends IntentService {
 										+ tRmLocTxAddr);
 								if (tRmAddr == null) {
 									geocdRMAddrErr = true;
+								}else{
+									Address loc = tRmAddr.get(0);
+
+									rmLatLng = new LatLng(loc.getLatitude(),
+											loc.getLongitude());
+
+									mRoomList.add(new GrpRoomListExt(room_id,
+											title, category, noOfLearner, location,
+											latLng, rmLatLng, distance));
 								}
-								Address loc = tRmAddr.get(0);
-
-								rmLatLng = new LatLng(loc.getLatitude(),
-										loc.getLongitude());
-
-								mRoomList.add(new GrpRoomListExt(room_id,
-										title, category, noOfLearner, location,
-										latLng, rmLatLng, distance));
 							} catch (Exception e) {
-								String err = "Could not get room's coordinate due to:\n";
+								String err = "Could not get room " + room_id
+										+ "'s coordinate due to:\n";
 								Log.d("Geocode", err + e);
 							}
 						}
@@ -242,7 +244,7 @@ public class GrpRmPullService extends IntentService {
 				dist = locHome.distanceTo(locRoom);
 
 				r.setDistance(dist);
-				
+
 			}
 			return null;
 		}

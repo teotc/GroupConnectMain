@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <PreferenceCategory android:title="@string/frag_title_prof" >
+        <MultiSelectListPreference
+            android:dialogTitle="@string/diag_ttl_list_interests"
+            android:key="mslp_listSub"
+            android:positiveButtonText="@string/diag_ttl_et_interestedSub_pos"
+            android:title="@string/ttl_prof_interests" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

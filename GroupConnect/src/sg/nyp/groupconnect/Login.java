@@ -49,7 +49,10 @@ public class Login extends Activity implements OnClickListener {
 	private static final String TAG_TYPE = "type";
 	private static final String TAG_ID = "id";
 	private static final String TAG_UUID = "device";
-	private static final String TAG_HOME = "homeLocation";
+	private static final String TAG_HOME = "location";
+	private static final String TAG_LAT = "latitude";
+	private static final String TAG_LNG = "longitude";
+	private static final String TAG_SCHID = "schoolId";
 
 	private static final String MEM_UPDATE_DEVICE_URL = "http://www.it3197Project.3eeweb.com/grpConnect/memUpdate.php";
 	static String deviceUUID = "";
@@ -125,7 +128,7 @@ public class Login extends Activity implements OnClickListener {
 			try {
 				// Building Parameters
 				List<NameValuePair> params = new ArrayList<NameValuePair>();
-				params.add(new BasicNameValuePair("username", username));
+				params.add(new BasicNameValuePair("name", username));
 				params.add(new BasicNameValuePair("password", password));
 
 				Log.d("request!", "starting");
@@ -144,19 +147,29 @@ public class Login extends Activity implements OnClickListener {
 					SharedPreferences sp = PreferenceManager
 							.getDefaultSharedPreferences(Login.this);
 					Editor edit = sp.edit();
-					edit.putString("username", username);
-					String type = json.getString(TAG_TYPE);
-					edit.putString("type", type);
 					String id = json.getString(TAG_ID);
 					edit.putString("id", id);
+					
+					edit.putString("username", username);
+					
 					String homeLocation = json.getString(TAG_HOME);
 					edit.putString("home", homeLocation);
+					
+					String lat = json.getString(TAG_LAT);
+					String lng = json.getString(TAG_LNG);
+					edit.putString("homeLat", lat);
+					edit.putString("homeLng", lng);
+					
+					String schId = json.getString(TAG_SCHID);
+					edit.putString("schoolId", schId);
+					
+					String type = json.getString(TAG_TYPE);
+					edit.putString("type", type);
+					
 					String uuid = json.getString(TAG_UUID);
 
 					edit.putString("interestedSub",
 							json.getString("interestedSub"));
-					edit.putString("homeLocation",
-							json.getString("homeLocation"));
 
 					// edit.putString("device", uuid);
 					edit.commit();

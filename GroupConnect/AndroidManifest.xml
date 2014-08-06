@@ -159,11 +159,6 @@
                 <category android:name="sg.nyp.groupconnect" />
             </intent-filter>
         </receiver>
-        <receiver android:name="sg.nyp.groupconnect.item.DataReadyReceiver" >
-            <intent-filter>
-                <action android:name="sg.nyp.groupconnect.DATAREADY" />
-            </intent-filter>
-        </receiver>
     </application>
 
 </manifest>

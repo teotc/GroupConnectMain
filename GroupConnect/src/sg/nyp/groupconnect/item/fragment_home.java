@@ -30,6 +30,8 @@ public class fragment_home extends Fragment {
 	ListView eduSuggestLV;
 	Button frag_bnnearbyrooms;
 
+	BroadcastReceiver dataDone;
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
@@ -44,9 +46,12 @@ public class fragment_home extends Fragment {
 				.findViewById(R.id.fgh_tvHomeLocation);
 
 		sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
-		homeLocTextAddr = sp.getString("homeLocation", null);
+		homeLocTextAddr = sp.getString("home", "Error in retrieving location");
 		Log.i("Geocode", "Home:" + homeLocTextAddr);
 		homeLoc.setText(homeLocTextAddr);
+		
+		mDbHelper = new GrpRoomDbAdapter(getActivity());
+		mDbHelper.open();
 
 		frag_bnnearbyrooms.setOnClickListener(new OnClickListener() {
 
@@ -66,9 +71,37 @@ public class fragment_home extends Fragment {
 		// // show();
 		// }
 		// });
-		//new CompareRoomDistance().execute();
+		// new CompareRoomDistance().execute();
 
 		return rootView;
+	}
+
+	@Override
+	public void onPause() {
+		super.onPause();
+		//getActivity().unregisterReceiver(dataDone);
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
+
+		dataDone = new BroadcastReceiver() {
+			@Override
+			public void onReceive(Context context, Intent intent) {
+				Log.d(TAG, "Intent Received");
+				Log.d(TAG, "Executing CompareRoomDistance");
+				new CompareRoomDistance().execute();
+			}
+		};
+		IntentFilter intf = new IntentFilter("sg.nyp.groupconnect.DATADONE");
+		getActivity().registerReceiver(dataDone, intf);
+		
+		if(details != null){
+			updateLV();
+		}
+		
+		//new CompareRoomDistance().execute();
 	}
 
 	Spinner spUnit;
@@ -147,7 +180,7 @@ public class fragment_home extends Fragment {
 
 	public void updateLV() {
 		eduSuggestLV.setAdapter(null);
-		eduSuggestLV.setAdapter(new GrpRoomListExtAdapter(roomList2,
+		eduSuggestLV.setAdapter(new GrpRoomListExtAdapter(details,
 				getActivity()));
 	}
 
@@ -161,43 +194,44 @@ public class fragment_home extends Fragment {
 	private ArrayList<GrpRoomListExt> details;
 	private ArrayList<GrpRoomListExt> roomList2;
 
-	String info = null;
-
 	class CompareRoomDistance extends AsyncTask<String, String, String> {
 
 		@Override
 		protected String doInBackground(String... params) {
 
 			details = new ArrayList<GrpRoomListExt>();
-			Cursor mRMCursor = mDbHelper.fetchRoomsWDistance(DISTPREF);
-			if (mRMCursor.getCount() != 0) {
+			Cursor mCursor = mDbHelper.fetchRoomsWDistance(DISTPREF);
+			if (mCursor.getCount() != 0) {
 				// mRMCursor.moveToFirst();
 				Log.d("GrpRmPullService",
-						"filldata(): count: " + mRMCursor.getCount());
-				while (mRMCursor.moveToNext()) {
+						"filldata(): count: " + mCursor.getCount());
+				while (mCursor.moveToNext()) {
 
-					room_id = GrpRoomDbAdapter.getLong(mRMCursor,
+					room_id = GrpRoomDbAdapter.getLong(mCursor,
 							GrpRoomDbAdapter.KEY_ROOM_ID);
-					title = GrpRoomDbAdapter.getString(mRMCursor,
+					title = GrpRoomDbAdapter.getString(mCursor,
 							GrpRoomDbAdapter.KEY_TITLE);
-					category = GrpRoomDbAdapter.getString(mRMCursor,
+					category = GrpRoomDbAdapter.getString(mCursor,
 							GrpRoomDbAdapter.KEY_CATEGORY);
-					noOfLearner = GrpRoomDbAdapter.getLong(mRMCursor,
+					noOfLearner = GrpRoomDbAdapter.getLong(mCursor,
 							GrpRoomDbAdapter.KEY_NO_OF_LEARNER);
-					location = GrpRoomDbAdapter.getString(mRMCursor,
+					location = GrpRoomDbAdapter.getString(mCursor,
 							GrpRoomDbAdapter.KEY_LOCATION);
-					distance = GrpRoomDbAdapter.getLong(mRMCursor,
+					distance = GrpRoomDbAdapter.getLong(mCursor,
 							GrpRoomDbAdapter.KEY_DISTANCE);
 
-					lat = GrpRoomDbAdapter.getLong(mRMCursor,
+					lat = GrpRoomDbAdapter.getLong(mCursor,
 							GrpRoomDbAdapter.KEY_LAT);
-					lng = GrpRoomDbAdapter.getLong(mRMCursor,
+					lng = GrpRoomDbAdapter.getLong(mCursor,
 							GrpRoomDbAdapter.KEY_LNG);
 
 					details.add(new GrpRoomListExt(room_id, title, category,
 							noOfLearner, location, null, new LatLng(lat, lng),
 							distance));
 				}
+			} else {
+				Log.d(TAG, "No results in cursor");
+				Log.d(TAG, "Count: " + mCursor.getCount());
 			}
 
 			return null;
@@ -208,17 +242,7 @@ public class fragment_home extends Fragment {
 			super.onPostExecute(result);
 			eduSuggestLV.setAdapter(new GrpRoomListExtAdapter(details,
 					getActivity()));
-			Log.d(TAG + " Geocode", info);
+			Log.d(TAG + " Geocode", "Done");
 		}
-	}
-
-	public class DataReadyReceiver extends BroadcastReceiver {
-
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			Log.d(TAG, "Executing CompareRoomDistance");
-			new CompareRoomDistance().execute();
-		}
-
 	}
 }
