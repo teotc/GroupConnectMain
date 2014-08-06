@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import sg.nyp.groupconnect.db.RetrieveSchool;
 import sg.nyp.groupconnect.db.RetrieveSubject;
 import sg.nyp.groupconnect.entity.Schools;
-import sg.nyp.groupconnect.entity.Subjects;
+import sg.nyp.groupconnect.entity.Categories;
 import sg.nyp.groupconnect.utilities.PieChartBuilder;
 import android.app.ActionBar;
 import android.app.AlertDialog;
@@ -29,6 +29,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 
+@SuppressWarnings("deprecation")
 public class Map extends FragmentActivity {
 
 	// Common
@@ -45,7 +46,7 @@ public class Map extends FragmentActivity {
 	private CheckBox chkPrimary, chkSecondary, chkPolytechnic;
 	private String category;
 	
-	public static ArrayList<Subjects> arraySubject = new ArrayList<Subjects>();
+	public static ArrayList<Categories> arraySubject = new ArrayList<Categories>();
 	public static ArrayList<Schools> arraySchools = new ArrayList<Schools>();
 	public static RadioGroup rdGrp;
 	public static String schoolCategory1, schoolCategory2, schoolCategory3;
@@ -82,6 +83,12 @@ public class Map extends FragmentActivity {
 	@Override
 	protected void onStop() {
 		super.onStop();
+	}
+	
+	@Override
+	protected void onDestroy() {
+		mMap = null;
+		super.onDestroy();
 	}
 
 	/**

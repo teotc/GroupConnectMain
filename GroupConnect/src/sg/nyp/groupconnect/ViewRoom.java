@@ -67,7 +67,7 @@ public class ViewRoom extends Activity {
 
 		JSONParser jsonParser = new JSONParser();
 
-		private static final String ROOM_URL = "http://www.it3197Project.3eeweb.com/grpConnect/statics/retrieveRoom.php";
+		private static final String ROOM_URL = "http://www.it3197Project.3eeweb.com/grpConnect/statics/retrieveRoom.php"; //TODO
 
 		private static final String TAG_SUCCESS = "success";
 		private static final String TAG_MESSAGE = "message";

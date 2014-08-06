@@ -1,20 +1,13 @@
 package sg.nyp.groupconnect;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import sg.nyp.groupconnect.utilities.JSONParser;
+import sg.nyp.groupconnect.data.VoteLocationDbAdapter;
 import sg.nyp.groupconnect.utilities.VotingfPieChartBuilder;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -29,15 +22,16 @@ public class VoteLocation extends Activity {
 	private Intent intent = null;
 
 	// Required info
-	private String currentMemberId = "1007";
+	private String currentMemberId;
 	private String currentRoomId = "159";
 	private String[] roomMemberId = new String[] { "1001", "1002", "1003",
 			"1004", "1005", "1006", "1007", "1117", "2095" };
 	private String roomLocation = "none";
-	private String creatorMemberId = "1007";
+	private String creatorMemberId = "1117";
 	private int stat = 0;
 	private int num = 0;
-
+	private ProgressDialog pDialog;
+	private int check = 0;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -50,40 +44,42 @@ public class VoteLocation extends Activity {
 		btnVote = (Button) findViewById(R.id.vote);
 		btnViewResult = (Button) findViewById(R.id.viewResult);
 
-		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(VoteLocation.this);
+		SharedPreferences sp = PreferenceManager
+				.getDefaultSharedPreferences(VoteLocation.this);
 		currentMemberId = sp.getString("id", null);
-		
+
 		Setup();
 
 		TextView tv = (TextView) findViewById(R.id.textView1);
 		tv.setText("Assume: \nCurrentMemberId - " + currentMemberId
 				+ "\nCurrentRoomId - " + currentRoomId + "\nRoomLocation - "
-				+ roomLocation + "\nCreatorMemberId - " + creatorMemberId);
+				+ roomLocation + "\nCreatorMemberId - " + creatorMemberId
+				+ "\nSTAT " + stat);
 	}
 
 	private void Setup() {
-		int check = 0;
+		check = 0;
 		for (int i = 0; i < roomMemberId.length; i++) {
 			if (roomMemberId[i].equals(currentMemberId)) {
 				check = 1;
 			}
 		}
 		if (check == 1 && roomLocation.equals("none")) {
-			new RetrieveMemberVote().execute();
 
 		} else {
 			btnVote.setVisibility(View.GONE);
 			btnViewResult.setVisibility(View.GONE);
 		}
 
-		if (currentMemberId == creatorMemberId)
+		new RetrieveRoomVote().execute();
+
+		if (currentMemberId.equals(creatorMemberId))
 			stat = 1;
 	}
 
 	public void Vote(View v) {
 		intent = new Intent(VoteLocation.this, VoteMap.class);
 		intent.putExtra("CURRENT_ROOM_ID", currentRoomId);
-		intent.putExtra("CURRENT_MEMBER_ID", currentMemberId);
 		startActivityForResult(intent, 0);
 	}
 
@@ -98,28 +94,16 @@ public class VoteLocation extends Activity {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (resultCode == 1) {
 			btnVote.setVisibility(View.GONE);
+			btnViewResult.setVisibility(View.VISIBLE);
 		}
 	}
 
-	public class RetrieveMemberVote extends AsyncTask<String, String, String> {
+	public class RetrieveRoomVote extends AsyncTask<String, String, String> {
 		/**
 		 * Before starting background thread Show Progress Dialog
 		 * */
 		boolean failure = false;
 		public int success;
-
-		// Database
-		private ProgressDialog pDialog;
-
-		JSONParser jsonParser = new JSONParser();
-
-		private static final String RETRIEVE_VOTE_URL = "http://www.it3197Project.3eeweb.com/grpConnect/statics/retrieveVote.php";
-
-		private static final String TAG_SUCCESS = "success";
-		private static final String TAG_MESSAGE = "message";
-		private static final String TAG_ARRAY = "posts";
-
-		private static final String TAG_NUM = "num";
 
 		@Override
 		protected void onPreExecute() {
@@ -135,36 +119,63 @@ public class VoteLocation extends Activity {
 		protected String doInBackground(String... args) {
 			// Check for success tag
 
-			try {
-				// Building Parameters
-				List<NameValuePair> params = new ArrayList<NameValuePair>();
-				params.add(new BasicNameValuePair("memberId", currentMemberId));
-				params.add(new BasicNameValuePair("roomId", currentRoomId));
+			VoteLocationDbAdapter mDbHelper = new VoteLocationDbAdapter(
+					VoteLocation.this);
+			mDbHelper.open();
 
-				// getting product details by making HTTP request
-				JSONObject json = jsonParser.makeHttpRequest(RETRIEVE_VOTE_URL,
-						"POST", params);
+			Cursor mCursor = mDbHelper.fetchAllRoomVote(currentRoomId);
 
-				// json success tag
-				success = json.getInt(TAG_SUCCESS);
+			num = mCursor.getCount();
 
-				for (int i = 0; i < json.getJSONArray(TAG_ARRAY).length(); i++) {
+			mCursor.close();
+			mDbHelper.close();
 
-					JSONObject c = json.getJSONArray(TAG_ARRAY)
-							.getJSONObject(i);
+			return null;
 
-					num = c.getInt(TAG_NUM);
+		}
+
+		/**
+		 * After completing background task Dismiss the progress dialog
+		 * **/
+		protected void onPostExecute(String file_url) {
+			if (num == 0) {
+				btnViewResult.setVisibility(View.GONE);
+
+			} else {
+				btnViewResult.setVisibility(View.VISIBLE);
+				if (check == 1 && roomLocation.equals("none")) {
+					new RetrieveMemberVote().execute();
 				}
-
-				if (success == 1) {
-					return json.getString(TAG_MESSAGE);
-				} else {
-					return json.getString(TAG_MESSAGE);
-
-				}
-			} catch (JSONException e) {
-				e.printStackTrace();
 			}
+		}
+	}
+
+	public class RetrieveMemberVote extends AsyncTask<String, String, String> {
+		/**
+		 * Before starting background thread Show Progress Dialog
+		 * */
+		boolean failure = false;
+		public int success;
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+
+		}
+
+		@Override
+		protected String doInBackground(String... args) {
+			VoteLocationDbAdapter mDbHelper = new VoteLocationDbAdapter(
+					VoteLocation.this);
+			mDbHelper.open();
+
+			Cursor mCursor = mDbHelper.fetchMemberRoomVote(currentMemberId,
+					currentRoomId);
+
+			num = mCursor.getCount();
+
+			mCursor.close();
+			mDbHelper.close();
 
 			return null;
 

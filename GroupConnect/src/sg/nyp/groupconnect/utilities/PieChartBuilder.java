@@ -19,6 +19,9 @@ import sg.nyp.groupconnect.EditRoom;
 import sg.nyp.groupconnect.Map;
 import sg.nyp.groupconnect.R;
 import sg.nyp.groupconnect.ViewRoom;
+import sg.nyp.groupconnect.data.MemberDbAdapter;
+import sg.nyp.groupconnect.data.RoomDbAdapter;
+import sg.nyp.groupconnect.data.RoomMembersDbAdapter;
 import sg.nyp.groupconnect.entity.Member;
 import sg.nyp.groupconnect.entity.MemberGrades;
 import android.app.ActionBar;
@@ -28,14 +31,18 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -54,7 +61,7 @@ public class PieChartBuilder extends Activity {
 
 	private String category, schoolName;
 	private Bundle extras;
-	public static ArrayList<Member> arrayFakeMember = new ArrayList<Member>();
+	public static ArrayList<Member> arrayMember = new ArrayList<Member>();
 	public static ArrayList<MemberGrades> arrayMemberGrade = new ArrayList<MemberGrades>();
 	private Intent intent = null;
 	private int schoolId, subjectId;
@@ -64,6 +71,8 @@ public class PieChartBuilder extends Activity {
 	private ArrayList<String> roomNames = new ArrayList<String>();
 	private ArrayList<Integer> roomId = new ArrayList<Integer>();
 	public static int count;
+	private String currentMemberId = "";
+	private Button viewGrp;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +80,10 @@ public class PieChartBuilder extends Activity {
 		setContentView(R.layout.chart);
 
 		context = this;
+
+		SharedPreferences sp = PreferenceManager
+				.getDefaultSharedPreferences(PieChartBuilder.this);
+		currentMemberId = sp.getString("id", null);
 
 		extras = getIntent().getExtras();
 		if (extras != null) {
@@ -87,6 +100,9 @@ public class PieChartBuilder extends Activity {
 		TextView tw = (TextView) findViewById(R.id.Chart_Tittle);
 		tw.setText(schoolName + " - " + category);
 
+		viewGrp = (Button) findViewById(R.id.btnGroup);
+		viewGrp.setVisibility(View.GONE);
+
 		new RetrieveMemberGradeSchool().execute();
 		new RetrieveCreatedRoom().execute();
 
@@ -96,10 +112,10 @@ public class PieChartBuilder extends Activity {
 		mRenderer.setApplyBackgroundColor(true);
 		mRenderer.setBackgroundColor(Color.BLACK);
 		mRenderer.setChartTitle("Total No. of Student in each grade.");
-		mRenderer.setChartTitleTextSize(40f); 	//TODO
-		mRenderer.setLegendTextSize(40f);		//TODO
+		mRenderer.setChartTitleTextSize(40f); // TODO
+		mRenderer.setLegendTextSize(40f); // TODO
 		mRenderer.setLabelsColor(Color.WHITE);
-		mRenderer.setLabelsTextSize(30f);		//TODO
+		mRenderer.setLabelsTextSize(30f); // TODO
 		mRenderer.setPanEnabled(false);
 		mRenderer.setZoomEnabled(false);
 	}
@@ -124,63 +140,63 @@ public class PieChartBuilder extends Activity {
 									i == seriesSelection.getPointIndex());
 						}
 						mChartView.repaint();
-						ArrayList<Member> arrayMember = new ArrayList<Member>();
+						ArrayList<Member> arrayMembers = new ArrayList<Member>();
 						ArrayList<MemberGrades> arrayGrades = new ArrayList<MemberGrades>();
 
 						if (seriesSelection.getPointIndex() == 0) {
-							int size = arrayFakeMember.size();
+							int size = arrayMember.size();
 
 							for (int i = 0; i < size; i++) {
 								if (arrayMemberGrade.get(i).getNewGrade() >= 80.0) {
-									arrayMember.add(arrayFakeMember.get(i));
+									arrayMembers.add(arrayMember.get(i));
 									arrayGrades.add(arrayMemberGrade.get(i));
 								}
 							}
 						} else if (seriesSelection.getPointIndex() == 1) {
-							int size = arrayFakeMember.size();
+							int size = arrayMember.size();
 
 							for (int i = 0; i < size; i++) {
 								if (arrayMemberGrade.get(i).getNewGrade() >= 70.0
 										&& arrayMemberGrade.get(i)
 												.getNewGrade() < 80.0) {
-									arrayMember.add(arrayFakeMember.get(i));
+									arrayMembers.add(arrayMember.get(i));
 									arrayGrades.add(arrayMemberGrade.get(i));
 								}
 							}
 						} else if (seriesSelection.getPointIndex() == 2) {
-							int size = arrayFakeMember.size();
+							int size = arrayMember.size();
 
 							for (int i = 0; i < size; i++) {
 								if (arrayMemberGrade.get(i).getNewGrade() >= 60.0
 										&& arrayMemberGrade.get(i)
 												.getNewGrade() < 70.0) {
-									arrayMember.add(arrayFakeMember.get(i));
+									arrayMembers.add(arrayMember.get(i));
 									arrayGrades.add(arrayMemberGrade.get(i));
 								}
 							}
 						} else if (seriesSelection.getPointIndex() == 3) {
-							int size = arrayFakeMember.size();
+							int size = arrayMember.size();
 
 							for (int i = 0; i < size; i++) {
 								if (arrayMemberGrade.get(i).getNewGrade() >= 50.0
 										&& arrayMemberGrade.get(i)
 												.getNewGrade() < 60.0) {
-									arrayMember.add(arrayFakeMember.get(i));
+									arrayMembers.add(arrayMember.get(i));
 									arrayGrades.add(arrayMemberGrade.get(i));
 								}
 							}
 						} else if (seriesSelection.getPointIndex() == 4) {
-							int size = arrayFakeMember.size();
+							int size = arrayMember.size();
 
 							for (int i = 0; i < size; i++) {
 								if (arrayMemberGrade.get(i).getNewGrade() < 50.0) {
-									arrayMember.add(arrayFakeMember.get(i));
+									arrayMembers.add(arrayMember.get(i));
 									arrayGrades.add(arrayMemberGrade.get(i));
 								}
 							}
 						}
 
-						alertDialog(arrayMember, arrayGrades);
+						alertDialog(arrayMembers, arrayGrades);
 
 					}
 				}
@@ -288,14 +304,6 @@ public class PieChartBuilder extends Activity {
 		// Database
 		public ProgressDialog pDialog;
 
-		JSONParser jsonParser = new JSONParser();
-
-		private static final String SCHOOL_URL = "http://www.it3197Project.3eeweb.com/grpConnect/statics/retrieveMemberGradeSchool.php";
-
-		private static final String TAG_SUCCESS = "success";
-		private static final String TAG_MESSAGE = "message";
-		private static final String TAG_ARRAY = "posts";
-
 		private static final String TAG_ID = "id";
 		private static final String TAG_NAME = "name";
 		private static final String TAG_LOCATION = "location";
@@ -304,7 +312,7 @@ public class PieChartBuilder extends Activity {
 		private static final String TAG_GENDER = "gender";
 		private static final String TAG_OLDGRADE = "oldGrade";
 		private static final String TAG_NEWGRADE = "newGrade";
-
+		
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
@@ -317,55 +325,51 @@ public class PieChartBuilder extends Activity {
 
 		@Override
 		protected String doInBackground(String... args) {
-			// Check for success tag
 
-			try {
-				// Building Parameters
-				List<NameValuePair> params = new ArrayList<NameValuePair>();
-				params.add(new BasicNameValuePair("schoolId", Integer
-						.toString(schoolId)));
-				params.add(new BasicNameValuePair("subjectId", Integer
-						.toString(subjectId)));
+			MemberDbAdapter mDbHelper = new MemberDbAdapter(
+					PieChartBuilder.this);
+			mDbHelper.open();
 
-				// getting product details by making HTTP request
-				JSONObject json = jsonParser.makeHttpRequest(SCHOOL_URL,
-						"POST", params);
+			Cursor mCursor = mDbHelper.fetchMemberGradeSchool(
+					Integer.toString(schoolId), Integer.toString(subjectId));
+			arrayMember.clear();
+			arrayMemberGrade.clear();
 
-				// json success tag
-				success = json.getInt(TAG_SUCCESS);
+			if (mCursor.getCount() != 0) {
+				mCursor.moveToFirst();
 
-				arrayFakeMember.clear();
-				arrayMemberGrade.clear();
+				Member m = new Member(mCursor.getInt(mCursor.getColumnIndex(TAG_ID)),
+						mCursor.getString(mCursor.getColumnIndex(TAG_NAME)), mCursor.getString(mCursor.getColumnIndex(TAG_LOCATION)),
+						mCursor.getDouble(mCursor.getColumnIndex(TAG_LATITUDE)),
+						mCursor.getDouble(mCursor.getColumnIndex(TAG_LONGITUDE)),
+						mCursor.getString(mCursor.getColumnIndex(TAG_GENDER)), schoolId, "", "", "", "");
+				arrayMember.add(m);
 
-				for (int i = 0; i < json.getJSONArray(TAG_ARRAY).length(); i++) {
+				MemberGrades mg = new MemberGrades(Integer.toString(mCursor
+						.getInt(mCursor.getColumnIndex(TAG_ID))), Integer.toString(subjectId),
+						mCursor.getDouble(mCursor.getColumnIndex(TAG_OLDGRADE)),
+						mCursor.getDouble(mCursor.getColumnIndex(TAG_NEWGRADE)));
+				arrayMemberGrade.add(mg);
 
-					JSONObject c = json.getJSONArray(TAG_ARRAY)
-							.getJSONObject(i);
+				while (mCursor.moveToNext()) {
 
-					Member m = new Member(c.getInt(TAG_ID),
-							c.getString(TAG_NAME), c.getString(TAG_LOCATION),
-							c.getDouble(TAG_LATITUDE),
-							c.getDouble(TAG_LONGITUDE),
-							c.getString(TAG_GENDER), schoolId);
-					arrayFakeMember.add(m);
+					m = new Member(mCursor.getInt(mCursor.getColumnIndex(TAG_ID)),
+							mCursor.getString(mCursor.getColumnIndex(TAG_NAME)), mCursor.getString(mCursor.getColumnIndex(TAG_LOCATION)),
+							mCursor.getDouble(mCursor.getColumnIndex(TAG_LATITUDE)),
+							mCursor.getDouble(mCursor.getColumnIndex(TAG_LONGITUDE)),
+							mCursor.getString(mCursor.getColumnIndex(TAG_GENDER)), schoolId, "", "", "", "");
+					arrayMember.add(m);
 
-					MemberGrades mg = new MemberGrades(Integer.toString(c
-							.getInt(TAG_ID)), Integer.toString(subjectId),
-							c.getDouble(TAG_OLDGRADE),
-							c.getDouble(TAG_NEWGRADE));
+					mg = new MemberGrades(Integer.toString(mCursor
+							.getInt(mCursor.getColumnIndex(TAG_ID))), Integer.toString(subjectId),
+							mCursor.getDouble(mCursor.getColumnIndex(TAG_OLDGRADE)),
+							mCursor.getDouble(mCursor.getColumnIndex(TAG_NEWGRADE)));
 					arrayMemberGrade.add(mg);
-
 				}
-
-				if (success == 1) {
-					return json.getString(TAG_MESSAGE);
-				} else {
-					return json.getString(TAG_MESSAGE);
-
-				}
-			} catch (JSONException e) {
-				e.printStackTrace();
 			}
+
+			mCursor.close();
+			mDbHelper.close();
 
 			return null;
 
@@ -379,7 +383,7 @@ public class PieChartBuilder extends Activity {
 					"Grade D", "Grade F" };
 
 			Double GradeA = 0.0, GradeB = 0.0, GradeC = 0.0, GradeD = 0.0, GradeF = 0.0;
-			int size = arrayFakeMember.size();
+			int size = arrayMember.size();
 
 			for (int i = 0; i < size; i++) {
 				if (arrayMemberGrade.get(i).getNewGrade() < 50.0) {
@@ -421,7 +425,7 @@ public class PieChartBuilder extends Activity {
 
 		AlertDialog.Builder builderSingle = new AlertDialog.Builder(
 				PieChartBuilder.this);
-		builderSingle.setTitle("Select A Name: ");
+		builderSingle.setTitle("Select A Group: ");
 		final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(
 				getBaseContext(), android.R.layout.select_dialog_singlechoice);
 
@@ -470,16 +474,16 @@ public class PieChartBuilder extends Activity {
 																DialogInterface dialog,
 																int which) {
 															AlertDialog dialog1;
-															int size = arrayFakeMember
+															int size = arrayMember
 																	.size();
 															final String[] items = new String[size];
 
 															for (int i = 0; i < size; i++) {
-																items[i] = arrayFakeMember
+																items[i] = arrayMember
 																		.get(i)
 																		.getName()
 																		+ "("
-																		+ arrayFakeMember
+																		+ arrayMember
 																				.get(i)
 																				.getGender()
 																		+ ")";
@@ -520,7 +524,7 @@ public class PieChartBuilder extends Activity {
 																					StudIds.clear();
 																					for (int i = 0; i < seletedItems
 																							.size(); i++) {
-																						StudIds.add(arrayFakeMember
+																						StudIds.add(arrayMember
 																								.get(seletedItems
 																										.get(i))
 																								.getId());
@@ -581,12 +585,12 @@ public class PieChartBuilder extends Activity {
 				// file
 				// arraylist to keep the selected items
 
-				int size = arrayFakeMember.size();
+				int size = arrayMember.size();
 				final String[] items = new String[size];
 
 				for (int i = 0; i < size; i++) {
-					items[i] = arrayFakeMember.get(i).getName() + "("
-							+ arrayFakeMember.get(i).getGender() + ")";
+					items[i] = arrayMember.get(i).getName() + "("
+							+ arrayMember.get(i).getGender() + ")";
 				}
 
 				final ArrayList<Integer> seletedItems = new ArrayList<Integer>();
@@ -614,7 +618,7 @@ public class PieChartBuilder extends Activity {
 											int id) {
 										StudIds.clear();
 										for (int i = 0; i < seletedItems.size(); i++) {
-											StudIds.add(arrayFakeMember.get(
+											StudIds.add(arrayMember.get(
 													seletedItems.get(i))
 													.getId());
 										}
@@ -657,15 +661,8 @@ public class PieChartBuilder extends Activity {
 
 		JSONParser jsonParser = new JSONParser();
 
-		private static final String RETRIEVE_CREATED_ROOM_URL = "http://www.it3197Project.3eeweb.com/grpConnect/statics/retrieveCreatedRoom.php";
-
-		private static final String TAG_SUCCESS = "success";
-		private static final String TAG_MESSAGE = "message";
-		private static final String TAG_ARRAY = "posts";
-
 		private static final String TAG_ROOM_ID = "room_id";
 		private static final String TAG_TITLE = "title";
-		private static final String TAG_CATEGORY = "category";
 
 		@Override
 		protected void onPreExecute() {
@@ -679,42 +676,31 @@ public class PieChartBuilder extends Activity {
 
 		@Override
 		protected String doInBackground(String... args) {
-			// Check for success tag
 
-			try {
-				// Building Parameters
-				List<NameValuePair> params = new ArrayList<NameValuePair>();
-				params.add(new BasicNameValuePair("creatorId", "1001"));
+			RoomDbAdapter mDbHelper = new RoomDbAdapter(
+					PieChartBuilder.this);
+			mDbHelper.open();
 
-				// getting product details by making HTTP request
-				JSONObject json = jsonParser.makeHttpRequest(
-						RETRIEVE_CREATED_ROOM_URL, "POST", params);
+			Cursor mCursor = mDbHelper.fetchCreatedRoom(currentMemberId, category);
 
-				// json success tag
-				success = json.getInt(TAG_SUCCESS);
+			roomId.clear();
+			roomNames.clear();
 
-				roomId.clear();
-				roomNames.clear();
+			if (mCursor.getCount() != 0) {
+				mCursor.moveToFirst();
 
-				for (int i = 0; i < json.getJSONArray(TAG_ARRAY).length(); i++) {
+				roomId.add(mCursor.getInt(mCursor.getColumnIndex(TAG_ROOM_ID)));
+				roomNames.add(mCursor.getString(mCursor.getColumnIndex(TAG_TITLE)));
 
-					JSONObject c = json.getJSONArray(TAG_ARRAY)
-							.getJSONObject(i);
-					roomId.add(c.getInt(TAG_ROOM_ID));
-					roomNames.add(c.getString(TAG_TITLE) + " - "
-							+ c.getString(TAG_CATEGORY));
+				while (mCursor.moveToNext()) {
 
+					roomId.add(mCursor.getInt(mCursor.getColumnIndex(TAG_ROOM_ID)));
+					roomNames.add(mCursor.getString(mCursor.getColumnIndex(TAG_TITLE)));
 				}
-
-				if (success == 1) {
-					return json.getString(TAG_MESSAGE);
-				} else {
-					return json.getString(TAG_MESSAGE);
-
-				}
-			} catch (JSONException e) {
-				e.printStackTrace();
 			}
+
+			mCursor.close();
+			mDbHelper.close();
 
 			return null;
 
@@ -725,6 +711,7 @@ public class PieChartBuilder extends Activity {
 		 * **/
 		protected void onPostExecute(String file_url) {
 			// dismiss the dialog once product deleted
+			viewGrp.setVisibility(View.VISIBLE);
 			pDialog.dismiss();
 
 		}
@@ -753,16 +740,7 @@ public class PieChartBuilder extends Activity {
 
 		// Database
 		public ProgressDialog pDialog;
-		JSONParser jsonParser = new JSONParser();
 
-		private static final String ROOM_URL = "http://www.it3197Project.3eeweb.com/grpConnect/statics/retrieveRoom.php";
-
-		private static final String TAG_SUCCESS = "success";
-		private static final String TAG_MESSAGE = "message";
-		private static final String TAG_ARRAY = "posts";
-
-		// private static final String TAG_TITLE = "title";
-		// private static final String TAG_CATEGORY = "category";
 		private static final String TAG_MEMBERID = "memberId";
 		private static final String TAG_MEMBERNAME = "name";
 		private static final String TAG_MEMBERTYPE = "memberType";
@@ -781,32 +759,29 @@ public class PieChartBuilder extends Activity {
 
 		@Override
 		protected String doInBackground(String... args) {
-			int success;
-			String room_id = Integer.toString(PieChartBuilder.createdRoomId);
-			try {
-				// Building Parameters
-				List<NameValuePair> params = new ArrayList<NameValuePair>();
-				params.add(new BasicNameValuePair("room_id", room_id));
+			RoomDbAdapter mDbHelper = new RoomDbAdapter(
+					PieChartBuilder.this);
+			mDbHelper.open();
 
-				// getting product details by making HTTP request
-				JSONObject json = jsonParser.makeHttpRequest(ROOM_URL, "POST",
-						params);
+			Cursor mCursor = mDbHelper.fetchRoom(Integer.toString(PieChartBuilder.createdRoomId));
 
-				// json success tag
-				success = json.getInt(TAG_SUCCESS);
+			member.clear();
+			memberId.clear();
+			members.clear();
 
-				int size = json.getJSONArray(TAG_ARRAY).length();
-				member.clear();
-				memberId.clear();
-				members.clear();
+			if (mCursor.getCount() != 0) {
+				mCursor.moveToFirst();
 
-				for (int j = 0; j < size; j++) {
-					JSONObject c1 = json.getJSONArray(TAG_ARRAY).getJSONObject(
-							j);
+				if (mCursor.getString(mCursor.getColumnIndex(TAG_MEMBERTYPE)).equals("Learner")) {
+					member.add(mCursor.getString(mCursor.getColumnIndex(TAG_MEMBERNAME)));
+					memberId.add(Integer.toString(mCursor.getInt(mCursor.getColumnIndex(TAG_MEMBERID))));
+				}
 
-					if (c1.getString(TAG_MEMBERTYPE).equals("Learner")) {
-						member.add(c1.getString(TAG_MEMBERNAME));
-						memberId.add(Integer.toString(c1.getInt(TAG_MEMBERID)));
+				while (mCursor.moveToNext()) {
+
+					if (mCursor.getString(mCursor.getColumnIndex(TAG_MEMBERTYPE)).equals("Learner")) {
+						member.add(mCursor.getString(mCursor.getColumnIndex(TAG_MEMBERNAME)));
+						memberId.add(Integer.toString(mCursor.getInt(mCursor.getColumnIndex(TAG_MEMBERID))));
 					}
 				}
 
@@ -823,15 +798,10 @@ public class PieChartBuilder extends Activity {
 								.get(i)));
 					}
 				}
-
-				if (success == 1) {
-					return json.getString(TAG_MESSAGE);
-				} else {
-					return json.getString(TAG_MESSAGE);
-				}
-			} catch (JSONException e) {
-				e.printStackTrace();
 			}
+
+			mCursor.close();
+			mDbHelper.close();
 
 			return null;
 
@@ -854,7 +824,7 @@ public class PieChartBuilder extends Activity {
 
 			JSONParser jsonParser = new JSONParser();
 
-			private static final String CREATE_ROOM_MEM_URL = "http://www.it3197Project.3eeweb.com/grpConnect/statics/createRoomMember.php";
+			private static final String CREATE_ROOM_MEM_URL = "http://www.it3197Project.3eeweb.com/grpConnect/statics/createRoomMember.php"; // TODO
 
 			private static final String TAG_SUCCESS = "success";
 			private static final String TAG_MESSAGE = "message";
@@ -891,6 +861,15 @@ public class PieChartBuilder extends Activity {
 					success = json.getInt(TAG_SUCCESS);
 
 					if (success == 1) {
+						
+						RoomMembersDbAdapter mDbHelper = new RoomMembersDbAdapter(
+								PieChartBuilder.this);
+						mDbHelper.open();
+
+						mDbHelper.createRoomMembers(PieChartBuilder.createdRoomId, Integer.parseInt(members.get(PieChartBuilder.count)), "Learner");
+
+						mDbHelper.close();
+						
 						return json.getString(TAG_MESSAGE);
 					} else {
 						return json.getString(TAG_MESSAGE);

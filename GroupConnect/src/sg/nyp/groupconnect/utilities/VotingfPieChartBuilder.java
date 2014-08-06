@@ -17,14 +17,18 @@ import org.json.JSONObject;
 
 import sg.nyp.groupconnect.Map;
 import sg.nyp.groupconnect.R;
+import sg.nyp.groupconnect.data.RoomDbAdapter;
+import sg.nyp.groupconnect.data.VoteLocationDbAdapter;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
@@ -48,6 +52,8 @@ public class VotingfPieChartBuilder extends Activity {
 	private String[] places;
 	private Double[] percentage;
 	private String highLocation;
+	private double highLocationLat;
+	private double highLocationLng;
 	private int highLocationId;
 	private int confirm;
 	private int num;
@@ -88,10 +94,10 @@ public class VotingfPieChartBuilder extends Activity {
 		mRenderer.setApplyBackgroundColor(true);
 		mRenderer.setBackgroundColor(Color.BLACK);
 		mRenderer.setChartTitle("Total No. of Student in each grade.");
-		mRenderer.setChartTitleTextSize(40f);	//TODO
-		mRenderer.setLegendTextSize(40f);		//TODO
+		mRenderer.setChartTitleTextSize(40f); // TODO
+		mRenderer.setLegendTextSize(40f); // TODO
 		mRenderer.setLabelsColor(Color.WHITE);
-		mRenderer.setLabelsTextSize(30f);		//TODO
+		mRenderer.setLabelsTextSize(30f); // TODO
 		mRenderer.setPanEnabled(false);
 		mRenderer.setZoomEnabled(false);
 
@@ -122,7 +128,7 @@ public class VotingfPieChartBuilder extends Activity {
 						Toast.makeText(
 								VotingfPieChartBuilder.this,
 								seriesSelection.getValue()
-										+ " people voted for " + places[0]
+										+ "% of the people voted for " + places[0]
 										+ ".", Toast.LENGTH_SHORT).show();
 
 					}
@@ -177,20 +183,13 @@ public class VotingfPieChartBuilder extends Activity {
 		// Database
 		private ProgressDialog pDialog;
 
-		JSONParser jsonParser = new JSONParser();
-
-		private static final String RETRIEVE_VOTE_URL = "http://www.it3197Project.3eeweb.com/grpConnect/statics/retrieveVoteResult.php";
-
-		private static final String TAG_SUCCESS = "success";
-		private static final String TAG_MESSAGE = "message";
-		private static final String TAG_ARRAY = "posts";
-
-		private static final String TAG_NUM = "num";
 		private static final String TAG_LOCATIONID = "locationId";
 		private static final String TAG_NAME = "name";
 		private static final String TAG_COUNTVALUE = "countValue";
 		private static final String TAG_STATUS = "status";
 		private static final String TAG_LOCATION = "location";
+		private static final String TAG_LATITUDE = "latitude";
+		private static final String TAG_LONGITUDE = "longitude";
 
 		@Override
 		protected void onPreExecute() {
@@ -204,65 +203,90 @@ public class VotingfPieChartBuilder extends Activity {
 
 		@Override
 		protected String doInBackground(String... args) {
-			// Check for success tag
 
-			try {
-				// Building Parameters
-				List<NameValuePair> params = new ArrayList<NameValuePair>();
-				params.add(new BasicNameValuePair("roomId", currentRoomId));
+			VoteLocationDbAdapter mDbHelper = new VoteLocationDbAdapter(
+					VotingfPieChartBuilder.this);
+			mDbHelper.open();
 
-				// getting product details by making HTTP request
-				JSONObject json = jsonParser.makeHttpRequest(RETRIEVE_VOTE_URL,
-						"POST", params);
+			Cursor mCursor = mDbHelper.fetchVoteResult(currentRoomId);
 
-				// json success tag
-				success = json.getInt(TAG_SUCCESS);
+			places = new String[mCursor.getCount()];
+			percentage = new Double[mCursor.getCount()];
 
-				places = new String[json.getJSONArray(TAG_ARRAY).length()];
-				percentage = new Double[json.getJSONArray(TAG_ARRAY).length()];
+			int max = 0;
 
-				int max = 0;
+			DecimalFormat df = new DecimalFormat("#.00");
 
-				DecimalFormat df = new DecimalFormat("#.00");
+			num = mCursor.getCount();
+			
+			if (mCursor.getCount() != 0) {
+				mCursor.moveToFirst();
+				int i = 0;
 
-				for (int i = 0; i < json.getJSONArray(TAG_ARRAY).length(); i++) {
+				places[i] = mCursor.getString(mCursor.getColumnIndex(TAG_NAME));
 
-					JSONObject c = json.getJSONArray(TAG_ARRAY)
-							.getJSONObject(i);
+				double score = (Double.parseDouble(Integer.toString(mCursor
+						.getInt(mCursor.getColumnIndex(TAG_COUNTVALUE)))))
+						/ mCursor.getCount() * 100;
 
-					num = c.getInt(TAG_NUM);
+				percentage[i] = Double.parseDouble(df.format(score));
 
-					if (num == 1) {
-						places[i] = c.getString(TAG_NAME);
+				if (mCursor.getString(mCursor.getColumnIndex(TAG_STATUS))
+						.equals("final")) {
+					confirm = 1;
+				}
 
-						double score = (Double.parseDouble(Integer.toString(c
-								.getInt(TAG_COUNTVALUE))))
-								/ json.getJSONArray(TAG_ARRAY).length() * 100;
+				if (mCursor.getInt(mCursor.getColumnIndex(TAG_COUNTVALUE)) > max) {
+					highLocationId = mCursor.getInt(mCursor
+							.getColumnIndex(TAG_LOCATIONID));
+					max = mCursor
+							.getInt(mCursor.getColumnIndex(TAG_COUNTVALUE));
+					highLocation = mCursor.getString(mCursor
+							.getColumnIndex(TAG_LOCATION));
+					highLocationLat = mCursor.getDouble(mCursor
+							.getColumnIndex(TAG_LATITUDE));
+					highLocationLng = mCursor.getDouble(mCursor
+							.getColumnIndex(TAG_LONGITUDE));
+					highLocationId = mCursor.getInt(mCursor
+							.getColumnIndex(TAG_LOCATIONID));
+				}
 
-						percentage[i] = Double.parseDouble(df.format(score));
+				while (mCursor.moveToNext()) {
+					i++;
 
-						if (c.getString(TAG_STATUS).equals("final")) {
-							confirm = 1;
-						}
+					places[i] = mCursor.getString(mCursor
+							.getColumnIndex(TAG_NAME));
 
-						if (c.getInt(TAG_COUNTVALUE) > max) {
-							highLocationId = c.getInt(TAG_LOCATIONID);
-							max = c.getInt(TAG_COUNTVALUE);
-							highLocation = c.getString(TAG_LOCATION);
-							highLocationId = c.getInt(TAG_LOCATIONID);
-						}
+					score = (Double.parseDouble(Integer.toString(mCursor
+							.getInt(mCursor.getColumnIndex(TAG_COUNTVALUE)))))
+							/ mCursor.getCount() * 100;
+
+					percentage[i] = Double.parseDouble(df.format(score));
+
+					if (mCursor.getString(mCursor.getColumnIndex(TAG_STATUS))
+							.equals("final")) {
+						confirm = 1;
+					}
+
+					if (mCursor.getInt(mCursor.getColumnIndex(TAG_COUNTVALUE)) > max) {
+						highLocationId = mCursor.getInt(mCursor
+								.getColumnIndex(TAG_LOCATIONID));
+						max = mCursor.getInt(mCursor
+								.getColumnIndex(TAG_COUNTVALUE));
+						highLocation = mCursor.getString(mCursor
+								.getColumnIndex(TAG_LOCATION));
+						highLocationLat = mCursor.getDouble(mCursor
+								.getColumnIndex(TAG_LATITUDE));
+						highLocationLng = mCursor.getDouble(mCursor
+								.getColumnIndex(TAG_LONGITUDE));
+						highLocationId = mCursor.getInt(mCursor
+								.getColumnIndex(TAG_LOCATIONID));
 					}
 				}
-
-				if (success == 1) {
-					return json.getString(TAG_MESSAGE);
-				} else {
-					return json.getString(TAG_MESSAGE);
-
-				}
-			} catch (JSONException e) {
-				e.printStackTrace();
 			}
+
+			mCursor.close();
+			mDbHelper.close();
 
 			return null;
 
@@ -329,10 +353,10 @@ public class VotingfPieChartBuilder extends Activity {
 				mRenderer.addSeriesRenderer(renderer);
 			}
 			mChartView.repaint();
-			
+
 			pDialog.dismiss();
-			
-			if (num == 1) {
+
+			if (num != 0) {
 				if (confirm == 1) {
 					btnFinal.setVisibility(View.GONE);
 				}
@@ -403,6 +427,8 @@ public class VotingfPieChartBuilder extends Activity {
 						.toString(highLocationId)));
 				params.add(new BasicNameValuePair("location", highLocation));
 				params.add(new BasicNameValuePair("roomId", currentRoomId));
+				params.add(new BasicNameValuePair("latLng", highLocationLat
+						+ "," + highLocationLng));
 
 				// getting product details by making HTTP request
 				JSONObject json = jsonParser.makeHttpRequest(RETRIEVE_VOTE_URL,
@@ -412,6 +438,25 @@ public class VotingfPieChartBuilder extends Activity {
 				success = json.getInt(TAG_SUCCESS);
 
 				if (success == 1) {
+
+					VoteLocationDbAdapter mDbHelper = new VoteLocationDbAdapter(
+							VotingfPieChartBuilder.this);
+					mDbHelper.open();
+
+					mDbHelper.updateVoteLocation(
+							Integer.toString(highLocationId), currentRoomId);
+
+					mDbHelper.close();
+
+					RoomDbAdapter mDbHelper2 = new RoomDbAdapter(
+							VotingfPieChartBuilder.this);
+					mDbHelper2.open();
+
+					mDbHelper2.updateRoom(highLocation, highLocationLat + ","
+							+ highLocationLng, Integer.parseInt(currentRoomId));
+
+					mDbHelper2.close();
+
 					return json.getString(TAG_MESSAGE);
 				} else {
 					return json.getString(TAG_MESSAGE);

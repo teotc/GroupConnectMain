@@ -248,8 +248,8 @@ public class Login extends Activity implements OnClickListener {
 			new AttemptLogin().execute();
 			
 		} else if (id == R.id.action_magiclogin_nyp) {
-			etUser.setText("tom");
-			etPass.setText("1");
+			etUser.setText("NYP");
+			etPass.setText("NYP");
 			new AttemptLogin().execute();
 		}
 		return super.onOptionsItemSelected(item);

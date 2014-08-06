@@ -3,18 +3,14 @@ package sg.nyp.groupconnect.db;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import sg.nyp.groupconnect.Map;
+import sg.nyp.groupconnect.data.SchoolsDbAdapter;
 import sg.nyp.groupconnect.entity.MyItem;
 import sg.nyp.groupconnect.entity.Schools;
-import sg.nyp.groupconnect.utilities.JSONParser;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.database.Cursor;
 import android.os.AsyncTask;
 
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -32,24 +28,16 @@ public class RetrieveSchool extends AsyncTask<String, String, String> {
 	boolean failure = false;
 	public int success;
 	private float colour;
-	private ClusterManager<MyItem> mClusterManager;
+	public static ClusterManager<MyItem> mClusterManager;
 
 	// Database
 	public static ProgressDialog pDialog;
 
-	JSONParser jsonParser = new JSONParser();
-
-	private static final String SCHOOL_URL = "http://www.it3197Project.3eeweb.com/grpConnect/statics/retrieveSchools.php";
-
-	private static final String TAG_SUCCESS = "success";
-	private static final String TAG_MESSAGE = "message";
-	private static final String TAG_ARRAY = "posts";
-
-	private static final String TAG_ID = "id";
-	private static final String TAG_NAME = "name";
-	private static final String TAG_CATEGORY = "category";
-	private static final String TAG_LATITUDE = "latitude";
-	private static final String TAG_LONGITUDE = "longitude";
+	private static final String KEY_ID = "id";
+	private static final String KEY_NAME = "name";
+	private static final String KEY_CATEGORY = "category";
+	private static final String KEY_LATITUDE = "latitude";
+	private static final String KEY_LONGITUDE = "longitude";
 
 	@Override
 	protected void onPreExecute() {
@@ -57,66 +45,63 @@ public class RetrieveSchool extends AsyncTask<String, String, String> {
 		pDialog = new ProgressDialog(Map.context);
 		pDialog.setMessage("Retreiving data...");
 		pDialog.setIndeterminate(false);
-		pDialog.setCancelable(true);
+		pDialog.setCancelable(false);
 		pDialog.show();
 	}
 
 	@Override
 	protected String doInBackground(String... args) {
 		// Check for success tag
+		SchoolsDbAdapter mDbHelper = new SchoolsDbAdapter(Map.context);
+		mDbHelper.open();
 
-		try {
-			// Building Parameters
-			List<NameValuePair> params = new ArrayList<NameValuePair>();
-			params.add(new BasicNameValuePair("category1", Map.schoolCategory1));
-			params.add(new BasicNameValuePair("category2", Map.schoolCategory2));
-			params.add(new BasicNameValuePair("category3", Map.schoolCategory3));
-			params.add(new BasicNameValuePair("subjectId", Integer
-					.toString(Map.subjectId)));
+		Cursor mCursor = mDbHelper.fetchAllSearchSchools(Map.schoolCategory1,
+				Map.schoolCategory2, Map.schoolCategory3,
+				Integer.toString(Map.subjectId));
+		Map.arraySchools.clear();
 
-			// getting product details by making HTTP request
-			JSONObject json = jsonParser.makeHttpRequest(SCHOOL_URL, "POST",
-					params);
+		if (mCursor.getCount() != 0) {
+			mCursor.moveToFirst();
+			Schools s = new Schools(
+					mCursor.getInt(mCursor.getColumnIndex(KEY_ID)),
+					mCursor.getString(mCursor.getColumnIndex(KEY_NAME)),
+					mCursor.getString(mCursor.getColumnIndex(KEY_CATEGORY)),
+					mCursor.getDouble(mCursor.getColumnIndex(KEY_LATITUDE)),
+					mCursor.getDouble(mCursor.getColumnIndex(KEY_LONGITUDE)));
+			Map.arraySchools.add(s);
+			
+			while (mCursor.moveToNext()) {
 
-			// json success tag
-			success = json.getInt(TAG_SUCCESS);
-			if (success == 1) {
-				for (int i = 0; i < json.getJSONArray(TAG_ARRAY).length(); i++) {
-
-					JSONObject c = json.getJSONArray(TAG_ARRAY)
-							.getJSONObject(i);
-
-					Schools s = new Schools(c.getInt(TAG_ID),
-							c.getString(TAG_NAME), c.getString(TAG_CATEGORY),
-							c.getDouble(TAG_LATITUDE),
-							c.getDouble(TAG_LONGITUDE));
-					Map.arraySchools.add(s);
-				}
+				s = new Schools(
+						mCursor.getInt(mCursor.getColumnIndex(KEY_ID)),
+						mCursor.getString(mCursor.getColumnIndex(KEY_NAME)),
+						mCursor.getString(mCursor.getColumnIndex(KEY_CATEGORY)),
+						mCursor.getDouble(mCursor.getColumnIndex(KEY_LATITUDE)),
+						mCursor.getDouble(mCursor.getColumnIndex(KEY_LONGITUDE)));
+				Map.arraySchools.add(s);
 			}
-			if (success == 1) {
-				return json.getString(TAG_MESSAGE);
-			} else {
-				return json.getString(TAG_MESSAGE);
-
-			}
-		} catch (JSONException e) {
-			e.printStackTrace();
 		}
 
-		return Integer.toString(success);
+		success = mCursor.getCount();
+		
+		mCursor.close();
+		mDbHelper.close();
+
+		return null;
 
 	}
 
 	/**
 	 * After completing background task Dismiss the progress dialog
 	 * **/
+	@SuppressWarnings("deprecation")
 	protected void onPostExecute(String file_url) {
 		mClusterManager = new ClusterManager<MyItem>(Map.context, Map.mMap);
 		Map.mMap.setOnCameraChangeListener(mClusterManager);
 		mClusterManager.setRenderer(new ItemRenderer());
 		List<MyItem> items = new ArrayList<MyItem>();
 
-		if (success == 1) {
+		if (success != 0) {
 			for (int i = 0; i < Map.arraySchools.size(); i++) {
 				if (Map.arraySchools.get(i).getCategory().equals("Primary")) {
 					colour = BitmapDescriptorFactory.HUE_YELLOW;
@@ -140,7 +125,7 @@ public class RetrieveSchool extends AsyncTask<String, String, String> {
 
 			pDialog.dismiss();
 			Map.slide.close();
-			
+
 		} else {
 			pDialog.dismiss();
 			AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
@@ -187,12 +172,12 @@ public class RetrieveSchool extends AsyncTask<String, String, String> {
 		@Override
 		protected void onBeforeClusterRendered(Cluster<MyItem> cluster,
 				MarkerOptions markerOptions) {
-			// TODO Auto-generated method stub
 			super.onBeforeClusterRendered(cluster, markerOptions);
 		}
 
 		@Override
-		protected boolean shouldRenderAsCluster(Cluster cluster) {
+		protected boolean shouldRenderAsCluster(
+				@SuppressWarnings("rawtypes") Cluster cluster) {
 			// Always render clusters.
 			return cluster.getSize() > 1;
 		}
