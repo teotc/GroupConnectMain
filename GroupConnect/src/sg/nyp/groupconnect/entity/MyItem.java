@@ -19,6 +19,15 @@ public class MyItem implements ClusterItem {
 		this.mIcon = mIcon;
 	}
 
+	public MyItem(LatLng mPosition, String mTitle,
+			BitmapDescriptor mIcon) {
+		super();
+		this.mPosition = mPosition;
+		this.mTitle = mTitle;
+		this.mSnippet = "";
+		this.mIcon = mIcon;
+	}
+	
 	@Override
 	public LatLng getPosition() {
 		return mPosition;

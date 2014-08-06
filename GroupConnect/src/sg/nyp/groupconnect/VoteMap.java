@@ -9,13 +9,18 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import sg.nyp.groupconnect.entity.AvailableLocation;
+import sg.nyp.groupconnect.entity.MyItem;
 import sg.nyp.groupconnect.utilities.JSONParser;
 import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -25,26 +30,49 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.maps.android.clustering.Cluster;
+import com.google.maps.android.clustering.ClusterManager;
+import com.google.maps.android.clustering.view.DefaultClusterRenderer;
 
 public class VoteMap extends FragmentActivity {
 
 	private String currentMemberId;
 	private String currentRoomId;
 	private String locationId;
+	private String home = "Your Home";
 	private Bundle extras;
 	private ArrayList<AvailableLocation> availableLocationArray = new ArrayList<AvailableLocation>();
 
+	private Location locHome;
+	private int DISTPREF = 5000; // metres
+
 	// Common
-	static final LatLng singapore = new LatLng(1.352083, 103.819836);
+	private LatLng myLocation;
 	public static GoogleMap mMap;
+
+	private ClusterManager<MyItem> mClusterManager;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.vote_map);
+
+		SharedPreferences sp = PreferenceManager
+				.getDefaultSharedPreferences(VoteMap.this);
+		currentMemberId = sp.getString("id", null);
+		Double lat = Double.parseDouble(sp.getString("homeLat", null));
+		Double lon = Double.parseDouble(sp.getString("homeLng", null));
+
+		myLocation = new LatLng(lat, lon);
+
+		locHome = new Location("User Home");
+		locHome.setLatitude(lat);
+		locHome.setLongitude(lon);
+
 		setUpMapIfNeeded();
 
 		// Managed by Geraldine
@@ -60,6 +88,7 @@ public class VoteMap extends FragmentActivity {
 		actionBar.setHomeButtonEnabled(true);
 
 		new RetrieveLocation().execute();
+
 	}
 
 	@Override
@@ -95,6 +124,7 @@ public class VoteMap extends FragmentActivity {
 	private void setUpMapIfNeeded() {
 		// Do a null check to confirm that we have not already instantiated the
 		// map.
+		mMap = null;
 		if (mMap == null) {
 			// Try to obtain the map from the SupportMapFragment.
 			mMap = ((SupportMapFragment) getSupportFragmentManager()
@@ -117,14 +147,85 @@ public class VoteMap extends FragmentActivity {
 		if (mMap != null) {
 
 			// Move the camera instantly to Singapore with a zoom of 15.
-			mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(singapore, 8));
+			mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 15));
 
 			// Zoom in, animating the camera.
 			mMap.animateCamera(CameraUpdateFactory.zoomIn());
 
 			// Zoom out to zoom level 10, animating with a duration of 2
 			// seconds.
-			mMap.animateCamera(CameraUpdateFactory.zoomTo(10), 2000, null);
+			mMap.animateCamera(CameraUpdateFactory.zoomTo(12), 2000, null);
+
+			mMap.addMarker(new MarkerOptions()
+					.position(myLocation)
+					.title(home)
+					.icon(BitmapDescriptorFactory
+							.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));
+
+			CircleOptions circleOptions = new CircleOptions()
+					.center(myLocation)
+					// set center
+					.radius(DISTPREF)
+					// set radius in meters
+					.strokeColor(Color.BLUE)
+					.fillColor(Color.parseColor("#500084d3")).strokeWidth(5);
+
+			mMap.addCircle(circleOptions);
+
+			mMap.setOnInfoWindowClickListener(new OnInfoWindowClickListener() {
+				@Override
+				public void onInfoWindowClick(final Marker marker) {
+					if (!(marker.getTitle().equals(home))) {
+						AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+								VoteMap.this);
+
+						// set title
+						alertDialogBuilder.setTitle("Vote for "
+								+ marker.getTitle());
+
+						// set dialog message
+						alertDialogBuilder
+								.setMessage("Are you okay with this location?")
+								.setCancelable(false)
+								.setNegativeButton("No",
+										new DialogInterface.OnClickListener() {
+											public void onClick(
+													DialogInterface dialog,
+													int id) {
+												dialog.cancel();
+											}
+										})
+								.setPositiveButton("Yes",
+										new DialogInterface.OnClickListener() {
+											public void onClick(
+													DialogInterface dialog,
+													int id) {
+												for (int i = 0; i < availableLocationArray
+														.size(); i++) {
+													if (availableLocationArray
+															.get(i)
+															.getName()
+															.equals(marker
+																	.getTitle())) {
+														locationId = Integer
+																.toString(availableLocationArray
+																		.get(i)
+																		.getId());
+													}
+												}
+
+												new VoteLocation().execute();
+											}
+										});
+
+						// create alert dialog
+						AlertDialog alertDialog = alertDialogBuilder.create();
+
+						// show it
+						alertDialog.show();
+					}
+				}
+			});
 
 		}
 	}
@@ -211,72 +312,98 @@ public class VoteMap extends FragmentActivity {
 		 * After completing background task Dismiss the progress dialog
 		 * **/
 		protected void onPostExecute(String file_url) {
-
-
-			mMap.clear();
-			mMap.setOnInfoWindowClickListener(new OnInfoWindowClickListener() {
-				@Override
-				public void onInfoWindowClick(final Marker marker) {
-					AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
-							VoteMap.this);
-
-					// set title
-					alertDialogBuilder.setTitle("Vote for " + marker.getTitle());
-
-					// set dialog message
-					alertDialogBuilder
-							.setMessage("Are you okay with this location?")
-							.setCancelable(false)
-							.setNegativeButton("No",
-									new DialogInterface.OnClickListener() {
-										public void onClick(
-												DialogInterface dialog, int id) {
-											dialog.cancel();
-										}
-									})
-							.setPositiveButton("Yes",
-									new DialogInterface.OnClickListener() {
-										public void onClick(
-												DialogInterface dialog, int id) {
-											for (int i = 0; i < availableLocationArray
-													.size(); i++) {
-												if (availableLocationArray
-														.get(i)
-														.getName()
-														.equals(marker
-																.getTitle())) {
-													locationId = Integer
-															.toString(availableLocationArray
-																	.get(i)
-																	.getId());
-												}
-											}
-											
-											new VoteLocation().execute();
-										}
-									});
-
-					// create alert dialog
-					AlertDialog alertDialog = alertDialogBuilder.create();
-
-					// show it
-					alertDialog.show();
-				}
-			});
+			int count = 0;
+			mClusterManager = new ClusterManager<MyItem>(VoteMap.this, mMap);
+			mMap.setOnCameraChangeListener(mClusterManager);
+			mClusterManager.setRenderer(new ItemRenderer());
+			List<MyItem> items = new ArrayList<MyItem>();
 
 			for (int i = 0; i < availableLocationArray.size(); i++) {
-
-				LatLng coordinate = new LatLng(availableLocationArray.get(i)
-						.getLatitude(), availableLocationArray.get(i)
+				Location locRoom = new Location("");
+				locRoom.setLatitude(availableLocationArray.get(i).getLatitude());
+				locRoom.setLongitude(availableLocationArray.get(i)
 						.getLongitude());
 
-				mMap.addMarker(new MarkerOptions()
-						.position(coordinate)
-						.title(availableLocationArray.get(i).getName())
-						.icon(BitmapDescriptorFactory
-								.defaultMarker(BitmapDescriptorFactory.HUE_ROSE)));
+				double dist = locHome.distanceTo(locRoom);
+
+				int retval;
+
+				// if (DISTPREF_UNIT == 0) {
+				retval = Double.compare(DISTPREF, dist);
+				// }
+				// else {
+				// retval = Double.compare(DISTPREF / 1000, dist);
+				// }
+
+				if (retval < 0) {
+
+				} else {
+					LatLng coordinate = new LatLng(availableLocationArray
+							.get(i).getLatitude(), availableLocationArray
+							.get(i).getLongitude());
+
+					items.add(new MyItem(coordinate, availableLocationArray
+							.get(i).getName(), BitmapDescriptorFactory
+							.defaultMarker(BitmapDescriptorFactory.HUE_ROSE)));
+					count++;
+				}
 			}
-			
+			mClusterManager.addItems(items);
+
+			if (count == 0) {
+				AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+						VoteMap.this);
+
+				// set title
+				alertDialogBuilder.setTitle("Sorry. No nearby location.");
+
+				// set dialog message
+				alertDialogBuilder
+						.setMessage(
+								"Load location outside 5km from your house?")
+						.setCancelable(false)
+						.setNegativeButton("No",
+								new DialogInterface.OnClickListener() {
+									public void onClick(DialogInterface dialog,
+											int id) {
+										dialog.cancel();
+									}
+								})
+						.setPositiveButton("Yes",
+								new DialogInterface.OnClickListener() {
+									public void onClick(DialogInterface dialog,
+											int id) {
+
+										List<MyItem> items = new ArrayList<MyItem>();
+
+										mClusterManager.clearItems();
+										for (int i = 0; i < availableLocationArray
+												.size(); i++) {
+											LatLng coordinate = new LatLng(
+													availableLocationArray.get(
+															i).getLatitude(),
+													availableLocationArray.get(
+															i).getLongitude());
+
+											items.add(new MyItem(
+													coordinate,
+													availableLocationArray.get(
+															i).getName(),
+													BitmapDescriptorFactory
+															.defaultMarker(BitmapDescriptorFactory.HUE_ROSE)));
+										}
+
+										mClusterManager.addItems(items);
+									}
+								});
+
+				// create alert dialog
+				AlertDialog alertDialog = alertDialogBuilder.create();
+
+				// show it
+				alertDialog.show();
+			}
+
 			pDialog.dismiss();
 		}
 	}
@@ -363,6 +490,34 @@ public class VoteMap extends FragmentActivity {
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
+		}
+	}
+
+	private class ItemRenderer extends DefaultClusterRenderer<MyItem> {
+
+		public ItemRenderer() {
+			super(VoteMap.this, mMap, mClusterManager);
+
+		}
+
+		@Override
+		protected void onBeforeClusterItemRendered(MyItem myItem,
+				MarkerOptions markerOptions) {
+			markerOptions.position(myItem.getPosition())
+					.title(myItem.getmTitle()).icon(myItem.getmIcon());
+		}
+
+		@Override
+		protected void onBeforeClusterRendered(Cluster<MyItem> cluster,
+				MarkerOptions markerOptions) {
+			// TODO Auto-generated method stub
+			super.onBeforeClusterRendered(cluster, markerOptions);
+		}
+
+		@Override
+		protected boolean shouldRenderAsCluster(Cluster cluster) {
+			// Always render clusters.
+			return cluster.getSize() > 1;
 		}
 	}
 

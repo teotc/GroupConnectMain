@@ -14,8 +14,10 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -30,7 +32,7 @@ public class VoteLocation extends Activity {
 	private String currentMemberId = "1007";
 	private String currentRoomId = "159";
 	private String[] roomMemberId = new String[] { "1001", "1002", "1003",
-			"1004", "1005", "1006", "1007" };
+			"1004", "1005", "1006", "1007", "1117", "2095" };
 	private String roomLocation = "none";
 	private String creatorMemberId = "1007";
 	private int stat = 0;
@@ -48,6 +50,9 @@ public class VoteLocation extends Activity {
 		btnVote = (Button) findViewById(R.id.vote);
 		btnViewResult = (Button) findViewById(R.id.viewResult);
 
+		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(VoteLocation.this);
+		currentMemberId = sp.getString("id", null);
+		
 		Setup();
 
 		TextView tv = (TextView) findViewById(R.id.textView1);
