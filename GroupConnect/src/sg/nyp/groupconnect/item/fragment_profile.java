@@ -3,24 +3,16 @@ package sg.nyp.groupconnect.item;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import sg.nyp.groupconnect.Login;
 import sg.nyp.groupconnect.R;
-import sg.nyp.groupconnect.room.CreateRmStep2;
+import sg.nyp.groupconnect.data.CategoriesDbAdapter;
+import sg.nyp.groupconnect.data.GrpRoomDbAdapter;
 import sg.nyp.groupconnect.utilities.JSONParser;
 import android.annotation.SuppressLint;
-import android.app.Dialog;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.EditTextPreference;
@@ -30,28 +22,17 @@ import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.NumberPicker;
-import android.widget.Spinner;
 
 @SuppressLint("NewApi")
 public class fragment_profile extends PreferenceFragment implements
 		OnSharedPreferenceChangeListener {
 
-	// @Override
-	// public View onCreateView(LayoutInflater inflater, ViewGroup container,
-	// Bundle savedInstanceState) {
-	// View rootView = inflater.inflate(R.layout.fragment_profile, container,
-	// false);
-	// return rootView;
-	// }
-
 	private String interestedSub;
 	MultiSelectListPreference mslpInterests;
 	EditTextPreference et_interestedSub;
+	CategoriesDbAdapter mDbHelper;
+
+	private static final String TAG = "fragment_profile";
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -62,13 +43,17 @@ public class fragment_profile extends PreferenceFragment implements
 		SharedPreferences sp = PreferenceManager
 				.getDefaultSharedPreferences(getActivity());
 		interestedSub = sp.getString("interestedSub", "No categories");
+		Log.d(TAG, "IntrsSub: " + interestedSub);
 
-		new getCateFromWS().execute();
+		mDbHelper = new CategoriesDbAdapter(getActivity());
+		mDbHelper.open();
+
+		new LoadCategories().execute();
 	}
 
 	@Override
 	public void onSharedPreferenceChanged(SharedPreferences sp, String key) {
-		Log.d("GC", "Fired");
+		Log.d("GC", "onSharedPreferenceChanged Fired");
 		Preference pref = findPreference(key);
 		// if (pref instanceof EditTextPreference) {
 		// EditTextPreference etp = (EditTextPreference) pref;
@@ -85,133 +70,53 @@ public class fragment_profile extends PreferenceFragment implements
 		}
 	}
 
-	ArrayList<String> mInterestList;
+	private ArrayList<String> mFullCategList;
+	private ArrayList<String> userCategList;
+	private String userInterestedCategStr;
 
-	// class setProfileItems extends AsyncTask<String, String, String> {
-	//
-	// @Override
-	// protected String doInBackground(String... args) {
-	//
-	// String interest = "";
-	//
-	// Log.d("GC - interestedSub:", interestedSub);
-	//
-	// mInterestList = new ArrayList<String>();
-	//
-	// String[] parts = interestedSub.split(",");
-	// if (parts.length != 0) {
-	// for (int z = 0; z < parts.length; z++) {
-	// String sub = parts[z];
-	// mInterestList.add(sub);
-	// if (z % 2 == 1) {
-	// interest += sub + " ";
-	// } else {
-	// interest += sub + ", ";
-	// }
-	// }
-	// mslpInterests.setEntries(mInterestList
-	// .toArray(new CharSequence[mInterestList.size()]));
-	// mslpInterests.setEntryValues(mInterestList
-	// .toArray(new CharSequence[mInterestList.size()]));
-	// mslpInterests.setSummary(interest);
-	// }
-	// return null;
-	// }
-	//
-	// }
-
-	String URL = "http://www.it3197Project.3eeweb.com/grpConnect/categRetrieveAll.php";
-
-	private static final String TAG_POSTS = "posts";
-	// private static final String TAG_CATEID = "id";
-	private static final String TAG = "name";
-	// private static final String TAG_TYPE_ID = "typeId";
-	private ArrayList<String> mCateList;
-	private JSONArray mCategories;
-
-	String interest;
-
-	class getCateFromWS extends AsyncTask<String, String, String> {
+	class LoadCategories extends AsyncTask<String, String, String> {
 
 		@Override
 		protected void onPreExecute() {
-			// TODO Auto-generated method stub
 			super.onPreExecute();
 
 			mslpInterests = (MultiSelectListPreference) findPreference("mslp_listSub");
 			mslpInterests.setEnabled(false);
 		}
 
-		String cate_name;
-
 		@Override
 		protected String doInBackground(String... args) {
+			String category;
+			mFullCategList = new ArrayList<String>();
+
 			try {
-				// mCateList = new ArrayList<HashMap<String, String>>();
-				mCateList = new ArrayList<String>();
 
-				JSONParser jParser = new JSONParser();
-				JSONObject json = jParser.getJSONFromUrl(URL);
-
-				if (json.getString("success").equals("1")) {
-					try {
-
-						mCategories = json.getJSONArray(TAG_POSTS);
-
-						for (int i = 0; i < mCategories.length(); i++) {
-							JSONObject c = mCategories.getJSONObject(i);
-
-							// cate_id = c.getString(TAG_CATEID);
-							// Log.d("TC", "userid:" + cate_id);
-							cate_name = c.getString(TAG);
-							Log.d("TC", "cate_name:" + cate_name);
-							// cate_typeId = c.getString(TAG_TYPE_ID);
-
-							// HashMap<String, String> map = new HashMap<String,
-							// String>();
-
-							// map.put(TAG_CATEID, cate_id);
-							// map.put(TAG_CATE_NAME, cate_name);
-							// map.put(TAG_TYPE_ID, cate_typeId);
-
-							// mCateList.add(map);
-							mCateList.add(cate_name);
-						}
-
-					} catch (JSONException e) {
-						e.printStackTrace();
+				Cursor mCursor = mDbHelper.fetchAll();
+				if (mCursor.getCount() != 0) {
+					while (mCursor.moveToNext()) {
+						category = CategoriesDbAdapter.getString(mCursor,
+								CategoriesDbAdapter.KEY_NAME);
+						Log.d(TAG, "Category(DB): " + category);
+						mFullCategList.add(category);
 					}
+				}
 
-					interest = "";
+				userInterestedCategStr = "";
+				userCategList = new ArrayList<String>();
 
-					// mInterestList = mCateList;
-					// mCateList2 = new ArrayList<String>();
+				String[] parts = interestedSub.split(",");
+				if (parts.length != 0) {
+					for (int z = 0; z < parts.length; z++) {
+						String sub = parts[z];
 
-					ArrayList<String> insSubArr = new ArrayList<String>();
+						userCategList.add(sub);
 
-					String[] parts = interestedSub.split(",");
-					if (parts.length != 0) {
-						for (int z = 0; z < parts.length; z++) {
-							String sub = parts[z];
-
-							insSubArr.add(sub);
-
-							// for (String s : mCateList) {
-							// if (!sub.equals(s)) {
-							// Log.d("TC", "cat: " + s + "sub: " + sub);
-							// mCateList2.add(s);
-							// }
-							// }
-							// mInterestList.add(sub);
-							if (z % 2 == 1) {
-								interest += sub + " ";
-							} else {
-								interest += sub + ", ";
-							}
-
+						if (z % 2 == 1) {
+							userInterestedCategStr += sub + " ";
+						} else {
+							userInterestedCategStr += sub + ", ";
 						}
-						// mCateList2 = nonOverLap(mCateList, insSubArr);
-						insSelected = intersectArr(mCateList, insSubArr);
+
 					}
 				}
 
@@ -223,62 +128,67 @@ public class fragment_profile extends PreferenceFragment implements
 
 		@Override
 		protected void onPostExecute(String result) {
-			// TODO Auto-generated method stub
 			super.onPostExecute(result);
 			interestSetUp();
 		}
 
 	}
 
-	ArrayList<String> insSelected;
-
 	private void interestSetUp() {
 
-//		mslpInterests = (MultiSelectListPreference) this
-//				.findPreference("mslp_listSub");
+		for (String s : userCategList) {
+			Log.d(TAG, "intCatArr:" + s);
+		}
+
+		Set<String> ins = new HashSet<String>(userCategList);
+
 		mslpInterests.setPersistent(false);
-
-		// Object defaultValue = insSelected;
-
-		for (String s : insSelected) {
-			Log.d(TAG, "insSelected: " + s);
-		}
-
-		// Log.d(TAG, "mslpInterests: " + mslpInterests.getValues());
-
-		for (String s : mCateList) {
-			Log.d(TAG, "mCatelist: " + s);
-		}
-		
-		Set<String> ins = new HashSet<String>(insSelected);
-		
+		// Sets default ticked values i.e. a
+		// subset of the full list
 		mslpInterests.setValues(ins);
-		mslpInterests.setEntries(mCateList.toArray(new CharSequence[mCateList
-				.size()]));
-		mslpInterests.setEntryValues(mCateList
-				.toArray(new CharSequence[mCateList.size()]));
-
-		// Log.d(TAG, "mslpInterests: " + mslpInterests.getValues());
-		mslpInterests.setSummary(interest);
+		// Sets the full list to select from
+		mslpInterests.setEntries(mFullCategList
+				.toArray(new CharSequence[mFullCategList.size()]));
+		mslpInterests.setEntryValues(mFullCategList
+				.toArray(new CharSequence[mFullCategList.size()]));
+		mslpInterests.setSummary(userInterestedCategStr);
 
 		mslpInterests
 				.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
 
 					@Override
-					public boolean onPreferenceChange(Preference preference,
+					public boolean onPreferenceChange(Preference pref,
 							Object newValue) {
 						// TODO Auto-generated method stub
 						Log.d("GC - prefchange", newValue.toString());
-						setInterest(newValue);
-						return false;
+						Log.d("GC - interestedSub", interestedSub);
+						interestedSub = newValue.toString().replace("[", "").replace("]", "");
+						Log.d("GC - interestedSub - c", interestedSub);
+						userInterestedCategStr = "";
+						userCategList.clear();
+						
+						String[] parts = interestedSub.split(",");
+						if (parts.length != 0) {
+							for (int z = 0; z < parts.length; z++) {
+								String sub = parts[z];
+								userCategList.add(sub);
+								// if (z % 2 == 1) {
+								// userInterestedCategStr += sub + " ";
+								// } else {
+								// userInterestedCategStr += sub + ", ";
+								// }
+								// Log.d("GC - prefchange catgstr:",
+								// userInterestedCategStr);
+							}
+						}
+						Set<String> ins = new HashSet<String>(userCategList);
+						mslpInterests.setValues(ins);
+						mslpInterests.setSummary(interestedSub);
+
+						return true;
 					}
 				});
 		mslpInterests.setEnabled(true);
-
-	}
-
-	private void setInterest(Object newValue) {
-		// TODO Auto-generated method stub
 
 	}
 
@@ -360,7 +270,7 @@ public class fragment_profile extends PreferenceFragment implements
 	ArrayList<String> nonOverLap(Collection<String> coll1,
 			Collection<String> coll2) {
 		Collection<String> result = union(coll1, coll2);
-		insSelected = new ArrayList<String>(result);
+		userCategList = new ArrayList<String>(result);
 		result.removeAll(intersect(coll1, coll2));
 
 		return new ArrayList<String>(result);

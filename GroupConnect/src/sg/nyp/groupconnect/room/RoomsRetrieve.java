@@ -165,31 +165,31 @@ public class RoomsRetrieve extends Activity {
 		protected String doInBackground(String... params) {
 
 			details = new ArrayList<GrpRoomListExt>();
-			Cursor mRMCursor = mDbHelper.fetchAllRooms();
-			if (mRMCursor.getCount() != 0) {
+			Cursor mCursor = mDbHelper.fetchAllRooms();
+			if (mCursor.getCount() != 0) {
 				// mRMCursor.moveToFirst();
 				Log.d("GrpRmPullService",
-						"filldata(): count: " + mRMCursor.getCount());
-				while (mRMCursor.moveToNext()) {
+						"filldata(): count: " + mCursor.getCount());
+				while (mCursor.moveToNext()) {
 
-					room_id = GrpRoomDbAdapter.getLong(mRMCursor,
+					room_id = GrpRoomDbAdapter.getLong(mCursor,
 							GrpRoomDbAdapter.KEY_ROOM_ID);
-					title = GrpRoomDbAdapter.getString(mRMCursor,
+					title = GrpRoomDbAdapter.getString(mCursor,
 							GrpRoomDbAdapter.KEY_TITLE);
-					category = GrpRoomDbAdapter.getString(mRMCursor,
+					category = GrpRoomDbAdapter.getString(mCursor,
 							GrpRoomDbAdapter.KEY_CATEGORY);
-					noOfLearner = GrpRoomDbAdapter.getLong(mRMCursor,
+					noOfLearner = GrpRoomDbAdapter.getLong(mCursor,
 							GrpRoomDbAdapter.KEY_NO_OF_LEARNER);
-					location = GrpRoomDbAdapter.getString(mRMCursor,
+					location = GrpRoomDbAdapter.getString(mCursor,
 							GrpRoomDbAdapter.KEY_LOCATION);
-					distance = GrpRoomDbAdapter.getLong(mRMCursor,
+					distance = GrpRoomDbAdapter.getLong(mCursor,
 							GrpRoomDbAdapter.KEY_DISTANCE);
 
-					lat = GrpRoomDbAdapter.getLong(mRMCursor,
+					lat = GrpRoomDbAdapter.getLong(mCursor,
 							GrpRoomDbAdapter.KEY_LAT);
-					lng = GrpRoomDbAdapter.getLong(mRMCursor,
+					lng = GrpRoomDbAdapter.getLong(mCursor,
 							GrpRoomDbAdapter.KEY_LNG);
-					icon = GrpRoomDbAdapter.getInt(mRMCursor,
+					icon = GrpRoomDbAdapter.getInt(mCursor,
 							GrpRoomDbAdapter.KEY_ICON);
 
 					details.add(new GrpRoomListExt(room_id, title, category,

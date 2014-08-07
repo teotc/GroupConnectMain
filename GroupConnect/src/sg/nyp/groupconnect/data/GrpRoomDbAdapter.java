@@ -30,25 +30,23 @@ import android.util.Log;
 import android.view.View;
 
 public class GrpRoomDbAdapter {
-
-	private final Context mCtx;
-
-	private static final String DATABASE_NAME = "data";
-	private static final String DATABASE_TABLE = "room";
-	private static final int DATABASE_VERSION = 2;
-
+	
+	// Public variables - used with getXX() methods below
 	public static final String KEY_ROOM_ID = "room_id";
 	public static final String KEY_TITLE = "title";
 	public static final String KEY_CATEGORY = "category";
 	public static final String KEY_NO_OF_LEARNER = "noOfLearner";
 	public static final String KEY_LOCATION = "location";
-
 	public static final String KEY_LAT = "lat";
 	public static final String KEY_LNG = "lng";
 	public static final String KEY_DISTANCE = "distance";
-
 	public static final String KEY_ICON = "icon";
-
+	
+	// Private variables
+	private final Context mCtx;
+	private static final String DATABASE_NAME = "data";
+	private static final String DATABASE_TABLE = "room";
+	private static final int DATABASE_VERSION = 2;
 	private static final String TAG = "GrpRoomDbAdapter";
 	private DatabaseHelper mDbHelper;
 	private SQLiteDatabase mDb;

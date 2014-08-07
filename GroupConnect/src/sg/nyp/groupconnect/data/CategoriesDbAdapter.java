@@ -17,7 +17,7 @@ public class CategoriesDbAdapter {
 	private static final int DATABASE_VERSION = 2;
 
 	private static final String KEY_ID = "id";
-	private static final String KEY_NAME = "name";
+	public static final String KEY_NAME = "name";
 	private static final String KEY_TYPEID = "typeId";
 
 	private MainDbAdapter mDbHelper;
@@ -160,5 +160,9 @@ public class CategoriesDbAdapter {
 		}
 		mCursor.close();
 		close();
+	}
+	
+	public static String getString(Cursor mCursor, String keyID) {
+		return mCursor.getString(mCursor.getColumnIndex(keyID));
 	}
 }

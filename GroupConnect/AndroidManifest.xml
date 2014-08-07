@@ -131,6 +131,10 @@
             android:name="sg.nyp.groupconnect.room.NearbyRooms"
             android:label="@string/title_activity_nearbyrm" >
         </activity>
+        <activity
+            android:name="sg.nyp.groupconnect.room.RoomDetails"
+            android:label="@string/title_activity_room_details" >
+        </activity>
         <!-- src/utilities/ -->
         <activity android:name="sg.nyp.groupconnect.utilities.BarChartBuilder" />
         <activity android:name="sg.nyp.groupconnect.utilities.LineChartBuilder" />
