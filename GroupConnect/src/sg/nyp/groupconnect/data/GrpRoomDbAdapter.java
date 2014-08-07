@@ -47,6 +47,8 @@ public class GrpRoomDbAdapter {
 	public static final String KEY_LNG = "lng";
 	public static final String KEY_DISTANCE = "distance";
 
+	public static final String KEY_ICON = "icon";
+
 	private static final String TAG = "GrpRoomDbAdapter";
 	private DatabaseHelper mDbHelper;
 	private SQLiteDatabase mDb;
@@ -59,7 +61,10 @@ public class GrpRoomDbAdapter {
 			+ "category TEXT NOT NULL, "
 			+ "noOfLearner INTEGER NOT NULL, "
 			+ "location TEXT, "
-			+ "lat DOUBLE, " + "lng DOUBLE, " + "distance DOUBLE " + ");";
+			+ "icon INTEGER, "
+			+ "lat DOUBLE, "
+			+ "lng DOUBLE, "
+			+ "distance DOUBLE " + ");";
 
 	private static class DatabaseHelper extends SQLiteOpenHelper {
 
@@ -135,7 +140,7 @@ public class GrpRoomDbAdapter {
 
 	public long createRoom(long room_id, String title, String category,
 			long noOfLearner, String location, double lat, double lng,
-			double distance) {
+			double distance, int icon) {
 		ContentValues cv = new ContentValues();
 		cv.put(KEY_ROOM_ID, room_id);
 		cv.put(KEY_TITLE, title);
@@ -145,6 +150,7 @@ public class GrpRoomDbAdapter {
 		cv.put(KEY_DISTANCE, distance);
 		cv.put(KEY_LAT, lat);
 		cv.put(KEY_LNG, lng);
+		cv.put(KEY_ICON, icon);
 
 		return mDb.insert(DATABASE_TABLE, null, cv);
 	}
@@ -173,7 +179,7 @@ public class GrpRoomDbAdapter {
 	public Cursor fetchAllRooms() {
 		return mDb.query(DATABASE_TABLE, new String[] { KEY_ROOM_ID, KEY_TITLE,
 				KEY_CATEGORY, KEY_NO_OF_LEARNER, KEY_LOCATION, KEY_DISTANCE,
-				KEY_LAT, KEY_LNG }, null, null, null, null, null);
+				KEY_LAT, KEY_LNG, KEY_ICON }, null, null, null, null, null);
 	}
 
 	/**
@@ -191,8 +197,8 @@ public class GrpRoomDbAdapter {
 
 		mDb.query(true, DATABASE_TABLE, new String[] { KEY_ROOM_ID, KEY_TITLE,
 				KEY_CATEGORY, KEY_NO_OF_LEARNER, KEY_LOCATION, KEY_DISTANCE,
-				KEY_LAT, KEY_LNG }, KEY_ROOM_ID + "=" + room_id, null, null,
-				null, null, null);
+				KEY_LAT, KEY_LNG, KEY_ICON }, KEY_ROOM_ID + "=" + room_id,
+				null, null, null, null, null);
 		if (mCursor != null) {
 			mCursor.moveToFirst();
 		}
@@ -215,8 +221,8 @@ public class GrpRoomDbAdapter {
 
 		mDb.query(true, DATABASE_TABLE, new String[] { KEY_ROOM_ID, KEY_TITLE,
 				KEY_CATEGORY, KEY_NO_OF_LEARNER, KEY_LOCATION, KEY_DISTANCE,
-				KEY_LAT, KEY_LNG }, KEY_DISTANCE + "<" + distance, null, null,
-				null, null, null);
+				KEY_LAT, KEY_LNG, KEY_ICON }, KEY_DISTANCE + "<" + distance,
+				null, null, null, null, null);
 		if (mCursor != null) {
 			mCursor.moveToFirst();
 		}
@@ -239,7 +245,7 @@ public class GrpRoomDbAdapter {
 	 */
 	public boolean updateRoom(long room_id, String title, String category,
 			long noOfLearner, String location, double lat, double lng,
-			double distance) {
+			double distance, int icon) {
 		ContentValues cv = new ContentValues();
 		cv.put(KEY_ROOM_ID, room_id);
 		cv.put(KEY_TITLE, title);
@@ -249,6 +255,7 @@ public class GrpRoomDbAdapter {
 		cv.put(KEY_DISTANCE, distance);
 		cv.put(KEY_LAT, lat);
 		cv.put(KEY_LNG, lng);
+		cv.put(KEY_ICON, icon);
 
 		return mDb
 				.update(DATABASE_TABLE, cv, KEY_ROOM_ID + "=" + room_id, null) > 0;
@@ -264,6 +271,7 @@ public class GrpRoomDbAdapter {
 		String title = null, location = null, category = null;
 		long noOfLearner = 0, room_id = 0;
 		double distance, lat, lng;
+		int icon;
 
 		Cursor mCursor = mDb.query(DATABASE_TABLE, new String[] { KEY_ROOM_ID,
 				KEY_TITLE, KEY_CATEGORY, KEY_NO_OF_LEARNER, KEY_LOCATION,
@@ -282,10 +290,11 @@ public class GrpRoomDbAdapter {
 				distance = r.getDistance();
 				lat = r.getRoomLatLng().latitude;
 				lng = r.getRoomLatLng().longitude;
+				icon = r.getIcon();
 
 				updateInfo += "\nCreated new record: " + room_id;
 				createRoom(room_id, title, category, noOfLearner, location,
-						lat, lng, distance);
+						lat, lng, distance, icon);
 			}
 
 		} else {
@@ -302,6 +311,7 @@ public class GrpRoomDbAdapter {
 					distance = r.getDistance();
 					lat = r.getRoomLatLng().latitude;
 					lng = r.getRoomLatLng().longitude;
+					icon = r.getIcon();
 
 					Log.d("GrpRmPullService",
 							"chkRm(): RmID: "
@@ -342,12 +352,12 @@ public class GrpRoomDbAdapter {
 						}
 						if (!wasUpdated && !vExist) {
 							createRoom(room_id, title, category, noOfLearner,
-									location, lat, lng, distance);
+									location, lat, lng, distance, icon);
 							Log.d("Record Update", "Created new record: "
 									+ room_id);
 						} else if (wasUpdated && vExist) {
 							updateRoom(room_id, title, category, noOfLearner,
-									location, lat, lng, distance);
+									location, lat, lng, distance, icon);
 							Log.d("Record Update", "Updated record: " + room_id);
 						} else {
 							Log.d("Record Update",
@@ -363,7 +373,7 @@ public class GrpRoomDbAdapter {
 		}
 		Log.d(SVC_TAG, "Updated record:\n" + updateInfo);
 
-		 broadcastIntent();
+		broadcastIntent();
 	}
 
 	public void broadcastIntent() {
@@ -373,10 +383,14 @@ public class GrpRoomDbAdapter {
 		mCtx.sendBroadcast(intent);
 	}
 
+	public static int getInt(Cursor mCursor, String keyID) {
+		return Integer.valueOf(mCursor.getInt(mCursor.getColumnIndex(keyID)));
+	}
+
 	public static long getLong(Cursor mCursor, String keyID) {
 		return Long.valueOf(mCursor.getLong(mCursor.getColumnIndex(keyID)));
 	}
-	
+
 	public static Double getDouble(Cursor mCursor, String keyID) {
 		return Double.valueOf(mCursor.getDouble(mCursor.getColumnIndex(keyID)));
 	}

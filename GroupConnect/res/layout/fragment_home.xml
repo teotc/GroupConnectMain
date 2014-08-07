@@ -2,28 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_marginTop="16dp"
     android:orientation="vertical" >
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal" >
-
-        <EditText
-            android:id="@+id/editText1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.8"
-            android:ems="10" >
-        </EditText>
-
-        <ImageView
-            android:id="@+id/imageView1"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_weight="0.2"
-            android:src="@drawable/search" />
-    </LinearLayout>
 
     <TextView
         android:id="@+id/textView1"
@@ -44,9 +24,9 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
+            android:layout_marginBottom="7dp"
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
-            android:layout_marginBottom="7dp"
             android:background="@drawable/border_for_imageview"
             android:text="Show nearby rooms" />
     </RelativeLayout>

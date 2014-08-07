@@ -4,6 +4,7 @@ import java.util.*;
 
 import org.json.*;
 
+import sg.nyp.groupconnect.R;
 import sg.nyp.groupconnect.data.GrpRoomDbAdapter;
 import sg.nyp.groupconnect.entity.GrpRoomListExt;
 import sg.nyp.groupconnect.utilities.JSONParser;
@@ -87,6 +88,7 @@ public class GrpRmPullService extends IntentService {
 	private long noOfLearner = 0, room_id = 0;
 	private double distance, lat, lng;
 	private LatLng rmLatLng = null;
+	private int icon;
 
 	class PullRooms extends AsyncTask<String, String, String> {
 
@@ -145,14 +147,6 @@ public class GrpRmPullService extends IntentService {
 					for (int i = 0; i < mRooms.length(); i++) {
 						JSONObject c = mRooms.getJSONObject(i);
 
-						// gets the content of each tag
-						// roomIdR = c.getString(TAG_ROOMID);
-						// titleR = c.getString(TAG_TITLE);
-						// locationR = c.getString(TAG_LOCATION);
-						// noOfLearnerR = c.getString(TAG_NOOFLEARNER);
-						// categoryR = c.getString(TAG_CATEGORY);
-						// latLngR = c.getString(TAG_LATLNG);
-
 						room_id = Long.parseLong(c.getString(TAG_ROOMID));
 						title = c.getString(TAG_TITLE);
 						category = c.getString(TAG_CATEGORY);
@@ -164,6 +158,93 @@ public class GrpRmPullService extends IntentService {
 						distance = 0;
 						lat = 0;
 						lng = 0;
+
+						// char grade = args[0].charAt(0);
+						char fChar = title.toUpperCase(Locale.ENGLISH)
+								.charAt(0);
+
+						switch (fChar) {
+						case 'A':
+							icon = R.drawable.gc_text_a;
+							break;
+						case 'B':
+							icon = R.drawable.gc_text_b;
+							break;
+						case 'C':
+							icon = R.drawable.gc_text_c;
+							break;
+						case 'D':
+							icon = R.drawable.gc_text_d;
+							break;
+						case 'E':
+							icon = R.drawable.gc_text_e;
+							break;
+						case 'F':
+							icon = R.drawable.gc_text_f;
+							break;
+						case 'G':
+							icon = R.drawable.gc_text_g;
+							break;
+						case 'H':
+							icon = R.drawable.gc_text_h;
+							break;
+						case 'I':
+							icon = R.drawable.gc_text_i;
+							break;
+						case 'J':
+							icon = R.drawable.gc_text_j;
+							break;
+						case 'K':
+							icon = R.drawable.gc_text_k;
+							break;
+						case 'L':
+							icon = R.drawable.gc_text_l;
+							break;
+						case 'M':
+							icon = R.drawable.gc_text_m;
+							break;
+						case 'N':
+							icon = R.drawable.gc_text_n;
+							break;
+						case 'O':
+							icon = R.drawable.gc_text_o;
+							break;
+						case 'P':
+							icon = R.drawable.gc_text_p;
+							break;
+						case 'Q':
+							icon = R.drawable.gc_text_q;
+							break;
+						case 'R':
+							icon = R.drawable.gc_text_r;
+							break;
+						case 'S':
+							icon = R.drawable.gc_text_s;
+							break;
+						case 'T':
+							icon = R.drawable.gc_text_t;
+							break;
+						case 'U':
+							icon = R.drawable.gc_text_u;
+							break;
+						case 'V':
+							icon = R.drawable.gc_text_v;
+							break;
+						case 'W':
+							icon = R.drawable.gc_text_w;
+							break;
+						case 'X':
+							icon = R.drawable.gc_text_x;
+							break;
+						case 'Y':
+							icon = R.drawable.gc_text_y;
+							break;
+						case 'Z':
+							icon = R.drawable.gc_text_z;
+							break;
+						default:
+							icon = R.drawable.gc_text_g;
+						}
 
 						Log.d(TAG, "updJSONd(): rmId:" + room_id);
 
@@ -177,7 +258,7 @@ public class GrpRmPullService extends IntentService {
 
 							mRoomList.add(new GrpRoomListExt(room_id, title,
 									category, noOfLearner, location, latLng,
-									rmLatLng, distance));
+									rmLatLng, distance, icon));
 						} else {
 							try {
 								tRmAddr = coder.getFromLocationName(
@@ -186,15 +267,16 @@ public class GrpRmPullService extends IntentService {
 										+ tRmLocTxAddr);
 								if (tRmAddr == null) {
 									geocdRMAddrErr = true;
-								}else{
+								} else {
 									Address loc = tRmAddr.get(0);
 
 									rmLatLng = new LatLng(loc.getLatitude(),
 											loc.getLongitude());
 
 									mRoomList.add(new GrpRoomListExt(room_id,
-											title, category, noOfLearner, location,
-											latLng, rmLatLng, distance));
+											title, category, noOfLearner,
+											location, latLng, rmLatLng,
+											distance, icon));
 								}
 							} catch (Exception e) {
 								String err = "Could not get room " + room_id

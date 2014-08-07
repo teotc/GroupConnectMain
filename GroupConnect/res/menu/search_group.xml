@@ -3,8 +3,9 @@
 
     <item
         android:id="@+id/srgrp_createroom"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@drawable/addroom"
         android:orderInCategory="0"
-        android:showAsAction="always"/>
+        android:showAsAction="always"
+        android:title="Create Room"/>
 
 </menu>

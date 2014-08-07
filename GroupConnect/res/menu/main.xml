@@ -17,5 +17,10 @@
         android:icon="@drawable/star"
         android:orderInCategory="3"
         android:showAsAction="always"/>
+    <item
+        android:id="@+id/refresh"
+        android:icon="@drawable/refresh1"
+        android:orderInCategory="4"
+        android:showAsAction="always"/>
 
 </menu>

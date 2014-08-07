@@ -1,19 +1,11 @@
 package sg.nyp.groupconnect.room;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-
-import org.apache.http.NameValuePair;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import sg.nyp.groupconnect.R;
 import sg.nyp.groupconnect.data.GrpRoomDbAdapter;
-import sg.nyp.groupconnect.data.GrpRoomListExtAdapter;
 import sg.nyp.groupconnect.entity.GrpRoomListExt;
-import sg.nyp.groupconnect.entity.GrpRoomListing;
-import sg.nyp.groupconnect.utilities.JSONParser;
 import android.app.ActionBar;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -38,15 +30,13 @@ public class NearbyRooms extends FragmentActivity {
 	private static final String TAG = "NearbyRooms";
 	SharedPreferences sp;
 	String homeLocTextAddr = null;
-	private ArrayList<GrpRoomListExt> roomsArray;
-	private ArrayList<GrpRoomListExt> newRoomLocList;
 	private ArrayList<GrpRoomListExt> details;
 	Geocoder coder;
 
 	List<Address> address;
 	LatLng homeLatLng = null;
 	Location locHome;
-	
+
 	private GrpRoomDbAdapter mDbHelper;
 
 	// Common
@@ -62,7 +52,7 @@ public class NearbyRooms extends FragmentActivity {
 		sp = PreferenceManager
 				.getDefaultSharedPreferences(getApplicationContext());
 		homeLocTextAddr = sp.getString("home", null);
-		
+
 		mDbHelper = new GrpRoomDbAdapter(getApplicationContext());
 		mDbHelper.open();
 
@@ -150,16 +140,15 @@ public class NearbyRooms extends FragmentActivity {
 			if (mMap != null) {
 				setUpMap();
 			}
-		} else{
+		} else {
 			setUpMap();
 		}
 	}
 
 	/**
 	 * This is where we can add markers or lines, add listeners or move the
-	 * camera.
-	 * This should only be called once and when we are sure that {@link #mMap}
-	 * is not null.
+	 * camera. This should only be called once and when we are sure that
+	 * {@link #mMap} is not null.
 	 */
 	private void setUpMap() {
 		if (mMap != null) {
@@ -176,13 +165,14 @@ public class NearbyRooms extends FragmentActivity {
 
 		}
 	}
-	
+
 	int DISTPREF = 5000; // metres
-	
+
 	// fillData() variables
-	String title = null, location = null, category = null;
-	long noOfLearner = 0, room_id = 0;
-	double distance, lat, lng;
+	private String title = null, location = null, category = null;
+	private long noOfLearner = 0, room_id = 0;
+	private double distance, lat, lng;
+	private int icon;
 
 	String info = null;
 
@@ -192,34 +182,36 @@ public class NearbyRooms extends FragmentActivity {
 		protected String doInBackground(String... params) {
 
 			details = new ArrayList<GrpRoomListExt>();
-			Cursor mRMCursor = mDbHelper.fetchRoomsWDistance(DISTPREF);
-			if (mRMCursor.getCount() != 0) {
+			Cursor mCursor = mDbHelper.fetchRoomsWDistance(DISTPREF);
+			if (mCursor.getCount() != 0) {
 				// mRMCursor.moveToFirst();
 				Log.d("GrpRmPullService",
-						"filldata(): count: " + mRMCursor.getCount());
-				while (mRMCursor.moveToNext()) {
+						"filldata(): count: " + mCursor.getCount());
+				while (mCursor.moveToNext()) {
 
-					room_id = GrpRoomDbAdapter.getLong(mRMCursor,
+					room_id = GrpRoomDbAdapter.getLong(mCursor,
 							GrpRoomDbAdapter.KEY_ROOM_ID);
-					title = GrpRoomDbAdapter.getString(mRMCursor,
+					title = GrpRoomDbAdapter.getString(mCursor,
 							GrpRoomDbAdapter.KEY_TITLE);
-					category = GrpRoomDbAdapter.getString(mRMCursor,
+					category = GrpRoomDbAdapter.getString(mCursor,
 							GrpRoomDbAdapter.KEY_CATEGORY);
-					noOfLearner = GrpRoomDbAdapter.getLong(mRMCursor,
+					noOfLearner = GrpRoomDbAdapter.getLong(mCursor,
 							GrpRoomDbAdapter.KEY_NO_OF_LEARNER);
-					location = GrpRoomDbAdapter.getString(mRMCursor,
+					location = GrpRoomDbAdapter.getString(mCursor,
 							GrpRoomDbAdapter.KEY_LOCATION);
-					distance = GrpRoomDbAdapter.getLong(mRMCursor,
+					distance = GrpRoomDbAdapter.getLong(mCursor,
 							GrpRoomDbAdapter.KEY_DISTANCE);
 
-					lat = GrpRoomDbAdapter.getDouble(mRMCursor,
+					lat = GrpRoomDbAdapter.getDouble(mCursor,
 							GrpRoomDbAdapter.KEY_LAT);
-					lng = GrpRoomDbAdapter.getDouble(mRMCursor,
+					lng = GrpRoomDbAdapter.getDouble(mCursor,
 							GrpRoomDbAdapter.KEY_LNG);
+					icon = GrpRoomDbAdapter.getInt(mCursor,
+							GrpRoomDbAdapter.KEY_ICON);
 
 					details.add(new GrpRoomListExt(room_id, title, category,
 							noOfLearner, location, null, new LatLng(lat, lng),
-							distance));
+							distance, icon));
 				}
 			}
 
@@ -230,8 +222,8 @@ public class NearbyRooms extends FragmentActivity {
 		protected void onPostExecute(String result) {
 			super.onPostExecute(result);
 			Log.d(TAG, "Adding ");
-			
-			for(int i=0;i<details.size();i++){
+
+			for (int i = 0; i < details.size(); i++) {
 				Log.d(TAG, "oPE- Adding: " + details.get(i).getTitle());
 				mMap.addMarker(new MarkerOptions()
 						.position(details.get(i).getRoomLatLng())
@@ -239,7 +231,7 @@ public class NearbyRooms extends FragmentActivity {
 						.snippet(details.get(i).getLocation())
 						.icon(BitmapDescriptorFactory
 								.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
-				Log.d(TAG, "LatLng:"+details.get(i).getRoomLatLng());
+				Log.d(TAG, "LatLng:" + details.get(i).getRoomLatLng());
 			}
 		}
 	}

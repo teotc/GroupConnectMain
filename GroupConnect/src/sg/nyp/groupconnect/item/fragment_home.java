@@ -2,13 +2,14 @@ package sg.nyp.groupconnect.item;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 import sg.nyp.groupconnect.R;
 import sg.nyp.groupconnect.data.*;
 import sg.nyp.groupconnect.entity.DistanceSorter;
 import sg.nyp.groupconnect.entity.GrpRoomListExt;
 import sg.nyp.groupconnect.room.NearbyRooms;
+import sg.nyp.groupconnect.room.RoomDetails;
+import sg.nyp.groupconnect.room.RoomsRetrieve;
 import android.annotation.SuppressLint;
 import android.app.*;
 import android.content.*;
@@ -19,6 +20,8 @@ import android.util.Log;
 import android.view.*;
 import android.view.View.OnClickListener;
 import android.widget.*;
+import android.widget.AdapterView.OnItemClickListener;
+
 import com.google.android.gms.maps.model.LatLng;
 
 @SuppressLint("NewApi")
@@ -35,6 +38,8 @@ public class fragment_home extends Fragment {
 	Button frag_bnnearbyrooms;
 
 	BroadcastReceiver dataDone;
+	
+	private Intent intent;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -63,6 +68,33 @@ public class fragment_home extends Fragment {
 			public void onClick(View v) {
 				Intent i = new Intent(getActivity(), NearbyRooms.class);
 				startActivity(i);
+			}
+		});
+		eduSuggestLV.setOnItemClickListener(new OnItemClickListener() {
+			public void onItemClick(AdapterView<?> a, View v, int position,
+					long id) {
+				intent = new Intent(getActivity(), RoomDetails.class);
+				intent.putExtra("title", details.get(position).getTitle());
+				intent.putExtra("category", details.get(position).getCategory());
+				intent.putExtra("location", details.get(position).getLocation());
+				startActivity(intent);
+				// details.get(position).getTitle()
+				// String s = (String) ((TextView) v.findViewById(R.id.lmTitle))
+				// .getText();
+				// Toast.makeText(Search_Group.this, s,
+				// Toast.LENGTH_LONG).show();
+
+				// intent = new Intent(Search_Group.this, RoomInfo.class);
+				// intent.putExtra(KEY_ROOM_ID,
+				// details.get(position).getRoom_id());
+				// intent.putExtra(KEY_NO_OF_LEARNER,
+				// details.get(position).getNoOfLearner());
+				// intent.putExtra(KEY_LATLNG,
+				// details.get(position).getLatlng());
+				// intent.putExtra(KEY_USERNAME,
+				// details.get(position).getUsername());
+				//
+				// startActivity(intent);
 			}
 		});
 		return rootView;
@@ -97,13 +129,11 @@ public class fragment_home extends Fragment {
 
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
-		// TODO Auto-generated method stub
 		super.onActivityCreated(savedInstanceState);
 		new CompareRoomDistance().execute();
 	}
 
 	public void updateLV() {
-		// eduSuggestLV.setAdapter(null);
 		eduSuggestLV.setAdapter(new GrpRoomListExtAdapter(details,
 				getActivity()));
 	}
@@ -114,6 +144,7 @@ public class fragment_home extends Fragment {
 	String title = null, location = null, category = null;
 	long noOfLearner = 0, room_id = 0;
 	double distance, lat, lng;
+	int icon;
 
 	private ArrayList<GrpRoomListExt> details;
 
@@ -147,10 +178,12 @@ public class fragment_home extends Fragment {
 							GrpRoomDbAdapter.KEY_LAT);
 					lng = GrpRoomDbAdapter.getLong(mCursor,
 							GrpRoomDbAdapter.KEY_LNG);
+					icon = GrpRoomDbAdapter.getInt(mCursor,
+							GrpRoomDbAdapter.KEY_ICON);
 
 					details.add(new GrpRoomListExt(room_id, title, category,
 							noOfLearner, location, null, new LatLng(lat, lng),
-							distance));
+							distance, icon));
 					Collections.sort(details, new DistanceSorter());
 				}
 			} else {

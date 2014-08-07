@@ -42,9 +42,8 @@ public class GrpRoomListExtAdapter extends BaseAdapter {
 					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			v = vi.inflate(R.layout.list_item_room, null);
 		}
-
-		//ImageView image = (ImageView) v.findViewById(R.id.icon);
-		//image.setImageResource(msg.icon);
+		
+		ImageView image = (ImageView) v.findViewById(R.id.lmIcon);
 		TextView lmTitle = (TextView) v.findViewById(R.id.lmTitle);
 		TextView lmCategory = (TextView) v.findViewById(R.id.lmCategory);
 		TextView lmLocation = (TextView) v.findViewById(R.id.lmLocation);
@@ -52,11 +51,11 @@ public class GrpRoomListExtAdapter extends BaseAdapter {
 
 		GrpRoomListExt msg = _data.get(position);
 		
-		//double dist = Double.toString(msg.getDistance());
-		
 		double dist = (double) Math.ceil(msg.getDistance());
 		
 		lmTitle.setText(msg.getTitle());
+		
+		image.setImageResource(msg.getIcon());
 		lmCategory.setText("Subject: " + msg.getCategory());
 		lmLocation.setText(msg.getLocation());
 		lmDist.setText(Double.toString(dist)+ "m");

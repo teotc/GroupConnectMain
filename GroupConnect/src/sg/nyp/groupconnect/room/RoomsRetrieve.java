@@ -29,11 +29,12 @@ public class RoomsRetrieve extends Activity {
 
 	// Others
 	private Intent intent;
-	
+
 	// fillData() variables
-	String title = null, location = null, category = null;
-	long noOfLearner = 0, room_id = 0;
-	double distance, lat, lng;
+	private String title = null, location = null, category = null;
+	private long noOfLearner = 0, room_id = 0;
+	private double distance, lat, lng;
+	private int icon;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +52,11 @@ public class RoomsRetrieve extends Activity {
 		roomList.setOnItemClickListener(new OnItemClickListener() {
 			public void onItemClick(AdapterView<?> a, View v, int position,
 					long id) {
+				intent = new Intent(RoomsRetrieve.this, RoomDetails.class);
+				intent.putExtra("title", details.get(position).getTitle());
+				intent.putExtra("category", details.get(position).getCategory());
+				intent.putExtra("location", details.get(position).getLocation());
+				startActivity(intent);
 				// details.get(position).getTitle()
 				// String s = (String) ((TextView) v.findViewById(R.id.lmTitle))
 				// .getText();
@@ -58,16 +64,10 @@ public class RoomsRetrieve extends Activity {
 				// Toast.LENGTH_LONG).show();
 
 				// intent = new Intent(Search_Group.this, RoomInfo.class);
-				//
 				// intent.putExtra(KEY_ROOM_ID,
 				// details.get(position).getRoom_id());
-				// intent.putExtra(KEY_TITLE, details.get(position).getTitle());
-				// intent.putExtra(KEY_CATEGORY,
-				// details.get(position).getCategory());
 				// intent.putExtra(KEY_NO_OF_LEARNER,
 				// details.get(position).getNoOfLearner());
-				// intent.putExtra(KEY_LOCATION,
-				// details.get(position).getLocation());
 				// intent.putExtra(KEY_LATLNG,
 				// details.get(position).getLatlng());
 				// intent.putExtra(KEY_USERNAME,
@@ -189,10 +189,12 @@ public class RoomsRetrieve extends Activity {
 							GrpRoomDbAdapter.KEY_LAT);
 					lng = GrpRoomDbAdapter.getLong(mRMCursor,
 							GrpRoomDbAdapter.KEY_LNG);
+					icon = GrpRoomDbAdapter.getInt(mRMCursor,
+							GrpRoomDbAdapter.KEY_ICON);
 
 					details.add(new GrpRoomListExt(room_id, title, category,
 							noOfLearner, location, null, new LatLng(lat, lng),
-							distance));
+							distance, icon));
 				}
 			}
 			return null;
