@@ -17,18 +17,27 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
+            android:singleLine="false"
             android:textColor="#FFFFFF"
-            android:textSize="15dp" />
+            android:textSize="25dp" />
 
         <Button
             android:id="@+id/btnFinal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginBottom="5dp"
             android:layout_marginLeft="50dp"
             android:layout_marginRight="5dp"
-            android:layout_alignParentRight="true"
+            android:layout_marginTop="5dp"
+            android:background="@drawable/button_okay_white"
+            android:drawableLeft="@drawable/ok"
+            android:drawablePadding="10dp"
             android:onClick="FinalLocation"
-            android:text="Finalize" />
+            android:paddingLeft="10dp"
+            android:paddingRight="15dp"
+            android:text="Finalize"
+            android:textColor="#FFFFFF" />
     </RelativeLayout>
 
     <LinearLayout

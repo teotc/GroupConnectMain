@@ -3,6 +3,8 @@ package sg.nyp.groupconnect;
 import java.util.ArrayList;
 import java.util.List;
 
+import sg.nyp.groupconnect.data.MainDbAdapter;
+import sg.nyp.groupconnect.data.MemberDbAdapter;
 import sg.nyp.groupconnect.item.fragment_favourite;
 import sg.nyp.groupconnect.item.fragment_help;
 import sg.nyp.groupconnect.item.fragment_home;
@@ -10,7 +12,16 @@ import sg.nyp.groupconnect.item.fragment_profile;
 import sg.nyp.groupconnect.item.fragment_setting;
 import sg.nyp.groupconnect.room.RoomMap;
 import sg.nyp.groupconnect.room.RoomsRetrieve;
+import sg.nyp.groupconnect.service.AvailableLocationPullSvc;
+import sg.nyp.groupconnect.service.CategoriesPullSvc;
+import sg.nyp.groupconnect.service.CategoriesTypePullSvc;
 import sg.nyp.groupconnect.service.GrpRmPullService;
+import sg.nyp.groupconnect.service.MemberGradePullSvc;
+import sg.nyp.groupconnect.service.MemberPullSvc;
+import sg.nyp.groupconnect.service.RoomMembersPullSvc;
+import sg.nyp.groupconnect.service.RoomPullSvc;
+import sg.nyp.groupconnect.service.SchoolsPullSvc;
+import sg.nyp.groupconnect.service.VoteLocationPullSvc;
 import sg.nyp.groupconnect.utilities.CustomAdapter;
 import sg.nyp.groupconnect.utilities.RowItem;
 import android.annotation.SuppressLint;
@@ -18,9 +29,11 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
@@ -52,7 +65,9 @@ public class MainActivity extends Activity {
 	// String fragmentNow = "main";
 	Intent mServiceIntent;
 
-	int item = -1;
+	int item = 1;
+
+	public static Context ct;
 
 	@SuppressLint("NewApi")
 	@Override
@@ -60,6 +75,30 @@ public class MainActivity extends Activity {
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+
+		ct = this;
+		new MainDbAdapter(this);
+
+		MemberDbAdapter mDbHelper = new MemberDbAdapter(MainActivity.this);
+		mDbHelper.open();
+
+		Cursor mCursor = mDbHelper.fetchAll();
+
+		if (mCursor.getCount() == 0) {
+
+			new CategoriesPullSvc().execute();
+			new CategoriesTypePullSvc().execute();
+			new AvailableLocationPullSvc().execute();
+			new MemberPullSvc().execute();
+			new MemberGradePullSvc().execute();
+			new RoomPullSvc().execute();
+			new RoomMembersPullSvc().execute();
+			new SchoolsPullSvc().execute();
+			new VoteLocationPullSvc().execute();
+		}
+		
+		mCursor.close();
+		mDbHelper.close();
 		
 		// TC: Start service to get room data from webservice
 		mServiceIntent = new Intent(this, GrpRmPullService.class);
@@ -155,7 +194,9 @@ public class MainActivity extends Activity {
 			fragmentManager.beginTransaction()
 					.replace(R.id.frame_container, fragment).commit();
 			// update selected item and title, then close the drawer
-			setTitle(menutitles[position]);
+
+			if (item != 1)
+				setTitle(menutitles[position]);
 			mDrawerLayout.closeDrawer(mDrawerList);
 		} else {
 			// error in creating fragment
@@ -196,6 +237,17 @@ public class MainActivity extends Activity {
 			intent = new Intent(MainActivity.this, RoomMap.class);
 			startActivity(intent);
 			return true;
+		case R.id.refresh:
+			new CategoriesPullSvc().execute();
+			new CategoriesTypePullSvc().execute();
+			new AvailableLocationPullSvc().execute();
+			new MemberPullSvc().execute();
+			new MemberGradePullSvc().execute();
+			new RoomPullSvc().execute();
+			new RoomMembersPullSvc().execute();
+			new SchoolsPullSvc().execute();
+			new VoteLocationPullSvc().execute();
+			return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
@@ -212,9 +264,13 @@ public class MainActivity extends Activity {
 		if (drawerOpen == false && item == 1) {
 			menu.findItem(R.id.groups).setVisible(true);
 			menu.findItem(R.id.map).setVisible(true);
+			menu.findItem(R.id.edu).setVisible(true);
+			menu.findItem(R.id.refresh).setVisible(true);
 		} else {
 			menu.findItem(R.id.groups).setVisible(false);
 			menu.findItem(R.id.map).setVisible(false);
+			menu.findItem(R.id.edu).setVisible(false);
+			menu.findItem(R.id.refresh).setVisible(false);
 		}
 		return super.onPrepareOptionsMenu(menu);
 	}

@@ -8,6 +8,8 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import sg.nyp.groupconnect.data.AvailableLocationDbAdapter;
+import sg.nyp.groupconnect.data.VoteLocationDbAdapter;
 import sg.nyp.groupconnect.entity.AvailableLocation;
 import sg.nyp.groupconnect.entity.MyItem;
 import sg.nyp.groupconnect.utilities.JSONParser;
@@ -16,6 +18,7 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.AsyncTask;
@@ -79,7 +82,6 @@ public class VoteMap extends FragmentActivity {
 
 		extras = getIntent().getExtras();
 		if (extras != null) {
-			currentMemberId = extras.getString("CURRENT_MEMBER_ID");
 			currentRoomId = extras.getString("CURRENT_ROOM_ID");
 		}
 
@@ -103,6 +105,12 @@ public class VoteMap extends FragmentActivity {
 		super.onStop();
 	}
 
+	@Override
+	protected void onDestroy() {
+		mMap = null;
+		super.onDestroy();
+	}
+
 	/**
 	 * Sets up the map if it is possible to do so (i.e., the Google Play
 	 * services APK is correctly installed) and the map has not already been
@@ -124,7 +132,6 @@ public class VoteMap extends FragmentActivity {
 	private void setUpMapIfNeeded() {
 		// Do a null check to confirm that we have not already instantiated the
 		// map.
-		mMap = null;
 		if (mMap == null) {
 			// Try to obtain the map from the SupportMapFragment.
 			mMap = ((SupportMapFragment) getSupportFragmentManager()
@@ -231,28 +238,13 @@ public class VoteMap extends FragmentActivity {
 	}
 
 	class RetrieveLocation extends AsyncTask<String, String, String> {
-		/**
-		 * Before starting background thread Show Progress Dialog
-		 * */
-		boolean failure = false;
-		public int success;
-
-		// Database
 		private ProgressDialog pDialog;
 
-		JSONParser jsonParser = new JSONParser();
-
-		private static final String RETRIEVE_LOCATION_URL = "http://www.it3197Project.3eeweb.com/grpConnect/statics/retrieveAvailableLocation.php";
-
-		private static final String TAG_SUCCESS = "success";
-		private static final String TAG_MESSAGE = "message";
-		private static final String TAG_ARRAY = "posts";
-
-		private static final String TAG_ID = "id";
-		private static final String TAG_NAME = "name";
-		private static final String TAG_LOCATION = "location";
-		private static final String TAG_LATITUDE = "latitude";
-		private static final String TAG_LONGITUDE = "longitude";
+		private static final String KEY_ID = "id";
+		private static final String KEY_NAME = "name";
+		private static final String KEY_LOCATION = "location";
+		private static final String KEY_LATITUDE = "latitude";
+		private static final String KEY_LONGITUDE = "longitude";
 
 		@Override
 		protected void onPreExecute() {
@@ -266,44 +258,44 @@ public class VoteMap extends FragmentActivity {
 
 		@Override
 		protected String doInBackground(String... args) {
-			// Check for success tag
+			AvailableLocationDbAdapter mDbHelper = new AvailableLocationDbAdapter(
+					VoteMap.this);
+			mDbHelper.open();
 
-			try {
-				// Building Parameters
-				List<NameValuePair> params = new ArrayList<NameValuePair>();
+			Cursor mCursor = mDbHelper.fetchAll();
+			availableLocationArray.clear();
 
-				// getting product details by making HTTP request
-				JSONObject json = jsonParser.makeHttpRequest(
-						RETRIEVE_LOCATION_URL, "POST", params);
+			if (mCursor.getCount() != 0) {
+				mCursor.moveToFirst();
 
-				// json success tag
-				success = json.getInt(TAG_SUCCESS);
-				availableLocationArray.clear();
+				AvailableLocation al = new AvailableLocation(
+						mCursor.getInt(mCursor.getColumnIndex(KEY_ID)),
+						mCursor.getString(mCursor.getColumnIndex(KEY_NAME)),
+						mCursor.getString(mCursor.getColumnIndex(KEY_LOCATION)),
+						mCursor.getDouble(mCursor.getColumnIndex(KEY_LATITUDE)),
+						mCursor.getDouble(mCursor.getColumnIndex(KEY_LONGITUDE)));
 
-				for (int i = 0; i < json.getJSONArray(TAG_ARRAY).length(); i++) {
+				availableLocationArray.add(al);
 
-					JSONObject c = json.getJSONArray(TAG_ARRAY)
-							.getJSONObject(i);
-					AvailableLocation al = new AvailableLocation(
-							c.getInt(TAG_ID), c.getString(TAG_NAME),
-							c.getString(TAG_LOCATION),
-							c.getDouble(TAG_LATITUDE),
-							c.getDouble(TAG_LONGITUDE));
+				while (mCursor.moveToNext()) {
+
+					al = new AvailableLocation(mCursor.getInt(mCursor
+							.getColumnIndex(KEY_ID)), mCursor.getString(mCursor
+							.getColumnIndex(KEY_NAME)),
+							mCursor.getString(mCursor
+									.getColumnIndex(KEY_LOCATION)),
+							mCursor.getDouble(mCursor
+									.getColumnIndex(KEY_LATITUDE)),
+							mCursor.getDouble(mCursor
+									.getColumnIndex(KEY_LONGITUDE)));
 
 					availableLocationArray.add(al);
-
 				}
-
-				if (success == 1) {
-					return json.getString(TAG_MESSAGE);
-				} else {
-					return json.getString(TAG_MESSAGE);
-
-				}
-			} catch (JSONException e) {
-				e.printStackTrace();
 			}
 
+			mCursor.close();
+			mDbHelper.close();
+			
 			return null;
 
 		}
@@ -454,6 +446,15 @@ public class VoteMap extends FragmentActivity {
 				success = json.getInt(TAG_SUCCESS);
 
 				if (success == 1) {
+					
+					VoteLocationDbAdapter mDbHelper = new VoteLocationDbAdapter(
+							VoteMap.this);
+					mDbHelper.open();
+
+					mDbHelper.createVoteLocation(currentMemberId, currentRoomId, locationId, "");
+
+					mDbHelper.close();
+					
 					return json.getString(TAG_MESSAGE);
 				} else {
 					return json.getString(TAG_MESSAGE);
@@ -510,12 +511,12 @@ public class VoteMap extends FragmentActivity {
 		@Override
 		protected void onBeforeClusterRendered(Cluster<MyItem> cluster,
 				MarkerOptions markerOptions) {
-			// TODO Auto-generated method stub
 			super.onBeforeClusterRendered(cluster, markerOptions);
 		}
 
 		@Override
-		protected boolean shouldRenderAsCluster(Cluster cluster) {
+		protected boolean shouldRenderAsCluster(
+				@SuppressWarnings("rawtypes") Cluster cluster) {
 			// Always render clusters.
 			return cluster.getSize() > 1;
 		}

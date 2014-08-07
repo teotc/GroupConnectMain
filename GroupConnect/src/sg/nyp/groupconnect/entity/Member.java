@@ -8,9 +8,14 @@ public class Member {
 	private double longitude;
 	private String gender;
 	private int schoolId;
+	private String password;
+	private String type;
+	private String device;
+	private String interestedSub;
 
 	public Member(int id, String name, String location, double latitude,
-			double longitude, String gender, int schoolId) {
+			double longitude, String gender, int schoolId, String password,
+			String type, String device, String interestedSub) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -19,6 +24,10 @@ public class Member {
 		this.longitude = longitude;
 		this.gender = gender;
 		this.schoolId = schoolId;
+		this.password = password;
+		this.type = type;
+		this.device = device;
+		this.interestedSub = interestedSub;
 	}
 
 	public int getId() {
@@ -75,6 +84,38 @@ public class Member {
 
 	public void setSchoolId(int schoolId) {
 		this.schoolId = schoolId;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public String getDevice() {
+		return device;
+	}
+
+	public void setDevice(String device) {
+		this.device = device;
+	}
+
+	public String getInterestedSub() {
+		return interestedSub;
+	}
+
+	public void setInterestedSub(String interestedSub) {
+		this.interestedSub = interestedSub;
 	}
 
 }
