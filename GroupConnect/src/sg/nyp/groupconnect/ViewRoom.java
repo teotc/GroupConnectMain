@@ -4,152 +4,214 @@ package sg.nyp.groupconnect;
 //import static sg.nyp.groupconnect.notification.Util.TAG;
 
 import java.util.ArrayList;
-import java.util.List;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import sg.nyp.groupconnect.entity.Member;
-import sg.nyp.groupconnect.utilities.JSONParser;
+import sg.nyp.groupconnect.data.RoomDbAdapter;
+import sg.nyp.groupconnect.entity.Model;
+import sg.nyp.groupconnect.room.RoomDetails;
+import sg.nyp.groupconnect.room.db.retrieveRmMem;
+import sg.nyp.groupconnect.utilities.ListAdapter;
 import sg.nyp.groupconnect.utilities.PieChartBuilder;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
 public class ViewRoom extends Activity {
+	// Variables
+	public static ListView memberList;
+	public static TextView tvTitle, tvCategory, tvLocation;
+	public static TextView tvStatus, tvDate, tvTime;
+	public static TextView tvNoOfLearner;
+	public static TextView tvNoOfEducator;
+	public static Button btnJoin, btnVote, btnViewResult;
+	ArrayList<String> memberArray = new ArrayList<String>();
 
-	ListView learnerlist;
-	TextView tvTitle, tvCategory;
-	Button btnDone;
-	public static ArrayList<Member> arrayMember = new ArrayList<Member>();
-
-	private String title = "", category = "";
-	private ArrayList<String> member = new ArrayList<String>();
-
-	public ProgressDialog pDialog;
+	public static Activity activity;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.room_view);
+		setContentView(R.layout.activity_room_details);
+		// For usernameRetrieve.java
+		activity = ViewRoom.this;
+
+		ActionBar actionBar = getActionBar();
+		actionBar.setIcon(R.drawable.back);
+		actionBar.setHomeButtonEnabled(true);
 
 		tvTitle = (TextView) findViewById(R.id.tvTitle);
 		tvCategory = (TextView) findViewById(R.id.tvCategory);
+		tvLocation = (TextView) findViewById(R.id.tvLocation);
+		tvStatus = (TextView) findViewById(R.id.tvStatus);
+		tvDate = (TextView) findViewById(R.id.tvDate);
+		tvTime = (TextView) findViewById(R.id.tvTime);
 
-		btnDone = (Button) findViewById(R.id.btnOkay);
+		btnJoin = (Button) findViewById(R.id.btnJoin);
+		btnVote = (Button) findViewById(R.id.vote);
+		btnViewResult = (Button) findViewById(R.id.viewResult);
 
-		btnDone.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				finish();
-			}
-		});
+		btnJoin.setVisibility(View.GONE);
+		btnVote.setVisibility(View.GONE);
+		btnViewResult.setVisibility(View.GONE);
 
-		new retrieveRoomDetail().execute();
+		memberList = (ListView) findViewById(R.id.memberList);
+
+		new retrieveRmMemDetail().execute();
+
 	}
 
-	class retrieveRoomDetail extends AsyncTask<String, String, String> {
-		/**
-		 * Before starting background thread Show Progress Dialog
-		 * */
-		boolean failure = false;
-		public int success;
+	@Override
+	protected void onResume() {
+		super.onResume();
+		Log.i("RoomDetails", "RESUME");
 
-		// Database
+	}
 
-		JSONParser jsonParser = new JSONParser();
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle action bar actions click
+		switch (item.getItemId()) {
+		case android.R.id.home:
+			ViewRoom.this.finish();
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+	}
 
-		private static final String ROOM_URL = "http://www.it3197Project.3eeweb.com/grpConnect/statics/retrieveRoom.php"; //TODO
+	class retrieveRmMemDetail extends AsyncTask<Void, Void, Boolean> {
 
-		private static final String TAG_SUCCESS = "success";
-		private static final String TAG_MESSAGE = "message";
-		private static final String TAG_ARRAY = "posts";
+		// retrieveRmMem doinbackground & postexecute
+		// Progress Dialog
+		private ProgressDialog pDialog;
 
-		private static final String TAG_TITLE = "title";
-		private static final String TAG_CATEGORY = "category";
-		// private static final String TAG_MEMBERID = "memberId";
+		// private static final String KEY_ROOMID = "room_id";
+		private static final String KEY_TITLE = "title";
+		private static final String KEY_CATEGORY = "category";
+		private static final String KEY_NOOFLEARNER = "noOfLearner";
+		private static final String KEY_LOCATION = "location";
+		// private static final String KEY_LATLNG = "latLng";
+		// private static final String KEY_CREATORID = "creatorId";
+		// private static final String KEY_DESCRIPTION = "description";
+		private static final String KEY_STATUS = "status";
+		private static final String KEY_DATEFROM = "dateFrom";
+		private static final String KEY_DATETO = "dateTo";
+		private static final String KEY_TIMEFROM = "timeFrom";
+		private static final String KEY_TIMETO = "timeTo";
+
 		private static final String TAG_MEMBERNAME = "name";
-		private static final String TAG_MEMBERTYPE = "memberType";
+
+		String totalNoOfLearner;
+		String status = "";
+		String dateFrom = "";
+		String dateTo = "";
+		String timeFrom = "";
+		String timeTo = "";
+		String title = "";
+		String location = "";
+		String category = "";
 
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
-
-			pDialog = new ProgressDialog(ViewRoom.this);
-			pDialog.setMessage("Retrieving Data...");
+			pDialog = new ProgressDialog(activity);
+			pDialog.setMessage("Retreiving data...");
 			pDialog.setIndeterminate(false);
 			pDialog.setCancelable(false);
 			pDialog.show();
-
 		}
 
 		@Override
-		protected String doInBackground(String... args) {
-			// TODO Auto-generated method stub
-			// Check for success tag
-			int success;
+		protected Boolean doInBackground(Void... arg0) {
 			String room_id = Integer.toString(PieChartBuilder.createdRoomId);
-			try {
-				// Building Parameters
-				List<NameValuePair> params = new ArrayList<NameValuePair>();
-				params.add(new BasicNameValuePair("room_id", room_id));
 
-				// getting product details by making HTTP request
-				JSONObject json = jsonParser.makeHttpRequest(ROOM_URL, "POST",
-						params);
+			RoomDbAdapter mDbHelper = new RoomDbAdapter(Map.context);
+			mDbHelper.open();
 
-				// json success tag
-				success = json.getInt(TAG_SUCCESS);
+			Cursor mCursor = mDbHelper.fetchRoomDetail(room_id);
 
-				JSONObject c = json.getJSONArray(TAG_ARRAY).getJSONObject(0);
-				title = c.getString(TAG_TITLE);
-				category = c.getString(TAG_CATEGORY);
+			if (mCursor.getCount() != 0) {
+				mCursor.moveToFirst();
 
-				int size = json.getJSONArray(TAG_ARRAY).length();
-
-				member.clear();
-
-				for (int j = 0; j < size; j++) {
-					JSONObject c1 = json.getJSONArray(TAG_ARRAY).getJSONObject(
-							j);
-
-					if (c1.getString(TAG_MEMBERTYPE).equals("Learner")) {
-						member.add(c1.getString(TAG_MEMBERNAME));
-					}
-				}
-
-				if (success == 1) {
-					return json.getString(TAG_MESSAGE);
-				} else {
-					return json.getString(TAG_MESSAGE);
-				}
-			} catch (JSONException e) {
-				e.printStackTrace();
+				title = mCursor.getString(mCursor.getColumnIndex(KEY_TITLE));
+				category = mCursor.getString(mCursor
+						.getColumnIndex(KEY_CATEGORY));
+				totalNoOfLearner = Integer.toString(mCursor.getInt(mCursor
+						.getColumnIndex(KEY_NOOFLEARNER)));
+				location = mCursor.getString(mCursor
+						.getColumnIndex(KEY_LOCATION));
+				status = mCursor.getString(mCursor.getColumnIndex(KEY_STATUS));
+				dateFrom = mCursor.getString(mCursor
+						.getColumnIndex(KEY_DATEFROM));
+				dateTo = mCursor.getString(mCursor.getColumnIndex(KEY_DATETO));
+				timeFrom = mCursor.getString(mCursor
+						.getColumnIndex(KEY_TIMEFROM));
+				timeTo = mCursor.getString(mCursor.getColumnIndex(KEY_TIMETO));
 			}
+
+			Cursor mCursor1 = mDbHelper.fetchMemberDetail(room_id);
+
+			memberArray.clear();
+			
+			if (mCursor1.getCount() != 0) {
+
+				mCursor1.moveToFirst();
+				memberArray.add(mCursor1.getString(mCursor1
+						.getColumnIndex(TAG_MEMBERNAME)));
+
+				while (mCursor1.moveToNext()) {
+
+					memberArray.add(mCursor1.getString(mCursor1
+							.getColumnIndex(TAG_MEMBERNAME)));
+				}
+			}
+
+			mCursor1.close();
+			mCursor.close();
+			mDbHelper.close();
 
 			return null;
 
 		}
 
-		protected void onPostExecute(String file_url) {
+		@Override
+		protected void onPostExecute(Boolean result) {
+			super.onPostExecute(result);
+
 			tvTitle.setText(title);
+			tvLocation.setText(location);
 			tvCategory.setText(category);
+			tvStatus.setText(status);
+			tvDate.setText(dateFrom + " to " + dateTo);
+			tvTime.setText(timeFrom + " to " + timeTo);
 
-			ArrayAdapter<String> adapter = new ArrayAdapter<String>(
-					ViewRoom.this, android.R.layout.simple_list_item_1,
-					android.R.id.text1, member);
+			ListAdapter adapter = new ListAdapter(activity,
+					generateDataE(memberArray, totalNoOfLearner));
+			memberList.setAdapter(null);
+			memberList.setAdapter(adapter);
 
-			learnerlist = (ListView) findViewById(R.id.learnerList);
-			learnerlist.setAdapter(adapter);
 			pDialog.dismiss();
 		}
+	}
+
+	private ArrayList<Model> generateDataE(ArrayList<String> array,
+			String totalNoOfLearner) {
+
+		ArrayList<Model> models = new ArrayList<Model>();
+		models.add(new Model("Learner: " + memberArray.size()
+				+ "/" + totalNoOfLearner));
+		for (int i = 0; i < array.size(); i++) {
+			models.add(new Model(R.drawable.user, array.get(i).toString(), null));
+		}
+
+		return models;
 	}
 }

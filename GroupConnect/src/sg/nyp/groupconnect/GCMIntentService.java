@@ -12,6 +12,8 @@ import sg.nyp.groupconnect.R.drawable;
 import sg.nyp.groupconnect.R.string;
 import sg.nyp.groupconnect.notification.AppServices;
 import sg.nyp.groupconnect.notification.PushMainActivity;
+import sg.nyp.groupconnect.room.RoomDetails;
+import sg.nyp.groupconnect.room.RoomMap;
 
 import com.google.android.gcm.GCMBaseIntentService;
 
@@ -94,14 +96,17 @@ public class GCMIntentService extends GCMBaseIntentService {
     NotificationManager notificationManager = (NotificationManager)
         context.getSystemService(Context.NOTIFICATION_SERVICE);
     
-    Intent notificationIntent = new Intent(context, PushMainActivity.class);
+    Intent notificationIntent = new Intent(context, RoomDetails.class);
+    notificationIntent.putExtra("title", RoomDetails.tvTitle.toString());
+    notificationIntent.putExtra("location", RoomDetails.tvCategory.toString());
+    notificationIntent.putExtra("category", RoomDetails.tvLocation.toString());
     // set intent so it does not start a new activity
     notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
     PendingIntent intent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
 
     Notification notification = new NotificationCompat.Builder(context)
     	.setContentText(message)
-    	.setContentTitle(context.getString(R.string.app_name))
+    	.setContentTitle(RoomDetails.nTitle)//context.getString(R.string.app_name))
     	.setSmallIcon(icon)
     	.setWhen(when)
     	.setContentIntent(intent)

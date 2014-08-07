@@ -15,7 +15,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import sg.nyp.groupconnect.EditRoom;
+import sg.nyp.groupconnect.EditRoom1;
 import sg.nyp.groupconnect.Map;
 import sg.nyp.groupconnect.R;
 import sg.nyp.groupconnect.ViewRoom;
@@ -79,6 +79,8 @@ public class PieChartBuilder extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.chart);
 
+		setTitle("View Statistics");
+		
 		context = this;
 
 		SharedPreferences sp = PreferenceManager
@@ -452,7 +454,7 @@ public class PieChartBuilder extends Activity {
 						String strName = arrayAdapter.getItem(which);
 						if (which == 0) {
 							Intent i = new Intent(PieChartBuilder.this,
-									EditRoom.class);
+									EditRoom1.class);
 							startActivityForResult(i, 1);
 						} else {
 							for (int i = 0; i < roomNames.size(); i++) {
@@ -839,8 +841,8 @@ public class PieChartBuilder extends Activity {
 			protected String doInBackground(String... args) {
 				int success;
 				String post_roomId = Integer
-						.toString(PieChartBuilder.createdRoomId);
-				String post_member = members.get(PieChartBuilder.count);
+						.toString(createdRoomId);
+				String post_member = members.get(count);
 
 				try {
 					// Building Parameters
@@ -866,7 +868,7 @@ public class PieChartBuilder extends Activity {
 								PieChartBuilder.this);
 						mDbHelper.open();
 
-						mDbHelper.createRoomMembers(PieChartBuilder.createdRoomId, Integer.parseInt(members.get(PieChartBuilder.count)), "Learner");
+						mDbHelper.createRoomMembers(createdRoomId, Integer.parseInt(members.get(count)), "Learner");
 
 						mDbHelper.close();
 						

@@ -9,12 +9,18 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal" >
  
-        <Button
+       <!--<Button
             android:id="@+id/btnFind"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Find"
-            android:layout_alignParentRight="true" />
+            android:layout_alignParentRight="true" /> --> 
+        <ImageView
+            android:id="@+id/btnFind"
+            android:layout_width="37dp"
+            android:layout_height="37dp"
+            android:src="@drawable/search" 
+            android:layout_alignParentRight="true"/>
 
        	<AutoCompleteTextView
             android:id="@+id/autoComplete"

@@ -35,6 +35,8 @@ public class BarChartBuilder extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.chart);
 
+		setTitle("View Statistics");
+		
 		extras = getIntent().getExtras();
 		if (extras != null) {
 			name = extras.getString("Name");

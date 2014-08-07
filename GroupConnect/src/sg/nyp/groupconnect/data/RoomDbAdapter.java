@@ -95,6 +95,12 @@ public class RoomDbAdapter {
 				null);
 	}
 
+	public Cursor fetchRoomDetail(String roomid) {
+		String MY_QUERY = "SELECT * FROM Room WHERE room_id=?;";
+
+		return mDb.rawQuery(MY_QUERY, new String[] { roomid });
+	}
+	
 	public Cursor fetchCreatedRoom(String creatorId, String category) {
 		String MY_QUERY = "SELECT * FROM Room WHERE creatorId=? AND status = 'Not Started' AND category=?;";
 
@@ -104,6 +110,14 @@ public class RoomDbAdapter {
 	public Cursor fetchRoom(String room_id) {
 		String MY_QUERY = "SELECT * FROM Room INNER JOIN RoomMembers ON Room.room_id = RoomMembers.room_id "
 				+ "INNER JOIN member ON RoomMembers.memberId = member.id WHERE Room.room_id=?;";
+
+		return mDb.rawQuery(MY_QUERY, new String[] { room_id });
+	}
+	
+	
+	public Cursor fetchMemberDetail(String room_id) {
+		String MY_QUERY = "SELECT * FROM Room INNER JOIN RoomMembers ON Room.room_id = RoomMembers.room_id "
+				+ "INNER JOIN member ON RoomMembers.memberId = member.id WHERE Room.room_id=? AND type='Learner';";
 
 		return mDb.rawQuery(MY_QUERY, new String[] { room_id });
 	}

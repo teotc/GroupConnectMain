@@ -59,6 +59,9 @@ public class Map extends FragmentActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
+
+		setTitle("View Statistics");
+		
 		setUpMapIfNeeded();
 
 		// Managed by Geraldine
@@ -244,22 +247,12 @@ public class Map extends FragmentActivity {
 	}
 	
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.map, menu);
-		return true;
-	}
-
-	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle action bar actions click
 		switch (item.getItemId()) {
         case android.R.id.home:
             Map.this.finish();
             return true;
-        case R.id.viewGroup:
-        	Intent intent = new Intent(Map.this, VoteLocation.class);
-			startActivity(intent);
-			return true;
         default:
             return super.onOptionsItemSelected(item);
 		}
