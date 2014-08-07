@@ -235,9 +235,7 @@ public class Login extends Activity implements OnClickListener {
 		// automatically handle clicks on the Home/Up button, so long
 		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
-		if (id == R.id.action_settings) {
-			return true;
-		} else if (id == R.id.action_magiclogin_tc) {
+		if (id == R.id.action_magiclogin_tc) {
 			etUser.setText("tc");
 			etPass.setText("tc");
 			new AttemptLogin().execute();

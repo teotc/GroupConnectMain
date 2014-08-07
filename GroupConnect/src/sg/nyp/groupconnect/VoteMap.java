@@ -64,6 +64,8 @@ public class VoteMap extends FragmentActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.vote_map);
 
+		setTitle("Vote Location");
+		
 		SharedPreferences sp = PreferenceManager
 				.getDefaultSharedPreferences(VoteMap.this);
 		currentMemberId = sp.getString("id", null);
@@ -166,8 +168,7 @@ public class VoteMap extends FragmentActivity {
 			mMap.addMarker(new MarkerOptions()
 					.position(myLocation)
 					.title(home)
-					.icon(BitmapDescriptorFactory
-							.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));
+					.icon(BitmapDescriptorFactory.fromResource(R.drawable.home_mapicon)));
 
 			CircleOptions circleOptions = new CircleOptions()
 					.center(myLocation)
@@ -249,7 +250,7 @@ public class VoteMap extends FragmentActivity {
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
-			pDialog = new ProgressDialog(Map.context);
+			pDialog = new ProgressDialog(VoteMap.this);
 			pDialog.setMessage("Setting up...");
 			pDialog.setIndeterminate(false);
 			pDialog.setCancelable(true);
@@ -420,7 +421,7 @@ public class VoteMap extends FragmentActivity {
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
-			pDialog = new ProgressDialog(Map.context);
+			pDialog = new ProgressDialog(VoteMap.this);
 			pDialog.setMessage("Voting...");
 			pDialog.setIndeterminate(false);
 			pDialog.setCancelable(true);

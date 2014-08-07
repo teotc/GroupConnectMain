@@ -1,139 +1,128 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical"
-    android:layout_margin="5dp" >
-    
+    android:padding="5dp"
+     >
 
-        
-       <!--  <Button
-        android:id="@+id/btnSuggest"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Suggest Members with Same Interest" /> -->
-
-    
-     <TextView
+   	<TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:layout_marginLeft="2dp"
-        android:text="Max no. of Learner" />
-
-     <EditText
-         android:id="@+id/etNoOfLearner"
-         android:layout_width="wrap_content"
-         android:layout_height="wrap_content"
-         android:ems="10"
-         android:inputType="number"  >
-
-         
-     </EditText>
-     
-     <LinearLayout
+        android:text="Date*"
+        android:textSize="17dp" />
+   	
+   	<LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content" 
-        android:orientation="horizontal">
-	     	
-	     	<TextView
-	        android:id="@+id/tvLocation"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:layout_marginTop="10dp"
-        	android:layout_marginLeft="2dp"
-	        android:text="Location" />
-	    
-	    	<EditText
-	            android:id="@+id/etLocation"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:hint="Enter Location"
-	   		/>
-	    	
-	    	<Button
-		        android:id="@+id/btnMap"
-		        android:layout_width="wrap_content"
-		        android:layout_height="wrap_content"
-		        android:text="Choose Location" />
-     </LinearLayout>
-
-    <!--  <RelativeLayout
-         android:layout_width="fill_parent"
-         android:layout_height="wrap_content" >
-        
-         <Button
-            android:id="@+id/btnSubmit"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="30dp"
-            android:text="Submit" />
-         
-         <Button
-            android:id="@+id/btnClear"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_marginRight="30dp"
-            android:text="Clear" />
-         
-         <Button
-            android:id="@+id/btnCancel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_below="@+id/btnSubmit"
-            android:text="Cancel" />
-         
-     </RelativeLayout>-->
-     
-     <TextView
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:text="Suggestion of Members with Same Interest" />
-
-     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" 
-        android:orientation="horizontal">
-         
-	     <TextView
-		        android:layout_width="wrap_content"
-		        android:layout_height="wrap_content"
-		        android:text="Within:" 
-		        android:layout_marginRight="2dp"/>
+        android:orientation="horizontal"
+        android:layout_marginTop="8dp">
 	     
-	     <Spinner
-	         android:id="@+id/spRadius"
-	         android:layout_width="130dp"
-	         android:layout_height="30dp" />
-     </LinearLayout>
+   	    <TextView
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        
+	        android:text="From: "
+	        android:textSize="17dp" 
+	        android:layout_weight="0.1"/>
+   	    
+	     <Button
+               android:id="@+id/btnDateFrom"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:text=""
+               android:layout_weight="0.9"
+               android:background="@drawable/button_grey_white"/>
 
-     <ListView
-         android:id="@+id/lv_suggestGroup"
-         android:layout_width="match_parent"
-         android:layout_height="wrap_content" >
-     </ListView>
-     
-     <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:gravity="bottom"
-        android:orientation="horizontal" >
 
-        <Button
-            android:id="@+id/btnBack"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.5"
-            android:text="Back" />
+	</LinearLayout>
+	
+	<LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" 
+        android:orientation="horizontal"
+        android:layout_marginTop="8dp">
+	     
+   	    <TextView
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_marginLeft="2dp"
+	        android:text="To: "
+	        android:textSize="17dp" 
+	        android:layout_weight="0.2"/>
 
-        <Button
-            android:id="@+id/btnSubmit"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.5"
-            android:text="Submit" />
-    </LinearLayout>
+           <Button
+               android:id="@+id/btnDateTo"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:text=""
+               android:layout_weight="0.8"
+               android:background="@drawable/button_grey_white"/>
+
+	</LinearLayout>
+	
+	
+	<TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="2dp"
+        android:text="Time*"
+        android:textSize="17dp" />
+   	
+   	<LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" 
+        android:orientation="horizontal"
+        android:layout_marginTop="8dp">
+	     
+   	    <TextView
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        
+	        android:text="From: "
+	        android:textSize="17dp" 
+	        android:layout_weight="0.1"/>
+   	    
+	     <Button
+               android:id="@+id/btnTimeFrom"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:text=""
+               android:layout_weight="0.9"
+               android:background="@drawable/button_grey_white"/>
+
+
+	</LinearLayout>
+	
+	<LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" 
+        android:orientation="horizontal"
+        android:layout_marginTop="8dp">
+	     
+   	    <TextView
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_marginLeft="2dp"
+	        android:text="To: "
+	        android:textSize="17dp" 
+	        android:layout_weight="0.2"/>
+
+           <Button
+               android:id="@+id/btnTimeTo"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:layout_marginLeft="3dp"
+               android:text="" 
+               android:layout_weight="0.8"
+               android:background="@drawable/button_grey_white"/>
+
+	</LinearLayout>
+
 
 </LinearLayout>
+
 

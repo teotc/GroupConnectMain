@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" 
+    android:padding="10dip">
+
+    <RadioGroup
+        android:id="@+id/rg_existNew"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_margin="10dp" >
+
+        <RadioButton
+            android:id="@+id/rbtn_exist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="Exist" />
+
+        <RadioButton
+            android:id="@+id/rbtn_new"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="New" />
+
+    </RadioGroup>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        
+        android:background="@android:color/darker_gray" />
+    
+    <TextView
+        android:id="@+id/tvCategory"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Choose one existing category below" 
+        android:layout_margin="10dp" />
+    
+    
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_margin="10dp" >
+        
+        <!-- For Exist -->
+        <ExpandableListView
+                android:id="@+id/lvExpExist"
+                android:layout_height="fill_parent"
+                android:layout_width="fill_parent"/>
+        
+        <!-- For New -->
+	    <EditText
+	        android:id="@+id/etCategoryDialog"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:ems="10"
+	        android:hint="Enter New Category Name" 
+	        android:visibility="gone">
+	
+	    </EditText>
+	
+	    <Spinner
+	        android:id="@+id/spCategoryType"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content" 
+	        android:visibility="gone"/>
+	    
+	    <Button
+            android:id="@+id/btnConfirm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Confirm"
+            android:visibility="gone" 
+            android:background="@drawable/button_okay_white"/>
+        
+    </LinearLayout>
+
+    
+    
+</LinearLayout>

@@ -9,36 +9,43 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import sg.nyp.groupconnect.R;
-import sg.nyp.groupconnect.R.id;
-import sg.nyp.groupconnect.R.layout;
-import sg.nyp.groupconnect.R.menu;
 import sg.nyp.groupconnect.utilities.JSONParser;
-
+import sg.nyp.groupconnect.R;
 
 import android.app.Activity;
+import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
+import android.app.DialogFragment;
+import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+import android.os.Build;
+import android.preference.PreferenceManager;
 
 public class ManageRoom extends Activity {
 	
 	EditText etTitle, etCategory, etLocation;
 	Button btnUpdate, btnDelete;
-	String roomId, title, category, location;
+	String roomId = null;
+	String title = null;
+	String category = null; 
+	String location = null;
 
 	//For Updating
 	 // Progress Dialog
@@ -109,26 +116,6 @@ public class ManageRoom extends Activity {
 		
 		
 
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.manage_room, menu);
-		return true;
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle action bar item clicks here. The action bar will
-		// automatically handle clicks on the Home/Up button, so long
-		// as you specify a parent activity in AndroidManifest.xml.
-		int id = item.getItemId();
-		if (id == R.id.action_settings) {
-			return true;
-		}
-		return super.onOptionsItemSelected(item);
 	}
 	
 	//For delete purpose. Warning Message

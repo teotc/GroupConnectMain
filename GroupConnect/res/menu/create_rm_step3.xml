@@ -3,10 +3,10 @@
     tools:context="sg.nyp.groupconnect.CreateRm" >
 
     <item
-        android:id="@+id/next"
+        android:id="@+id/submit"
         android:orderInCategory="200"
         android:showAsAction="always"
-        android:title="NEXT"/>
+        android:title="SUBMIT"/>
     
     <item
         android:id="@+id/back"

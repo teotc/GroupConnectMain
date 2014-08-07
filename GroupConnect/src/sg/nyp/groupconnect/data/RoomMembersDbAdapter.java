@@ -8,6 +8,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 public class RoomMembersDbAdapter {
 
@@ -51,7 +52,7 @@ public class RoomMembersDbAdapter {
 		cv.put(KEY_ROOMID, room_id);
 		cv.put(KEY_MEMBERID, memberId);
 		cv.put(KEY_MEMBERTYPE, memberType);
-
+		
 		mDb.insert(DATABASE_TABLE, null, cv);
 	}
 

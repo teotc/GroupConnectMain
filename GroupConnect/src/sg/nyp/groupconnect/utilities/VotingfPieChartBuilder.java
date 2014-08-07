@@ -15,7 +15,6 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import sg.nyp.groupconnect.Map;
 import sg.nyp.groupconnect.R;
 import sg.nyp.groupconnect.data.RoomDbAdapter;
 import sg.nyp.groupconnect.data.VoteLocationDbAdapter;
@@ -28,7 +27,6 @@ import android.database.Cursor;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
@@ -67,7 +65,9 @@ public class VotingfPieChartBuilder extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.voting_chart);
-
+		
+		setTitle("View Vote Result");
+		
 		extras = getIntent().getExtras();
 		if (extras != null) {
 			currentRoomId = extras.getString("CURRENT_ROOM_ID");
@@ -194,7 +194,7 @@ public class VotingfPieChartBuilder extends Activity {
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
-			pDialog = new ProgressDialog(Map.context);
+			pDialog = new ProgressDialog(VotingfPieChartBuilder.this);
 			pDialog.setMessage("Retreiving data...");
 			pDialog.setIndeterminate(false);
 			pDialog.setCancelable(false);
@@ -409,7 +409,7 @@ public class VotingfPieChartBuilder extends Activity {
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
-			pDialog = new ProgressDialog(Map.context);
+			pDialog = new ProgressDialog(VotingfPieChartBuilder.this);
 			pDialog.setMessage("Finalizing...");
 			pDialog.setIndeterminate(false);
 			pDialog.setCancelable(false);

@@ -3,9 +3,42 @@
     tools:context="sg.nyp.groupconnect.RoomDetails" >
 
     <item
-        android:id="@+id/action_settings"
-        android:orderInCategory="100"
-        android:showAsAction="never"
-        android:title="@string/action_settings"/>
+        android:id="@+id/menu"
+        android:orderInCategory="300"
+        android:showAsAction="always"
+        android:icon="@drawable/menu">
+        <menu>
+            <item
+		        android:id="@+id/join"
+		        android:title="Join"
+		        android:showAsAction="never"
+		        android:icon="@drawable/join" />
+	        
+	        <item
+		        android:id="@+id/vote"
+		        android:title="Vote"
+		        android:showAsAction="never"
+		        android:icon="@drawable/vote" />
+	        
+	        <item
+		        android:id="@+id/viewVoteResult"
+		        android:title="View Vote Result"
+		        android:showAsAction="never"
+		        android:icon="@drawable/result" />
+            
+            
+        </menu>
+    </item>
+    
+    <item
+        android:id="@+id/edit"
+        android:orderInCategory="200"
+        android:showAsAction="always"
+        android:icon="@drawable/edit"/>
 
+    <item
+        android:id="@+id/delete"
+        android:orderInCategory="100"
+        android:showAsAction="always"
+        android:icon="@drawable/delete"/>
 </menu>

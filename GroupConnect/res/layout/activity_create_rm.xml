@@ -1,158 +1,164 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scrollView1"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:orientation="vertical"
-    android:layout_margin="5dp" >
-    
-    
-   <!-- <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Icon" />
-    
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" 
-        android:orientation="horizontal"
-        android:layout_margin="3dp">
-           
-	        <ImageView
-	            android:id="@+id/imgView"
-	            android:layout_width="80dp"
-	            android:layout_height="80dp"
-	            android:background="@drawable/border_for_imageview" >
-			</ImageView>
+    android:layout_height="fill_parent" >
 
-    	
-    	<Button
-        android:id="@+id/btnLoadIcon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="0"
-        android:text="Upload Picture"
-        android:layout_gravity="center"></Button>
-        
-    </LinearLayout>-->
-    
-    
-    <TextView
-        android:id="@+id/tvTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_marginLeft="2dp"
-        android:text="Title of the Room" />
-    
-    <EditText
-            android:id="@+id/etTitle"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:hint="Enter Title">
-            <requestFocus />
-    </EditText>
-    
-    <TextView
-        android:id="@+id/tvCategory"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_marginLeft="2dp"
-        android:text="Category of the subject" />
+	<LinearLayout
+	    android:layout_width="fill_parent"
+	    android:layout_height="fill_parent"
+	    android:orientation="vertical"
+	    android:padding="5dp"
+	     >
 
+	    <TextView
+	        android:id="@+id/tvTitle"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_marginTop="10dp"
+	        android:layout_marginLeft="2dp"
+	        android:text="Title of the Room*" 
+	        android:textSize="17dp"/>
+	    
+	    <EditText
+	            android:id="@+id/etTitle"
+	            android:layout_width="fill_parent"
+	            android:layout_height="wrap_content"
+	            android:hint="Enter Title"
+	            android:text="jas">
+	    </EditText>
+	    
+	    
+	    <TextView
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_marginTop="10dp"
+	        android:layout_marginLeft="2dp"
+	        android:text="Category of the subject*"
+	        android:textSize="17dp" />
+	
+	
+	   	<LinearLayout
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content" 
+	        android:orientation="vertical">
+	            
+	        
+	        <TextView
+		        android:id="@+id/tvCategoryChosen"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:layout_marginTop="10dp"
+	        	android:layout_marginLeft="2dp"
+		        android:text="None" />
+	
+	        
+	    </LinearLayout>
+	    
+	    <TextView
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_marginTop="10dp"
+	        android:layout_marginLeft="2dp"
+	        android:text="Category Type*"
+	        android:textSize="17dp" />
+	
+	
+	   	<LinearLayout
+	        android:layout_width="fill_parent"
+	        android:layout_height="wrap_content" 
+	        android:orientation="vertical">
+	        
+	        <TextView
+		        android:id="@+id/tvCategoryTypeChosen"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:layout_marginTop="10dp"
+	        	android:layout_marginLeft="2dp"
+		        android:text="None" />
+	
+	        
+	    </LinearLayout>
+	    
+	    
+	    <Button
+	     android:id="@+id/btnCategoryDialog"
+	     android:layout_width="wrap_content"
+	     android:layout_height="match_parent"
+	     android:text="Select"
+	     android:layout_gravity="right"
+	     android:textColor="#FFFFFF"
+	     android:background="@drawable/button_okay_white"/>
+	    
+	    
+	    <View
+	        android:layout_width="match_parent"
+	        android:layout_height="1dp"
+	        android:layout_marginTop="2dp"
+	        android:background="@android:color/darker_gray" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" 
-        android:orientation="horizontal">
-            
-        <EditText
-            android:id="@+id/etCategory"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:hint="Enter Category"
-    	/>
-        
-        
-    </LinearLayout>
-    
-    <TextView
-        android:id="@+id/tvDesc"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_marginLeft="2dp"
-        android:text="Description" />
+	  <!--   <ListView
+	        android:id="@+id/lvCategory"
+	        android:layout_width="fill_parent"
+	        android:layout_height="fill_parent"
+	         >
+	    </ListView>--> 
+	    
+	    <TextView
+	        android:id="@+id/tvDesc"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_marginTop="10dp"
+	        android:layout_marginLeft="2dp"
+	        android:text="Description*" 
+	        android:textSize="17dp"/>
+	
+	
+	    <LinearLayout
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content" 
+	        android:orientation="horizontal">
+	            
+	        <EditText
+	            android:id="@+id/etDesc"
+	            android:layout_width="fill_parent"
+	            android:layout_height="wrap_content"
+	            android:text="Ddasd"
+	            android:hint="Enter Description"
+	    	/>
+	        
+	        
+	    </LinearLayout>
+	    
+	    
+	    <TextView
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_marginTop="10dp"
+	        android:layout_marginLeft="2dp"
+	        android:text="Max no. of Learner*"
+	        android:textSize="17dp" />
+	
+	   	<LinearLayout
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content" 
+	        android:orientation="horizontal"
+	        android:layout_marginTop="8dp">
+	        
+		     <!--<EditText
+		         android:id="@+id/etNoOfLearner"
+		         android:layout_width="fill_parent"
+		         android:layout_height="wrap_content"
+		         android:inputType="number"  /> -->
 
+		     <Spinner
+		         android:id="@+id/spMaxLearner"
+		         android:layout_width="wrap_content"
+		         android:layout_height="wrap_content"
+		         android:layout_weight="1" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" 
-        android:orientation="horizontal">
-            
-        <EditText
-            android:id="@+id/etDesc"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            
-            android:hint="Enter Description"
-    	/>
-        
-        
-    </LinearLayout>
-    
-    
+		</LinearLayout>
+		
 
-  <!--     <RelativeLayout
-         android:layout_width="fill_parent"
-         android:layout_height="wrap_content" 
-         >
-        
-         <Button
-            android:id="@+id/btnNext"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="30dp"
-            android:text="Next >" />
-         
-         <Button
-            android:id="@+id/btnClear"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_marginRight="30dp"
-            android:text="Clear" />
-         
-         <Button
-            android:id="@+id/btnCancel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_below="@+id/btnSubmit"
-            android:text="Cancel" />
-         
-     </RelativeLayout>-->
-     
-     <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:gravity="bottom"
-        android:orientation="horizontal" >
-
-        <Button
-            android:id="@+id/btnCancel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.5"
-            android:text="Cancel" />
-
-        <Button
-            android:id="@+id/btnNext"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.5"
-            android:text="Next >" />
-    </LinearLayout>
-
-
-</LinearLayout>
+	</LinearLayout>
+</ScrollView>
 

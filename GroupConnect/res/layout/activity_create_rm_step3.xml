@@ -1,0 +1,91 @@
+<LinearLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:padding ="5dp" >
+
+    
+    <TextView
+        android:id="@+id/tvLocation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+       	android:layout_marginLeft="2dp"
+        android:text="Location*"
+        android:textSize="17dp"  />
+    
+     <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" 
+        android:orientation="vertical">
+    	
+    	<AutoCompleteTextView
+            android:id="@+id/autoComplete"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="Select location wanted in the map OR Enter Location here" />
+
+     </LinearLayout>
+
+
+     <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+     		android:layout_marginLeft="2dp"
+        android:text="Suggestion of Members with Same Interest"
+        android:textSize="17dp"  />
+
+     <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" 
+        android:orientation="horizontal">
+         
+	     <TextView
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:text="Within:" 
+		        android:layout_marginLeft="2dp"
+		        android:layout_marginRight="2dp"/>
+	     
+	     <Spinner
+	         android:id="@+id/spRadius"
+	         android:layout_width="80dp"
+	         android:layout_height="30dp" />
+	     
+	     <TextView
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:text="Center:" 
+		        android:layout_marginLeft="2dp"
+		        android:layout_marginRight="2dp"/>
+	     
+	     <Spinner
+	         android:id="@+id/spCenter"
+	         android:layout_width="160dp"
+	         android:layout_height="30dp" />
+     </LinearLayout>
+
+     <!--<ListView
+         android:id="@+id/lv_suggestGroup"
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content" >
+     </ListView> -->
+     
+     <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="340dip"
+        android:layout_margin="10dp">
+	     
+	     <fragment 
+	   		  android:id="@+id/map"
+	   		  android:layout_width="match_parent"
+	   		  android:layout_height="match_parent"
+	   		  class="com.google.android.gms.maps.MapFragment"/>
+     
+     </LinearLayout>
+     
+
+</LinearLayout>
+
