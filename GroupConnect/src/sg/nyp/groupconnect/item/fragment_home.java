@@ -56,7 +56,7 @@ public class fragment_home extends Fragment {
 
 		sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
 		homeLocTextAddr = sp.getString("home", "Error in retrieving location");
-		Log.i("Geocode", "Home:" + homeLocTextAddr);
+		Log.d("Geocode", "Home:" + homeLocTextAddr);
 		homeLoc.setText(homeLocTextAddr);
 
 		mDbHelper = new GrpRoomDbAdapter(getActivity());
@@ -103,7 +103,7 @@ public class fragment_home extends Fragment {
 	@Override
 	public void onPause() {
 		super.onPause();
-		// getActivity().unregisterReceiver(dataDone);
+		getActivity().unregisterReceiver(dataDone);
 	}
 
 	@Override

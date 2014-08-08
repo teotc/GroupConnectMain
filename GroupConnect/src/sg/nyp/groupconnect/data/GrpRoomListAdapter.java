@@ -1,7 +1,7 @@
 package sg.nyp.groupconnect.data;
 
 import sg.nyp.groupconnect.R;
-import sg.nyp.groupconnect.entity.GrpRoomListing;
+import sg.nyp.groupconnect.entity.GrpRoomList;
 
 import java.util.ArrayList;
 
@@ -11,10 +11,10 @@ import android.widget.*;
 
 public class GrpRoomListAdapter extends BaseAdapter {
 
-	private ArrayList<GrpRoomListing> _data;
+	private ArrayList<GrpRoomList> _data;
 	Context _c;
 
-	public GrpRoomListAdapter(ArrayList<GrpRoomListing> data, Context c) {
+	public GrpRoomListAdapter(ArrayList<GrpRoomList> data, Context c) {
 		_data = data;
 		_c = c;
 	}
@@ -49,7 +49,7 @@ public class GrpRoomListAdapter extends BaseAdapter {
 		TextView lmCategory = (TextView) v.findViewById(R.id.lmCategory);
 		TextView lmLocation = (TextView) v.findViewById(R.id.lmLocation);
 
-		GrpRoomListing msg = _data.get(position);
+		GrpRoomList msg = _data.get(position);
 		
 		lmTitle.setText(msg.getTitle());
 		lmCategory.setText("Subject: " + msg.getCategory());

@@ -5,9 +5,11 @@ import java.util.ArrayList;
 import sg.nyp.groupconnect.entity.Room;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 public class RoomDbAdapter {
 
@@ -16,12 +18,12 @@ public class RoomDbAdapter {
 	private static final String DATABASE_TABLE = "Room";
 	private static final int DATABASE_VERSION = 2;
 
-	private static final String KEY_ROOMID = "room_id";
-	private static final String KEY_TITLE = "title";
-	private static final String KEY_CATEGORY = "category";
-	private static final String KEY_NOOFLEARNER = "noOfLearner";
-	private static final String KEY_LOCATION = "location";
-	private static final String KEY_LATLNG = "latLng";
+	public static final String KEY_ROOMID = "room_id";
+	public static final String KEY_TITLE = "title";
+	public static final String KEY_CATEGORY = "category";
+	public static final String KEY_NOOFLEARNER = "noOfLearner";
+	public static final String KEY_LOCATION = "location";
+	public static final String KEY_LATLNG = "latLng";
 	private static final String KEY_CREATORID = "creatorId";
 	private static final String KEY_DESCRIPTION = "description";
 	private static final String KEY_STATUS = "status";
@@ -29,6 +31,8 @@ public class RoomDbAdapter {
 	private static final String KEY_DATETO = "dateTo";
 	private static final String KEY_TIMEFROM = "timeFrom";
 	private static final String KEY_TIMETO = "timeTo";
+
+	private static final String TAG = "RoomDbAdapter";
 
 	private MainDbAdapter mDbHelper;
 	private SQLiteDatabase mDb;
@@ -105,6 +109,12 @@ public class RoomDbAdapter {
 		String MY_QUERY = "SELECT * FROM Room WHERE creatorId=? AND status = 'Not Started' AND category=?;";
 
 		return mDb.rawQuery(MY_QUERY, new String[] { creatorId, category });
+	}
+	
+	public Cursor fetchAllByCreator(String creatorId) {
+		String MY_QUERY = "SELECT * FROM Room WHERE creatorId=?;";
+
+		return mDb.rawQuery(MY_QUERY, new String[] { creatorId });
 	}
 	
 	public Cursor fetchRoom(String room_id) {
@@ -338,5 +348,13 @@ public class RoomDbAdapter {
 		}
 		mCursor.close();
 		close();
+		broadcastIntent();
+	}
+
+	public void broadcastIntent() {
+		Log.d(TAG, "Inserted Rooms");
+		Intent intent = new Intent();
+		intent.setAction("sg.nyp.groupconnect.RMDBDATADONE");
+		mCtx.sendBroadcast(intent);
 	}
 }

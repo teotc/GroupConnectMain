@@ -311,12 +311,12 @@ public class GrpRoomDbAdapter {
 					lng = r.getRoomLatLng().longitude;
 					icon = r.getIcon();
 
-					Log.d("GrpRmPullService",
-							"chkRm(): RmID: "
-									+ room_id
-									+ ", DB:"
-									+ Long.toString(getLong(mCursor,
-											KEY_ROOM_ID)));
+					// Log.d("GrpRmPullService",
+					// "chkRm(): RmID: "
+					// + room_id
+					// + ", DB:"
+					// + Long.toString(getLong(mCursor,
+					// KEY_ROOM_ID)));
 
 					boolean vExist = false;
 					boolean wasUpdated = false;

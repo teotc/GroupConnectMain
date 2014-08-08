@@ -31,6 +31,8 @@ import android.preference.PreferenceManager;
 import android.view.View.OnClickListener;
 
 public class Login extends Activity implements OnClickListener {
+	
+	private static final String TAG = "Login";
 
 	EditText etUser, etPass;
 	Button btnLogin;
@@ -151,6 +153,7 @@ public class Login extends Activity implements OnClickListener {
 					edit.putString("id", id);
 
 					edit.putString("username", username);
+					Log.d(TAG, "username: "+username);
 
 					String homeLocation = json.getString(TAG_HOME);
 					edit.putString("home", homeLocation);

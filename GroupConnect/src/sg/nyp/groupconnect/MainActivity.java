@@ -8,6 +8,7 @@ import sg.nyp.groupconnect.data.MemberDbAdapter;
 import sg.nyp.groupconnect.item.fragment_favourite;
 import sg.nyp.groupconnect.item.fragment_help;
 import sg.nyp.groupconnect.item.fragment_home;
+import sg.nyp.groupconnect.item.fragment_organisation;
 import sg.nyp.groupconnect.item.fragment_profile;
 import sg.nyp.groupconnect.item.fragment_setting;
 import sg.nyp.groupconnect.room.RoomMap;
@@ -31,10 +32,12 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
@@ -68,14 +71,19 @@ public class MainActivity extends Activity {
 	int item = 1;
 
 	public static Context ct;
+	
+	private SharedPreferences sp;
+	private String type;
 
 	@SuppressLint("NewApi")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-
+		
+		sp = PreferenceManager.getDefaultSharedPreferences(this);
+		type = sp.getString("type", "Learner");
+		
 		ct = this;
 		new MainDbAdapter(this);
 
@@ -174,7 +182,11 @@ public class MainActivity extends Activity {
 			fragment = new fragment_profile();
 			break;
 		case 1:
-			fragment = new fragment_home();
+			if(type.equalsIgnoreCase("Organization")){
+				fragment = new fragment_organisation();
+			}else{
+				fragment = new fragment_home();
+			}
 			break;
 		case 2:
 			fragment = new fragment_favourite();

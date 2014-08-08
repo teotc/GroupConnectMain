@@ -2,7 +2,7 @@ package sg.nyp.groupconnect.entity;
 
 import com.google.android.gms.maps.model.LatLng;
 
-public class GrpRoomListExt extends GrpRoomListing {
+public class GrpRoomListExt extends GrpRoomList {
 	LatLng roomLatLng;
 	double distance;
 	int icon;
