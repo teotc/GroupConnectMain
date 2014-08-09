@@ -30,6 +30,7 @@ public class ViewRoom extends Activity {
 	public static TextView tvNoOfEducator;
 	public static Button btnJoin, btnVote, btnViewResult;
 	ArrayList<String> memberArray = new ArrayList<String>();
+	ArrayList<String> genderArray = new ArrayList<String>();
 	private Bundle extras;
 	public static Activity activity;
 	
@@ -111,7 +112,7 @@ public class ViewRoom extends Activity {
 		private static final String KEY_TIMEFROM = "timeFrom";
 		private static final String KEY_TIMETO = "timeTo";
 
-		private static final String TAG_MEMBERNAME = "name";
+		private static final String TAG_MEMBERNAME = "name", TAG_GENDER = "gender";
 
 		String totalNoOfLearner;
 		String status = "";
@@ -162,17 +163,22 @@ public class ViewRoom extends Activity {
 			}
 
 			Cursor mCursor1 = mDbHelper.fetchMemberDetail(room_id);
+			
 
+			genderArray.clear();
 			memberArray.clear();
 			
 			if (mCursor1.getCount() != 0) {
 
 				mCursor1.moveToFirst();
+				genderArray.add(mCursor1.getString(mCursor1
+						.getColumnIndex(TAG_GENDER)));
 				memberArray.add(mCursor1.getString(mCursor1
 						.getColumnIndex(TAG_MEMBERNAME)));
 
 				while (mCursor1.moveToNext()) {
-
+					genderArray.add(mCursor1.getString(mCursor1
+							.getColumnIndex(TAG_GENDER)));
 					memberArray.add(mCursor1.getString(mCursor1
 							.getColumnIndex(TAG_MEMBERNAME)));
 				}
@@ -205,7 +211,7 @@ public class ViewRoom extends Activity {
 			tvTime.setText(timeFrom + " to " + timeTo);
 			
 			ListAdapter adapter = new ListAdapter(activity,
-					generateDataE(memberArray, totalNoOfLearner));
+					generateDataE(memberArray, genderArray, totalNoOfLearner));
 			memberList.setAdapter(null);
 			memberList.setAdapter(adapter);
 
@@ -213,14 +219,17 @@ public class ViewRoom extends Activity {
 		}
 	}
 
-	private ArrayList<Model> generateDataE(ArrayList<String> array,
+	private ArrayList<Model> generateDataE(ArrayList<String> array, ArrayList<String> genderArray,
 			String totalNoOfLearner) {
 
 		ArrayList<Model> models = new ArrayList<Model>();
 		models.add(new Model("Learner: " + memberArray.size()
 				+ "/" + totalNoOfLearner));
 		for (int i = 0; i < array.size(); i++) {
-			models.add(new Model(R.drawable.user, array.get(i).toString(), null));
+			if(genderArray.get(i).equals("M")){
+				models.add(new Model(R.drawable.user_male, array.get(i).toString(), null));
+			} else
+				models.add(new Model(R.drawable.user_female, array.get(i).toString(), null));
 		}
 
 		return models;
