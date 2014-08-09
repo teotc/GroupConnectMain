@@ -127,7 +127,8 @@ public class RoomDbAdapter {
 	
 	public Cursor fetchMemberDetail(String room_id) {
 		String MY_QUERY = "SELECT * FROM Room INNER JOIN RoomMembers ON Room.room_id = RoomMembers.room_id "
-				+ "INNER JOIN member ON RoomMembers.memberId = member.id WHERE Room.room_id=? AND type='Learner';";
+				+ "INNER JOIN member ON RoomMembers.memberId = member.id "
+				+ "WHERE Room.room_id=? AND type='Learner' ORDER BY name ASC;";
 
 		return mDb.rawQuery(MY_QUERY, new String[] { room_id });
 	}
