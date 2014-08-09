@@ -78,23 +78,6 @@ public class fragment_home extends Fragment {
 				intent.putExtra("category", details.get(position).getCategory());
 				intent.putExtra("location", details.get(position).getLocation());
 				startActivity(intent);
-				// details.get(position).getTitle()
-				// String s = (String) ((TextView) v.findViewById(R.id.lmTitle))
-				// .getText();
-				// Toast.makeText(Search_Group.this, s,
-				// Toast.LENGTH_LONG).show();
-
-				// intent = new Intent(Search_Group.this, RoomInfo.class);
-				// intent.putExtra(KEY_ROOM_ID,
-				// details.get(position).getRoom_id());
-				// intent.putExtra(KEY_NO_OF_LEARNER,
-				// details.get(position).getNoOfLearner());
-				// intent.putExtra(KEY_LATLNG,
-				// details.get(position).getLatlng());
-				// intent.putExtra(KEY_USERNAME,
-				// details.get(position).getUsername());
-				//
-				// startActivity(intent);
 			}
 		});
 		return rootView;
@@ -159,10 +142,11 @@ public class fragment_home extends Fragment {
 				// mRMCursor.moveToFirst();
 				Log.d("GrpRmPullService",
 						"filldata(): count: " + mCursor.getCount());
-				int count = mCursor.getCount() / 3;
-				// while (mCursor.moveToNext()) {
-				for (int i = 0; i < count; i++) {
+				// int count = mCursor.getCount() / 3;
+				// int i = 0;
 
+				while (mCursor.moveToNext()) {
+					// if (i < count) {
 					room_id = GrpRoomDbAdapter.getLong(mCursor,
 							GrpRoomDbAdapter.KEY_ROOM_ID);
 					title = GrpRoomDbAdapter.getString(mCursor,
@@ -186,8 +170,9 @@ public class fragment_home extends Fragment {
 					details.add(new GrpRoomListExt(room_id, title, category,
 							noOfLearner, location, null, new LatLng(lat, lng),
 							distance, icon));
+					// i++;
+					// }
 				}
-				// }
 				Collections.sort(details, new DistanceSorter());
 			} else {
 				Log.d(TAG, "No results in cursor");
