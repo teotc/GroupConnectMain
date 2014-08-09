@@ -1,11 +1,13 @@
 package sg.nyp.groupconnect.item;
 
 import java.util.ArrayList;
+
+import sg.nyp.groupconnect.MainActivity;
 import sg.nyp.groupconnect.R;
-import sg.nyp.groupconnect.data.GrpRoomDbAdapter;
+import sg.nyp.groupconnect.ViewRoom;
 import sg.nyp.groupconnect.data.GrpRoomListAdapter;
 import sg.nyp.groupconnect.data.RoomDbAdapter;
-import sg.nyp.groupconnect.entity.GrpRoomList;
+import sg.nyp.groupconnect.entity.Room;
 import android.annotation.SuppressLint;
 import android.app.Fragment;
 import android.content.BroadcastReceiver;
@@ -21,6 +23,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -34,25 +38,36 @@ public class fragment_organisation extends Fragment {
 	ListView frag_org_lv_groups;
 	TextView frag_org_tv_orgname;
 	private BroadcastReceiver dataDoneRecv;
-	String orgName="";
+	String orgName = "";
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		View rootView = inflater.inflate(R.layout.fragment_organisation, container,
-				false);
+		View rootView = inflater.inflate(R.layout.fragment_organisation,
+				container, false);
 		Log.d(TAG, "onCreateView 47");
 		sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
 		creatorId = sp.getString("id", "0");
 		orgName = sp.getString("username", "DadCompany");
-		Log.d(TAG, "Loading OrgName: "+orgName);
-		
+		Log.d(TAG, "Loading OrgName: " + orgName);
+
 		frag_org_lv_groups = (ListView) rootView
 				.findViewById(R.id.frag_org_lv_groups);
 		frag_org_tv_orgname = (TextView) rootView
 				.findViewById(R.id.frag_org_tv_orgname);
-		//
-		//frag_org_tv_orgname.setText(orgName);
+
+		frag_org_tv_orgname.setText(orgName);
+
+		frag_org_lv_groups.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				Intent intent = new Intent(MainActivity.ct, ViewRoom.class);
+				intent.putExtra("createdRoomId", details.get(position)
+						.getRoom_id());
+				startActivity(intent);
+			}
+		});
 
 		return rootView;
 	}
@@ -60,7 +75,7 @@ public class fragment_organisation extends Fragment {
 	@Override
 	public void onResume() {
 		super.onResume();
-		
+
 		dataDoneRecv = new BroadcastReceiver() {
 			@Override
 			public void onReceive(Context context, Intent intent) {
@@ -71,14 +86,10 @@ public class fragment_organisation extends Fragment {
 		};
 		IntentFilter intf = new IntentFilter("sg.nyp.groupconnect.RMDBDATADONE");
 		getActivity().registerReceiver(dataDoneRecv, intf);
-		
-//		if(mDbHelper.fetchAllByCreator(creatorId)!= null){
-//		//if (details != null) {
-//			Log.d(TAG, "Loading OrgRoomsLV");
+
 		new LoadOrgRooms().execute();
-//		}
 	}
-	
+
 	@Override
 	public void onPause() {
 		super.onPause();
@@ -87,19 +98,26 @@ public class fragment_organisation extends Fragment {
 
 	private RoomDbAdapter mDbHelper;
 
-	private ArrayList<GrpRoomList> details;
-	private String title = null, location = null, category = null, latlng = null;
-	private long noOfLearner = 0, room_id = 0;
+	private ArrayList<Room> details;
+	private String title = null, location = null, category = null,
+			status = null;
+	private int room_id = 0;
+	private String KEY_ROOMID = "room_id";
+	private String KEY_TITLE = "title";
+	private String KEY_CATEGORY = "category";
+	private String KEY_LOCATION = "location";
+	private String KEY_STATUS = "status";
 
 	class LoadOrgRooms extends AsyncTask<String, String, String> {
 
 		@Override
 		protected String doInBackground(String... params) {
-			
+
 			mDbHelper = new RoomDbAdapter(getActivity());
 			mDbHelper.open();
 
-			details = new ArrayList<GrpRoomList>();
+			details = new ArrayList<Room>();
+			details.clear();
 			Cursor mCursor = mDbHelper.fetchAllByCreator(creatorId);
 			if (mCursor.getCount() != 0) {
 				// mRMCursor.moveToFirst();
@@ -107,27 +125,27 @@ public class fragment_organisation extends Fragment {
 						"filldata(): count: " + mCursor.getCount());
 				while (mCursor.moveToNext()) {
 
-					room_id = GrpRoomDbAdapter.getLong(mCursor,
-							RoomDbAdapter.KEY_ROOMID);
-					title = GrpRoomDbAdapter.getString(mCursor,
-							RoomDbAdapter.KEY_TITLE);
-					category = GrpRoomDbAdapter.getString(mCursor,
-							RoomDbAdapter.KEY_CATEGORY);
-					noOfLearner = GrpRoomDbAdapter.getLong(mCursor,
-							RoomDbAdapter.KEY_NOOFLEARNER);
-					location = GrpRoomDbAdapter.getString(mCursor,
-							RoomDbAdapter.KEY_LOCATION);
+					room_id = mCursor
+							.getInt(mCursor.getColumnIndex(KEY_ROOMID));
+					title = mCursor
+							.getString(mCursor.getColumnIndex(KEY_TITLE));
+					category = mCursor.getString(mCursor
+							.getColumnIndex(KEY_CATEGORY));
+					location = mCursor.getString(mCursor
+							.getColumnIndex(KEY_LOCATION));
+					status = mCursor.getString(mCursor
+							.getColumnIndex(KEY_STATUS));
 
-					latlng = GrpRoomDbAdapter.getString(mCursor,
-							RoomDbAdapter.KEY_LATLNG);
-
-					details.add(new GrpRoomList(room_id, title, category,
-							noOfLearner, location, latlng));
+					details.add(new Room(room_id, title, category, location,
+							status));
 				}
 			} else {
 				Log.d(TAG, "No results in cursor");
 				Log.d(TAG, "Count: " + mCursor.getCount());
 			}
+
+			mCursor.close();
+			mDbHelper.close();
 
 			return null;
 		}

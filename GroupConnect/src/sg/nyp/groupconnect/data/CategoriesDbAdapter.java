@@ -69,6 +69,12 @@ public class CategoriesDbAdapter {
 				null, KEY_NAME + " ASC");
 	}
 
+	public Cursor fetchSubjectsWithTypeAll() {
+		String MY_QUERY = "Select * FROM categories s INNER JOIN categoriesType st ON s.typeId = st.id";
+
+		return mDb.rawQuery(MY_QUERY, new String[] { });
+	}
+	
 	public boolean updateCategoryType(int id, String name, int typeId) {
 		ContentValues cv = new ContentValues();
 		cv.put(KEY_ID, id);

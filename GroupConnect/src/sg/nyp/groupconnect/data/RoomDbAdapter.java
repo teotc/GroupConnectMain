@@ -18,12 +18,12 @@ public class RoomDbAdapter {
 	private static final String DATABASE_TABLE = "Room";
 	private static final int DATABASE_VERSION = 2;
 
-	public static final String KEY_ROOMID = "room_id";
-	public static final String KEY_TITLE = "title";
-	public static final String KEY_CATEGORY = "category";
-	public static final String KEY_NOOFLEARNER = "noOfLearner";
-	public static final String KEY_LOCATION = "location";
-	public static final String KEY_LATLNG = "latLng";
+	private static final String KEY_ROOMID = "room_id";
+	private static final String KEY_TITLE = "title";
+	private static final String KEY_CATEGORY = "category";
+	private static final String KEY_NOOFLEARNER = "noOfLearner";
+	private static final String KEY_LOCATION = "location";
+	private static final String KEY_LATLNG = "latLng";
 	private static final String KEY_CREATORID = "creatorId";
 	private static final String KEY_DESCRIPTION = "description";
 	private static final String KEY_STATUS = "status";
@@ -112,7 +112,7 @@ public class RoomDbAdapter {
 	}
 	
 	public Cursor fetchAllByCreator(String creatorId) {
-		String MY_QUERY = "SELECT * FROM Room WHERE creatorId=?;";
+		String MY_QUERY = "SELECT * FROM Room WHERE creatorId=? ORDER BY status DESC;";
 
 		return mDb.rawQuery(MY_QUERY, new String[] { creatorId });
 	}

@@ -4,18 +4,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
+import sg.nyp.groupconnect.data.CategoriesDbAdapter;
 import sg.nyp.groupconnect.utilities.ExpandableListAdapter;
-import sg.nyp.groupconnect.utilities.JSONParser;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -48,10 +45,7 @@ public class EditRoom1 extends Activity {
 	ListView lvCategory;
 
 	// For Retrieving all the subjects for the existing expandablelistview
-	private static final String RETRIEVE_ALL_SUB_URL = "http://www.it3197Project.3eeweb.com/grpConnect/retrieveSubjectsWithTypeAll.php";
-	private JSONArray mCategory = null;
 	private ArrayList<HashMap<String, String>> mCategoryList;
-	private static final String TAG_POSTS = "posts";
 	private static final String TAG_NAME = "name";
 	private static final String TAG_TYPENAME = "typeName";
 	String name, typeName;
@@ -94,7 +88,7 @@ public class EditRoom1 extends Activity {
 		setContentView(R.layout.activity_create_rm);
 
 		setTitle("Create Room Step 1");
-		
+
 		etTitle = (EditText) findViewById(R.id.etTitle);
 		btnCategoryDialog = (Button) findViewById(R.id.btnCategoryDialog);
 		etDesc = (EditText) findViewById(R.id.etDesc);
@@ -172,7 +166,7 @@ public class EditRoom1 extends Activity {
 		} else if (id == R.id.back) {
 			setResult(RESULT_CANCELED);
 			finish();
-			
+
 			return true;
 		}
 		return super.onOptionsItemSelected(item);
@@ -345,37 +339,24 @@ public class EditRoom1 extends Activity {
 	 * Retrieves recent post data from the server.
 	 */
 	public void updateJSONdata() {
-		Log.i("sg.nyp.groupconnect", "updateJSONdata");
-		// Instantiate the arraylist to contain all the JSON data.
-		// we are going to use a bunch of key-value pairs, referring
-		// to the json element name, and the content, for example,
-		// message it the tag, and "I'm awesome" as the content..
 
 		mCategoryList = new ArrayList<HashMap<String, String>>();
 
-		// Bro, it's time to power up the J parser
-		JSONParser jParser = new JSONParser();
-		// Feed the beast our comments url, and it spits us
-		// back a JSON object. Boo-yeah Jerome.
-		JSONObject json = jParser.getJSONFromUrl(RETRIEVE_ALL_SUB_URL);
+		CategoriesDbAdapter mDbHelper = new CategoriesDbAdapter(EditRoom1.this);
+		mDbHelper.open();
 
-		// when parsing JSON stuff, we should probably
-		// try to catch any exceptions:
-		try {
+		Cursor mCursor = mDbHelper.fetchSubjectsWithTypeAll();
 
-			// I know I said we would check if "Posts were Avail." (success==1)
-			// before we tried to read the individual posts, but I lied...
-			// mComments will tell us how many "posts" or comments are
-			// available
-			mCategory = json.getJSONArray(TAG_POSTS);
-
-			// looping through all posts according to the json object returned
-			for (int i = 0; i < mCategory.length(); i++) {
-				JSONObject c = mCategory.getJSONObject(i);
+		if (mCursor.getCount() != 0) {
+			// mRMCursor.moveToFirst();
+			Log.d("GrpRmPullService",
+					"filldata(): count: " + mCursor.getCount());
+			while (mCursor.moveToNext()) {
 
 				// gets the content of each tag
-				name = c.getString(TAG_NAME);
-				typeName = c.getString(TAG_TYPENAME);
+				name = mCursor.getString(mCursor.getColumnIndex(TAG_NAME));
+				typeName = mCursor.getString(mCursor
+						.getColumnIndex(TAG_TYPENAME));
 
 				// creating new HashMap and store all data
 				HashMap<String, String> map = new HashMap<String, String>();
@@ -385,11 +366,7 @@ public class EditRoom1 extends Activity {
 
 				// adding HashList to ArrayList
 				mCategoryList.add(map);
-
 			}
-
-		} catch (JSONException e) {
-			e.printStackTrace();
 		}
 	}
 
@@ -454,12 +431,12 @@ public class EditRoom1 extends Activity {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode == 1) {
 			if (resultCode == RESULT_OK) {
-				
+
 				Intent i = new Intent();
 				i.putExtra("RoomId", data.getExtras().getInt("RoomId"));
 				i.putExtra("RoomName", data.getExtras().getString("RoomName"));
 				setResult(RESULT_OK, i);
-				
+
 				finish();
 			}
 		}
