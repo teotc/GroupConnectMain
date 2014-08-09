@@ -38,7 +38,7 @@ public class fragment_home extends Fragment {
 	Button frag_bnnearbyrooms;
 
 	BroadcastReceiver dataDone;
-	
+
 	private Intent intent;
 
 	@Override
@@ -159,7 +159,9 @@ public class fragment_home extends Fragment {
 				// mRMCursor.moveToFirst();
 				Log.d("GrpRmPullService",
 						"filldata(): count: " + mCursor.getCount());
-				while (mCursor.moveToNext()) {
+				int count = mCursor.getCount() / 3;
+				// while (mCursor.moveToNext()) {
+				for (int i = 0; i < count; i++) {
 
 					room_id = GrpRoomDbAdapter.getLong(mCursor,
 							GrpRoomDbAdapter.KEY_ROOM_ID);
@@ -184,13 +186,13 @@ public class fragment_home extends Fragment {
 					details.add(new GrpRoomListExt(room_id, title, category,
 							noOfLearner, location, null, new LatLng(lat, lng),
 							distance, icon));
-					Collections.sort(details, new DistanceSorter());
 				}
+				// }
+				Collections.sort(details, new DistanceSorter());
 			} else {
 				Log.d(TAG, "No results in cursor");
 				Log.d(TAG, "Count: " + mCursor.getCount());
 			}
-
 			return null;
 		}
 
