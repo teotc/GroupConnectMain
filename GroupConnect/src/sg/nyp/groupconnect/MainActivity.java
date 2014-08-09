@@ -286,12 +286,9 @@ public class MainActivity extends Activity {
 			menu.findItem(R.id.refresh).setVisible(true);
 
 		} else {
-			if (type.equalsIgnoreCase("Organization")) {
-				menu.findItem(R.id.map).setVisible(false);
-			} else {
-				menu.findItem(R.id.groups).setVisible(false);
-				menu.findItem(R.id.edu).setVisible(false);
-			}
+			menu.findItem(R.id.map).setVisible(false);
+			menu.findItem(R.id.groups).setVisible(false);
+			menu.findItem(R.id.edu).setVisible(false);
 			menu.findItem(R.id.refresh).setVisible(false);
 		}
 		return super.onPrepareOptionsMenu(menu);
