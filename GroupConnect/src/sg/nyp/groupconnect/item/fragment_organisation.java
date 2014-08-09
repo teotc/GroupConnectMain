@@ -51,7 +51,7 @@ public class fragment_organisation extends Fragment {
 				.findViewById(R.id.frag_org_lv_groups);
 		frag_org_tv_orgname = (TextView) rootView
 				.findViewById(R.id.frag_org_tv_orgname);
-		
+		//
 		//frag_org_tv_orgname.setText(orgName);
 
 		return rootView;
