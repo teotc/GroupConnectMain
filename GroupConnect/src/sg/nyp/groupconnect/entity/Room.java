@@ -35,6 +35,16 @@ public class Room {
 		this.timeTo = timeTo;
 	}
 
+	public Room(int room_id, String title, String category, String location,
+			String status) {
+		super();
+		this.room_id = room_id;
+		this.title = title;
+		this.category = category;
+		this.location = location;
+		this.status = status;
+	}
+
 	public int getRoom_id() {
 		return room_id;
 	}

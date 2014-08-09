@@ -7,10 +7,7 @@ import java.util.ArrayList;
 
 import sg.nyp.groupconnect.data.RoomDbAdapter;
 import sg.nyp.groupconnect.entity.Model;
-import sg.nyp.groupconnect.room.RoomDetails;
-import sg.nyp.groupconnect.room.db.retrieveRmMem;
 import sg.nyp.groupconnect.utilities.ListAdapter;
-import sg.nyp.groupconnect.utilities.PieChartBuilder;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -33,9 +30,11 @@ public class ViewRoom extends Activity {
 	public static TextView tvNoOfEducator;
 	public static Button btnJoin, btnVote, btnViewResult;
 	ArrayList<String> memberArray = new ArrayList<String>();
-
+	private Bundle extras;
 	public static Activity activity;
-
+	
+	private int createdRoomId = 0;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -43,6 +42,11 @@ public class ViewRoom extends Activity {
 		// For usernameRetrieve.java
 		activity = ViewRoom.this;
 
+		extras = getIntent().getExtras();
+		if (extras != null) {
+			createdRoomId = extras.getInt("createdRoomId");
+		}
+		
 		ActionBar actionBar = getActionBar();
 		actionBar.setIcon(R.drawable.back);
 		actionBar.setHomeButtonEnabled(true);
@@ -131,9 +135,9 @@ public class ViewRoom extends Activity {
 
 		@Override
 		protected Boolean doInBackground(Void... arg0) {
-			String room_id = Integer.toString(PieChartBuilder.createdRoomId);
+			String room_id = Integer.toString(createdRoomId);
 
-			RoomDbAdapter mDbHelper = new RoomDbAdapter(Map.context);
+			RoomDbAdapter mDbHelper = new RoomDbAdapter(activity);
 			mDbHelper.open();
 
 			Cursor mCursor = mDbHelper.fetchRoomDetail(room_id);
@@ -190,9 +194,16 @@ public class ViewRoom extends Activity {
 			tvLocation.setText(location);
 			tvCategory.setText(category);
 			tvStatus.setText(status);
+			
+			if (status.equalsIgnoreCase("Ended")) {
+				tvStatus.setBackgroundResource(R.drawable.rectangle_red);
+			} else if (status.equalsIgnoreCase("Ongoing")) {
+				tvStatus.setBackgroundResource(R.drawable.rectangle_green);
+			}
+			
 			tvDate.setText(dateFrom + " to " + dateTo);
 			tvTime.setText(timeFrom + " to " + timeTo);
-
+			
 			ListAdapter adapter = new ListAdapter(activity,
 					generateDataE(memberArray, totalNoOfLearner));
 			memberList.setAdapter(null);

@@ -67,7 +67,7 @@ public class PieChartBuilder extends Activity {
 	private int schoolId, subjectId;
 	public static ArrayList<Integer> StudIds = new ArrayList<Integer>();
 	public static Context context;
-	public static int createdRoomId;
+	private int createdRoomId;
 	private ArrayList<String> roomNames = new ArrayList<String>();
 	private ArrayList<Integer> roomId = new ArrayList<Integer>();
 	public static int count;
@@ -765,7 +765,7 @@ public class PieChartBuilder extends Activity {
 					PieChartBuilder.this);
 			mDbHelper.open();
 
-			Cursor mCursor = mDbHelper.fetchRoom(Integer.toString(PieChartBuilder.createdRoomId));
+			Cursor mCursor = mDbHelper.fetchRoom(Integer.toString(createdRoomId));
 
 			member.clear();
 			memberId.clear();
@@ -896,8 +896,12 @@ public class PieChartBuilder extends Activity {
 							"Members added to group.", Toast.LENGTH_LONG)
 							.show();
 
-					startActivity(new Intent(PieChartBuilder.this,
-							ViewRoom.class));
+					Intent i = new Intent(
+							PieChartBuilder.this,
+							ViewRoom.class);
+					i.putExtra("createdRoomId",	createdRoomId);
+					startActivity(i);
+					
 				}
 			}
 		}

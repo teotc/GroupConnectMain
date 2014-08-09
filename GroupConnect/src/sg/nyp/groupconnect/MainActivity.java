@@ -71,7 +71,7 @@ public class MainActivity extends Activity {
 	int item = 1;
 
 	public static Context ct;
-	
+
 	private SharedPreferences sp;
 	private String type;
 
@@ -80,10 +80,10 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		
+
 		sp = PreferenceManager.getDefaultSharedPreferences(this);
 		type = sp.getString("type", "Learner");
-		
+
 		ct = this;
 		new MainDbAdapter(this);
 
@@ -104,10 +104,10 @@ public class MainActivity extends Activity {
 			new SchoolsPullSvc().execute();
 			new VoteLocationPullSvc().execute();
 		}
-		
+
 		mCursor.close();
 		mDbHelper.close();
-		
+
 		// TC: Start service to get room data from webservice
 		mServiceIntent = new Intent(this, GrpRmPullService.class);
 		startService(mServiceIntent);
@@ -182,9 +182,9 @@ public class MainActivity extends Activity {
 			fragment = new fragment_profile();
 			break;
 		case 1:
-			if(type.equalsIgnoreCase("Organization")){
+			if (type.equalsIgnoreCase("Organization")) {
 				fragment = new fragment_organisation();
-			}else{
+			} else {
 				fragment = new fragment_home();
 			}
 			break;
@@ -274,14 +274,24 @@ public class MainActivity extends Activity {
 		boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerList);
 
 		if (drawerOpen == false && item == 1) {
-			menu.findItem(R.id.groups).setVisible(true);
-			menu.findItem(R.id.map).setVisible(true);
-			menu.findItem(R.id.edu).setVisible(true);
+			if (type.equalsIgnoreCase("Organization")) {
+				menu.findItem(R.id.map).setVisible(true);
+				menu.findItem(R.id.groups).setVisible(false);
+				menu.findItem(R.id.edu).setVisible(false);
+			} else {
+				menu.findItem(R.id.groups).setVisible(true);
+				menu.findItem(R.id.edu).setVisible(true);
+				menu.findItem(R.id.map).setVisible(false);
+			}
 			menu.findItem(R.id.refresh).setVisible(true);
+
 		} else {
-			menu.findItem(R.id.groups).setVisible(false);
-			menu.findItem(R.id.map).setVisible(false);
-			menu.findItem(R.id.edu).setVisible(false);
+			if (type.equalsIgnoreCase("Organization")) {
+				menu.findItem(R.id.map).setVisible(false);
+			} else {
+				menu.findItem(R.id.groups).setVisible(false);
+				menu.findItem(R.id.edu).setVisible(false);
+			}
 			menu.findItem(R.id.refresh).setVisible(false);
 		}
 		return super.onPrepareOptionsMenu(menu);
