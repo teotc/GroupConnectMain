@@ -61,13 +61,13 @@ public class createRmMem extends AsyncTask<String, String, String> {
 		 // Check for success tag
         int success;
         String post_roomId = CreateRmStep3.createdRoomId;
-        String post_memberId = memIdList.get(CreateRmStep3.count);
-        String type = "";
-        if (CreateRmStep3.mem_id == memIdList.get(CreateRmStep3.count))
+        String post_memberId = CreateRmStep3.mem_id;//memIdList.get(CreateRmStep3.count);
+        String type = CreateRmStep3.mem_type;
+       /*if (CreateRmStep3.mem_id == memIdList.get(CreateRmStep3.count))
         	type = CreateRmStep3.mem_type;
         else
         	type = "Learner";
-        	
+        */	
         Log.i("createRmMem", String.valueOf(CreateRmStep3.count));
         Log.i("createRmMem", post_memberId + type);
         try {
@@ -109,7 +109,7 @@ public class createRmMem extends AsyncTask<String, String, String> {
 	}
 	
     protected void onPostExecute(String file_url) {
-       if (CreateRmStep3.count < memIdList.size()-1)
+      /* if (CreateRmStep3.count < memIdList.size()-1)
        {
     	   Log.i("createRmMem", String.valueOf(memIdList.size()));
     	   Log.i("createRmMem", "Repeat");
@@ -117,10 +117,12 @@ public class createRmMem extends AsyncTask<String, String, String> {
     	   new createRmMem().execute();
        }
        else
-       {
+       {*/
+    	   
+    	   
     	   CreateRmStep3.count = 0;
     	   Log.i("createRmMem", "Stop");
-       }
+       //}
        
     }
 }

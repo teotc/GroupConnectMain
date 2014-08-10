@@ -32,6 +32,7 @@
         <item>KM</item>
         <item>M</item>
     </string-array>
+    
     <string-array name="listOfNo">
         <item>1</item>
         <item>2</item>
@@ -54,8 +55,9 @@
         <item>19</item>
         <item>20</item>
     </string-array>
-
+    
     <string name="title_activity_nearbyrm">Nearby Rooms</string>
+
     <string name="activity_room_info_title">Title: </string>
     <string name="activity_room_info_category">Category: </string>
     <string name="activity_room_info_location">Location: </string>
@@ -69,12 +71,13 @@
     <string name="hello_world">Hello world!</string>
     <!-- Alfred -->
     <string name="title_activity_room_info">RoomInfo</string>
-    <string name="title_activity_create_rm">CreateRm</string>
+    <string name="title_activity_create_rm">Create Room Step 1/3</string>
     <string name="title_activity_room_details">Room Details</string>
-    <string name="title_activity_manage_room">ManageRoom</string>
-    <string name="title_activity_notification_display">NotificationDisplay</string>
-    <string name="title_activity_create_rm_step2">CreateRmStep2</string>
-    <string name="title_activity_create_rm_step3">CreateRmStep3</string>
+    <string name="title_activity_manage_room">Manage Room</string>
+    <string name="title_activity_notification_display">Notifications</string>
+    <string name="title_activity_create_rm_step2">Create Room Step 2/3</string>
+    <string name="title_activity_create_rm_step3">Create Room Step 3/3</string>
+    <string name="title_activity_room_without_location">Room Without Locations</string>
 
     <!-- Push Notification -->
     <string name="send_notification">Send myself a Notification</string>
@@ -85,16 +88,25 @@
     <string name="gcm_unregistered">Device Unregistered: (%1$s).</string>
     <string name="gcm_alert_title">Message</string>
     <string name="gcm_message">Message: (%1$s)</string>
-    
-    <!-- Profile Pref -->
-    <string name="ppf_ttl_profrel">Your Profile</string>
-    <string name="ppf_ttl_prof_interests">Your Name</string>
-    <string name="ppf_diag_ttl_name">Edit your name</string>
-    <!-- Room Pref -->
-    <string name="ppf_ttl_roomrel">Room Related Settings</string>
-    <string name="ppf_ttl_prof_interests">Interests</string>
-    <string name="ppf_diag_interest_posbtn">Update</string>
-    <string name="ppf_diag_ttl_list_interests">Select or Remove Interests</string>
 
+    <!-- Profile Pref -->
+    <string name="frag_title_prof">Profile Settings</string>
+    <string name="diag_ttl_et_interestedSub">Enter an interest category</string>
+    <string name="diag_ttl_et_interestedSub_pos">Add</string>
+    <string name="summ_et_interestedSub">Select to add an interest</string>
+    <string name="ttl_et_interestedSub">Add Interest</string>
+    <string name="ttl_prof_interests">Your Interests</string>
+    <string name="diag_ttl_list_interests">Check to remove an Interest</string>
+
+    <string-array name="entries_list_preference">
+        <item>Alpha Option 01</item>
+        <item>Beta Option 02</item>
+        <item>Charlie Option 03</item>
+    </string-array>
+    <string-array name="entryvalues_list_preference">
+        <item>Alpha</item>
+        <item>Beta</item>
+        <item>Charlie</item>
+    </string-array>
 
 </resources>

@@ -4,41 +4,41 @@
 
     <item
         android:id="@+id/menu"
+        android:icon="@drawable/menu"
         android:orderInCategory="300"
-        android:showAsAction="always"
-        android:icon="@drawable/menu">
+        android:showAsAction="always">
         <menu>
             <item
-		        android:id="@+id/join"
-		        android:title="Join"
-		        android:showAsAction="never"
-		        android:icon="@drawable/join" />
-	        
-	        <item
-		        android:id="@+id/vote"
-		        android:title="Vote"
-		        android:showAsAction="never"
-		        android:icon="@drawable/vote" />
-	        
-	        <item
-		        android:id="@+id/viewVoteResult"
-		        android:title="View Vote Result"
-		        android:showAsAction="never"
-		        android:icon="@drawable/result" />
-            
-            
+                android:id="@+id/join"
+                android:icon="@drawable/join"
+                android:showAsAction="never"
+                android:title="Join"/>
+            <item
+                android:id="@+id/vote"
+                android:icon="@drawable/vote"
+                android:showAsAction="never"
+                android:title="Vote"/>
+            <item
+                android:id="@+id/viewVoteResult"
+                android:icon="@drawable/result"
+                android:showAsAction="never"
+                android:title="View Vote Result"/>
+            <item
+                android:id="@+id/desc"
+                android:icon="@drawable/description_menuicon"
+                android:showAsAction="never"
+                android:title="Description"/>
         </menu>
     </item>
-    
     <item
         android:id="@+id/edit"
+        android:icon="@drawable/edit"
         android:orderInCategory="200"
-        android:showAsAction="always"
-        android:icon="@drawable/edit"/>
-
+        android:showAsAction="always"/>
     <item
         android:id="@+id/delete"
+        android:icon="@drawable/delete"
         android:orderInCategory="100"
-        android:showAsAction="always"
-        android:icon="@drawable/delete"/>
+        android:showAsAction="always"/>
+
 </menu>

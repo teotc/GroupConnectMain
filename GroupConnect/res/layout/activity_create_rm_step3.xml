@@ -5,37 +5,21 @@
     android:orientation="vertical"
     android:padding ="5dp" >
 
-    
-    <TextView
-        android:id="@+id/tvLocation"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-       	android:layout_marginLeft="2dp"
-        android:text="Location*"
-        android:textSize="17dp"  />
-    
-     <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content" 
-        android:orientation="vertical">
-    	
-    	<AutoCompleteTextView
-            android:id="@+id/autoComplete"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:hint="Select location wanted in the map OR Enter Location here" />
-
-     </LinearLayout>
-
-
      <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-     		android:layout_marginLeft="2dp"
+   		android:layout_marginLeft="2dp"
         android:text="Suggestion of Members with Same Interest"
         android:textSize="17dp"  />
+     
+     <CheckBox
+        android:id="@+id/chkNoLocation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checked="false"
+        android:text="Do not want to decide location yet"
+        android:textSize="17dp" />
 
      <LinearLayout
         android:layout_width="match_parent"
@@ -66,6 +50,33 @@
 	         android:layout_width="160dp"
 	         android:layout_height="30dp" />
      </LinearLayout>
+     
+     <TextView
+        android:id="@+id/tvLocation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop = "3dp"
+       	android:layout_marginLeft="2dp"
+        android:text="Location"
+        android:textSize="17dp" 
+        android:visibility="gone" />
+     
+     
+     <LinearLayout
+         android:id="@+id/llForAutoComp"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" 
+        android:orientation="vertical" 
+        android:visibility="gone">
+    	
+    	<AutoCompleteTextView
+            android:id="@+id/autoComplete"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="Select location wanted in the map OR Enter Location here" />
+
+     </LinearLayout>
 
      <!--<ListView
          android:id="@+id/lv_suggestGroup"
@@ -75,7 +86,7 @@
      
      <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="340dip"
+        android:layout_height="390dip"
         android:layout_margin="10dp">
 	     
 	     <fragment 

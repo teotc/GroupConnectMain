@@ -23,6 +23,7 @@ import org.json.JSONObject;
 
 import sg.nyp.groupconnect.custom.CustomCategoryList;
 import sg.nyp.groupconnect.custom.CustomList;
+import sg.nyp.groupconnect.custom.PopupAdapter;
 import sg.nyp.groupconnect.room.db.retrieveRmMem;
 import sg.nyp.groupconnect.utilities.ExpandableListAdapter;
 import sg.nyp.groupconnect.utilities.JSONParser;
@@ -43,10 +44,13 @@ import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.app.AlertDialog.Builder;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.location.Criteria;
 import android.location.Location;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -137,7 +141,32 @@ public class CreateRm extends Activity {
 			
 	};
     
-	 
+    String location = ""; //From RoomMap By Searching
+    
+    //For Update
+    private ProgressDialog pDialog;
+    boolean update = false;
+    String updateRoomId = "";
+    ArrayList<String> learnerInGrpList = new ArrayList<String>();
+  	private static final String RETRIEVE_ROOM_WITH_ID_URL = "http://www.it3197Project.3eeweb.com/grpConnect/roomRetrieveWithId.php";
+  	private JSONArray mRoom = null;
+  	private ArrayList<HashMap<String, String>> mRoomList;
+	private static final String TAG_ROOMID = "room_id";
+	private static final String TAG_TITLE = "title";
+	private static final String TAG_CATEGORY = "category";
+	private static final String TAG_NOOFLEARNER = "noOfLearner";
+	private static final String TAG_LOCATION = "location";
+	private static final String TAG_LATLNG = "latLng";
+	private static final String TAG_STATUS = "status";
+	private static final String TAG_DATEFROM = "dateFrom";
+	private static final String TAG_DATETO = "dateTo";
+	private static final String TAG_TIMEFROM = "timeFrom";
+	private static final String TAG_TIMETO = "timeTo";
+	private static final String TAG_DESC = "description";
+	String roomIdR, titleR, locationR, categoryR, noOfLearnerR, latLngR, usernameR, typeNameR, statusR, dateFromR, dateToR, timeFromR, timeToR, descR;
+	double latR, lngR;
+    LatLng retrievedLatLng; 
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -149,7 +178,21 @@ public class CreateRm extends Activity {
 	    spMaxLearner = (Spinner) findViewById(R.id.spMaxLearner);
 	    tvCategoryChosen = (TextView) findViewById(R.id.tvCategoryChosen);
 	    tvCategoryTypeChosen = (TextView) findViewById(R.id.tvCategoryTypeChosen);
-	   // lvCategory = (ListView) findViewById (R.id.lvCategory);
+	    
+	    Intent intent = getIntent();
+        Bundle extras = intent.getExtras();
+        if (extras != null) {
+            
+        	location = this.getIntent().getStringExtra("location");
+            
+        	update = this.getIntent().getBooleanExtra("update", false);
+        	if (update == true)
+        	{
+        		updateRoomId = this.getIntent().getStringExtra("roomId");
+        		learnerInGrpList = this.getIntent().getStringArrayListExtra("memList");
+        	}
+        	
+        }
 	    
 	    categoryNameChosen.add("None");
 	    categoryTypeChosen.add("None");
@@ -165,6 +208,18 @@ public class CreateRm extends Activity {
          
         
         prepareListData();
+        
+        if(update == true)
+        {
+        	new RetrieveRoomById().execute();
+        	ActionBar actionBar = getActionBar();
+			actionBar.setTitle("Update Room Step 1/3");
+        }
+        else
+        {
+        	ActionBar actionBar = getActionBar();
+			actionBar.setTitle("Create Room Step 1/3");
+        }
 		 
 		
 	}
@@ -221,6 +276,24 @@ public class CreateRm extends Activity {
             	myIntent.putExtra("desc", etDesc.getText().toString());
             	myIntent.putExtra("maxLearner", spMaxLearner.getSelectedItem().toString());
             	myIntent.putExtra("categoryMethod", categoryMethod);
+            	myIntent.putExtra("update", update);
+            	if (update == true)
+            	{
+            		myIntent.putExtra("roomId", roomIdR);
+            		myIntent.putExtra("dateFrom", dateFromR);
+            		myIntent.putExtra("dateTo", dateToR);
+            		myIntent.putExtra("timeFrom", timeFromR);
+            		myIntent.putExtra("timeTo", timeToR);
+            		myIntent.putExtra("location", locationR);
+            		myIntent.putExtra("lat", String.valueOf(latR));
+            		myIntent.putExtra("lng", String.valueOf(lngR));
+            		myIntent.putStringArrayListExtra("memList", learnerInGrpList);
+            		Log.i("UpdateTest", String.valueOf(latR) + String.valueOf(lngR));
+            	}
+            	else
+            	{
+            		myIntent.putExtra("location", location);
+            	}
             	startActivity(myIntent);
             	
 				
@@ -267,7 +340,6 @@ public class CreateRm extends Activity {
 			public void onCheckedChanged(RadioGroup arg0, int arg1) {
 				// TODO Auto-generated method stub
 				// get selected radio button from radioGroup
-				//rg_existNew.getCheckedRadioButtonId() == arg1
 				int selectedId = arg1;
 				// find the radiobutton by returned id
 				rBtnExistNew = (RadioButton) dialog.findViewById(selectedId);
@@ -297,7 +369,6 @@ public class CreateRm extends Activity {
         
         
         // preparing list data
-        //prepareListData();
         listAdapter = new ExpandableListAdapter(dialog.getContext(), listDataHeader, listDataChild);
         // setting list adapter
         expListView.setAdapter(listAdapter);
@@ -327,9 +398,7 @@ public class CreateRm extends Activity {
                 return false;
             }
         });
-        
-       /* final EditText editText = (EditText)dialog.findViewById(R.id.editText1);
-        Button button = (Button)dialog.findViewById(R.id.button1);    */
+
         btnConfirm.setOnClickListener(new View.OnClickListener() {
             
             @Override
@@ -409,46 +478,27 @@ public class CreateRm extends Activity {
 	 */
 	public void updateJSONdata() {
 		Log.i("sg.nyp.groupconnect", "updateJSONdata");
-		// Instantiate the arraylist to contain all the JSON data.
-		// we are going to use a bunch of key-value pairs, referring
-		// to the json element name, and the content, for example,
-		// message it the tag, and "I'm awesome" as the content..
 
 		mCategoryList = new ArrayList<HashMap<String, String>>();
 
-		// Bro, it's time to power up the J parser
 		JSONParser jParser = new JSONParser();
-		// Feed the beast our comments url, and it spits us
-		// back a JSON object. Boo-yeah Jerome.
 		JSONObject json = jParser.getJSONFromUrl(RETRIEVE_ALL_SUB_URL);
 		
-
-		// when parsing JSON stuff, we should probably
-		// try to catch any exceptions:
 		try {
 
-			// I know I said we would check if "Posts were Avail." (success==1)
-			// before we tried to read the individual posts, but I lied...
-			// mComments will tell us how many "posts" or comments are
-			// available
 			mCategory = json.getJSONArray(TAG_POSTS);
-			
 
-			// looping through all posts according to the json object returned
 			for (int i = 0; i < mCategory.length(); i++) {
 				JSONObject c = mCategory.getJSONObject(i);
 
-				// gets the content of each tag
 				name = c.getString(TAG_NAME);
 				typeName = c.getString(TAG_TYPENAME);
-		
-				// creating new HashMap and store all data 
+
 				HashMap<String, String> map = new HashMap<String, String>();
 				
 				map.put(TAG_NAME, name);
 				map.put(TAG_TYPENAME, typeName);
 
-				// adding HashList to ArrayList
 				mCategoryList.add(map); 
 
 			}
@@ -462,7 +512,6 @@ public class CreateRm extends Activity {
 	private void updateMap() 
 	{
 		Log.i("sg.nyp.groupconnect", "updateMap");
-		// To retrieve everything from Hashmap (mCommentList) and display all rooms
 		if (mCategoryList != null)
 		{
 			for (int i = 0; i<mCategoryList.size(); i++)
@@ -524,5 +573,127 @@ public class CreateRm extends Activity {
 		}
 	}
 
+	
+	//For Updates
+	public class RetrieveRoomById extends AsyncTask<Void, Void, Boolean> {
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			pDialog = new ProgressDialog(CreateRm.this);
+			pDialog.setMessage("Loading Map...");
+			pDialog.setIndeterminate(false);
+			pDialog.setCancelable(false);
+			pDialog.show();
+			Log.i("sg.nyp.groupconnect", "LoadRoom - Preexecute");
+		}
+
+		@Override
+		protected Boolean doInBackground(Void... arg0) {
+
+			mRoomList = new ArrayList<HashMap<String, String>>();
+			String post_roomId = updateRoomId;
+
+			List<NameValuePair> params = new ArrayList<NameValuePair>();
+			params.add(new BasicNameValuePair("room_id", post_roomId));
+
+			Log.d("request!", "starting");
+			JSONParser jsonParser = new JSONParser();
+			JSONObject json = jsonParser.makeHttpRequest(
+					RETRIEVE_ROOM_WITH_ID_URL, "POST", params);
+
+			try {
+
+				mRoom = json.getJSONArray(TAG_POSTS);
+
+				for (int i = 0; i < mRoom.length(); i++) {
+					JSONObject c = mRoom.getJSONObject(i);
+
+					roomIdR = c.getString(TAG_ROOMID);
+					titleR = c.getString(TAG_TITLE);
+					locationR = c.getString(TAG_LOCATION);
+					noOfLearnerR = c.getString(TAG_NOOFLEARNER);
+					categoryR = c.getString(TAG_CATEGORY);
+					latLngR = c.getString(TAG_LATLNG);
+					statusR = c.getString(TAG_STATUS);
+					dateFromR = c.getString(TAG_DATEFROM);
+					dateToR = c.getString(TAG_DATETO);
+					timeFromR = c.getString(TAG_TIMEFROM);
+					timeToR = c.getString(TAG_TIMETO);
+					typeNameR = c.getString(TAG_TYPENAME);
+					descR = c.getString(TAG_DESC);
+			
+					HashMap<String, String> map = new HashMap<String, String>();
+					
+					map.put(TAG_ROOMID, roomIdR);
+					map.put(TAG_TITLE, titleR);
+					map.put(TAG_LOCATION, locationR);
+					map.put(TAG_NOOFLEARNER, noOfLearnerR);
+					map.put(TAG_LATLNG, latLngR);
+					map.put(TAG_CATEGORY, categoryR);
+					map.put(TAG_STATUS, statusR);
+					map.put(TAG_DATEFROM, dateFromR);
+					map.put(TAG_DATETO, dateToR);
+					map.put(TAG_TIMEFROM, timeFromR);
+					map.put(TAG_TIMETO, timeToR);
+					map.put(TAG_TYPENAME, typeNameR);
+					map.put(TAG_DESC, descR);
+
+					mRoomList.add(map); 
+
+				}
+
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+			return null;
+
+		}
+
+		@Override
+		protected void onPostExecute(Boolean result) {
+			Log.i("sg.nyp.groupconnect", "LoadRoom - onPostExecute");
+			super.onPostExecute(result);
+			pDialog.dismiss();
+			if (mRoomList != null)
+			{
+				for (int i = 0; i<mRoomList.size(); i++)
+				{
+					roomIdR = mRoomList.get(i).get(TAG_ROOMID);
+					titleR = mRoomList.get(i).get(TAG_TITLE);
+					etTitle.setText(titleR);
+					
+					locationR = mRoomList.get(i).get(TAG_LOCATION);
+					
+					noOfLearnerR = mRoomList.get(i).get(TAG_NOOFLEARNER);
+					spMaxLearner.setSelection(Integer.parseInt(noOfLearnerR)-1);
+					
+					
+					categoryR = mRoomList.get(i).get(TAG_CATEGORY);
+					typeNameR = mRoomList.get(i).get(TAG_TYPENAME);
+					tvCategoryChosen.setText(categoryR);
+					tvCategoryTypeChosen.setText(typeNameR);
+					
+					dateFromR = mRoomList.get(i).get(TAG_DATEFROM);
+					dateToR = mRoomList.get(i).get(TAG_DATETO);
+					timeFromR = mRoomList.get(i).get(TAG_TIMEFROM);
+					timeToR = mRoomList.get(i).get(TAG_TIMETO);
+					
+					descR = mRoomList.get(i).get(TAG_DESC);
+					etDesc.setText(descR);
+					
+					String latLng = mRoomList.get(i).get(TAG_LATLNG);
+					if (!latLng.equals("") && !latLng.equals("undefined") && !latLng.equals(null))
+					{
+						//Spliting the lat Lng 
+						String[] parts = latLng.split(",");
+						latR = Double.parseDouble(parts[0]); 
+						lngR = Double.parseDouble(parts[1]);
+
+					}
+				}
+			}
+		}
+	}
  
 }

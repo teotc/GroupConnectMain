@@ -21,19 +21,17 @@
         android:layout_marginTop="8dp">
 	     
    	    <TextView
-	        android:layout_width="wrap_content"
+	        android:layout_width="50dp"
 	        android:layout_height="wrap_content"
-	        
+	        android:layout_marginLeft="2dp"
 	        android:text="From: "
-	        android:textSize="17dp" 
-	        android:layout_weight="0.1"/>
+	        android:textSize="17dp" />
    	    
 	     <Button
                android:id="@+id/btnDateFrom"
-               android:layout_width="wrap_content"
+               android:layout_width="fill_parent"
                android:layout_height="wrap_content"
                android:text=""
-               android:layout_weight="0.9"
                android:background="@drawable/button_grey_white"/>
 
 
@@ -46,19 +44,17 @@
         android:layout_marginTop="8dp">
 	     
    	    <TextView
-	        android:layout_width="wrap_content"
+	        android:layout_width="50dp"
 	        android:layout_height="wrap_content"
 	        android:layout_marginLeft="2dp"
 	        android:text="To: "
-	        android:textSize="17dp" 
-	        android:layout_weight="0.2"/>
+	        android:textSize="17dp" />
 
            <Button
                android:id="@+id/btnDateTo"
-               android:layout_width="wrap_content"
+               android:layout_width="fill_parent"
                android:layout_height="wrap_content"
                android:text=""
-               android:layout_weight="0.8"
                android:background="@drawable/button_grey_white"/>
 
 	</LinearLayout>
@@ -79,21 +75,18 @@
         android:layout_marginTop="8dp">
 	     
    	    <TextView
-	        android:layout_width="wrap_content"
+	        android:layout_width="50dp"
 	        android:layout_height="wrap_content"
-	        
+	        android:layout_marginLeft="2dp"
 	        android:text="From: "
-	        android:textSize="17dp" 
-	        android:layout_weight="0.1"/>
+	        android:textSize="17dp"/>
    	    
 	     <Button
                android:id="@+id/btnTimeFrom"
-               android:layout_width="wrap_content"
+               android:layout_width="fill_parent"
                android:layout_height="wrap_content"
                android:text=""
-               android:layout_weight="0.9"
                android:background="@drawable/button_grey_white"/>
-
 
 	</LinearLayout>
 	
@@ -104,20 +97,17 @@
         android:layout_marginTop="8dp">
 	     
    	    <TextView
-	        android:layout_width="wrap_content"
+	        android:layout_width="50dp"
 	        android:layout_height="wrap_content"
 	        android:layout_marginLeft="2dp"
 	        android:text="To: "
-	        android:textSize="17dp" 
-	        android:layout_weight="0.2"/>
+	        android:textSize="17dp"/>
 
            <Button
                android:id="@+id/btnTimeTo"
-               android:layout_width="wrap_content"
+               android:layout_width="fill_parent"
                android:layout_height="wrap_content"
-               android:layout_marginLeft="3dp"
                android:text="" 
-               android:layout_weight="0.8"
                android:background="@drawable/button_grey_white"/>
 
 	</LinearLayout>

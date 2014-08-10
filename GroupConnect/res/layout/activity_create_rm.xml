@@ -86,7 +86,6 @@
 	     android:layout_height="match_parent"
 	     android:text="Select"
 	     android:layout_gravity="right"
-	     android:textColor="#FFFFFF"
 	     android:background="@drawable/button_okay_white"/>
 	    
 	    
@@ -143,12 +142,6 @@
 	        android:layout_height="wrap_content" 
 	        android:orientation="horizontal"
 	        android:layout_marginTop="8dp">
-	        
-		     <!--<EditText
-		         android:id="@+id/etNoOfLearner"
-		         android:layout_width="fill_parent"
-		         android:layout_height="wrap_content"
-		         android:inputType="number"  /> -->
 
 		     <Spinner
 		         android:id="@+id/spMaxLearner"

@@ -21,21 +21,23 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class NotificationCustomList extends ArrayAdapter<String> {
+public class RoomWithoutLocationCustomList extends ArrayAdapter<String> {
 	
 	private final Activity context;
 	private final ArrayList<String> title;
 	private final ArrayList<String> message;
 	//private final Integer[] imageId;
 	private final ArrayList<Integer> imageId;
+	private final ArrayList<String> status;
 	
-	public NotificationCustomList(Activity context, ArrayList<String> title, ArrayList<String> message, ArrayList<Integer> imageId)
+	public RoomWithoutLocationCustomList(Activity context, ArrayList<String> title, ArrayList<String> message, ArrayList<Integer> imageId, ArrayList<String> status)
 	{
 		super(context, R.layout.notification_custom_list, title);
 		this.context = context;
 		this.title = title;
 		this.message = message;
 		this.imageId = imageId;
+		this.status = status;
 	}
 
 	@Override
@@ -43,15 +45,16 @@ public class NotificationCustomList extends ArrayAdapter<String> {
 		// TODO Auto-generated method stub
 		//Set up the inflater...
 		LayoutInflater inflater = context.getLayoutInflater();
-		View rowView = inflater.inflate(R.layout.notification_custom_list, null, true);
+		View rowView = inflater.inflate(R.layout.roomwithoutlocation_custom_list, null, true);
 		
 		//Reference the widgets...
 		TextView txtTitle = (TextView) rowView.findViewById(R.id.title);
+		TextView txtStatus = (TextView) rowView.findViewById(R.id.status);
 		TextView txtMessage = (TextView) rowView.findViewById(R.id.message);
 		ImageView imageView = (ImageView) rowView.findViewById(R.id.img);
-		LinearLayout llForList = (LinearLayout) rowView.findViewById(R.id.llForList);
 		
 		txtTitle.setText(title.get(position));
+		txtStatus.setText(status.get(position));
 		txtMessage.setText(message.get(position));
 		imageView.setImageResource(imageId.get(position));
 		

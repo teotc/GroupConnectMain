@@ -21,23 +21,26 @@
          android:id="@+id/item_title"
          android:layout_width="wrap_content"
          android:layout_height="wrap_content"
-         android:layout_marginTop="8dp"
+         android:layout_marginTop="12dp"
          android:layout_toRightOf="@+id/item_icon"
-         android:layout_alignBaseline="@+id/item_counter"
+         android:layout_alignBaseline="@+id/item_creator"
          android:textSize="18dp" />
  
         <!-- counter -->
-       <!-- <TextView
-            android:id="@+id/item_counter"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+
+        <TextView
+            android:id="@+id/item_creator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:layout_marginRight="8dp"
-            android:layout_marginTop="8dp"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="16dp"
+            android:padding="3dp"
             android:background="@drawable/rectangle"
-            android:gravity="center"
+            android:gravity="center_horizontal"
+            android:text="Creator"
             android:textColor="#FFFFFF"
             android:textSize="12sp"
-            android:textStyle="bold" /> -->
+            android:textStyle="bold" />
  
 </RelativeLayout>
