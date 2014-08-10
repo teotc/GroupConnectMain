@@ -75,6 +75,8 @@ public class MainActivity extends Activity {
 	private SharedPreferences sp;
 	private String type;
 
+	public static final String GCLINK = "http://www.it3197Project.3eeweb.com/grpConnect/";
+
 	@SuppressLint("NewApi")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    <PreferenceCategory android:title="@string/frag_title_prof" >
+    <PreferenceCategory android:title="@string/ppf_ttl_profrel" >
+        <EditTextPreference
+            android:dialogTitle="@string/ppf_diag_ttl_name"
+            android:key="ppf_pref_profname"
+            android:title="@string/ppf_ttl_prof_interests" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/ppf_ttl_roomrel" >
         <MultiSelectListPreference
-            android:dialogTitle="@string/diag_ttl_list_interests"
+            android:dialogTitle="@string/ppf_diag_ttl_list_interests"
             android:key="mslp_listSub"
-            android:positiveButtonText="@string/diag_ttl_et_interestedSub_pos"
-            android:title="@string/ttl_prof_interests" />
+            android:positiveButtonText="@string/ppf_diag_interest_posbtn"
+            android:title="@string/ppf_ttl_prof_interests" />
     </PreferenceCategory>
 
 </PreferenceScreen>

@@ -3,11 +3,17 @@ package sg.nyp.groupconnect.item;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import sg.nyp.groupconnect.MainActivity;
 import sg.nyp.groupconnect.R;
 import sg.nyp.groupconnect.data.CategoriesDbAdapter;
-import sg.nyp.groupconnect.data.GrpRoomDbAdapter;
 import sg.nyp.groupconnect.utilities.JSONParser;
 import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
@@ -22,6 +28,7 @@ import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.widget.Toast;
 
 @SuppressLint("NewApi")
 public class fragment_profile extends PreferenceFragment implements
@@ -31,6 +38,7 @@ public class fragment_profile extends PreferenceFragment implements
 	MultiSelectListPreference mslpInterests;
 	EditTextPreference et_interestedSub;
 	CategoriesDbAdapter mDbHelper;
+	private static final String defMsg = "Tap to choose interests";
 
 	private static final String TAG = "fragment_profile";
 
@@ -42,18 +50,37 @@ public class fragment_profile extends PreferenceFragment implements
 
 		SharedPreferences sp = PreferenceManager
 				.getDefaultSharedPreferences(getActivity());
-		interestedSub = sp.getString("interestedSub", "No categories");
+		interestedSub = sp.getString("interestedSub",
+				"No interests");
 		Log.d(TAG, "IntrsSub: " + interestedSub);
 
 		mDbHelper = new CategoriesDbAdapter(getActivity());
 		mDbHelper.open();
 
+		
+	}
+	
+	@Override
+	public void onResume() {
+		super.onResume();
 		new LoadCategories().execute();
 	}
 
 	@Override
+	public void onPause() {
+		super.onPause();
+		Log.d(TAG, "onPause Fired");
+		if(!userCategList.isEmpty()){
+			if(!userCategList.equals(userCategListCom)){
+				Log.d(TAG, "Firing MemInterestUpdate");
+				new MemInterestUpdate();
+			}
+		}
+	}
+
+	@Override
 	public void onSharedPreferenceChanged(SharedPreferences sp, String key) {
-		Log.d("GC", "onSharedPreferenceChanged Fired");
+		Log.d(TAG, "onSharedPreferenceChanged Fired");
 		Preference pref = findPreference(key);
 		// if (pref instanceof EditTextPreference) {
 		// EditTextPreference etp = (EditTextPreference) pref;
@@ -72,10 +99,13 @@ public class fragment_profile extends PreferenceFragment implements
 
 	private ArrayList<String> mFullCategList;
 	private ArrayList<String> userCategList;
+	private ArrayList<String> userCategListCom;
 	private String userInterestedCategStr;
+	
+	private boolean noInterest;
 
 	class LoadCategories extends AsyncTask<String, String, String> {
-
+		
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
@@ -102,24 +132,29 @@ public class fragment_profile extends PreferenceFragment implements
 				}
 
 				userInterestedCategStr = "";
-				userCategList = new ArrayList<String>();
+				userCategListCom = userCategList = new ArrayList<String>();
+				
+				if(!interestedSub.equalsIgnoreCase("No interests")){
+					String[] parts = interestedSub.split(",");
+					if (parts.length != 0) {
+						for (int z = 0; z < parts.length; z++) {
+							String sub = parts[z];
 
-				String[] parts = interestedSub.split(",");
-				if (parts.length != 0) {
-					for (int z = 0; z < parts.length; z++) {
-						String sub = parts[z];
+							userCategList.add(sub);
 
-						userCategList.add(sub);
+							if (z % 2 == 1) {
+								userInterestedCategStr += sub + " ";
+							} else {
+								userInterestedCategStr += sub + ", ";
+							}
 
-						if (z % 2 == 1) {
-							userInterestedCategStr += sub + " ";
-						} else {
-							userInterestedCategStr += sub + ", ";
 						}
-
+						userCategListCom = userCategList;
 					}
+				}else{
+					noInterest = true;
+					userInterestedCategStr = defMsg;
 				}
-
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -135,17 +170,17 @@ public class fragment_profile extends PreferenceFragment implements
 	}
 
 	private void interestSetUp() {
-
-		for (String s : userCategList) {
-			Log.d(TAG, "intCatArr:" + s);
+		
+		Set<String> ins = null;
+		
+		if(!noInterest){
+			ins = new HashSet<String>(userCategList);
+			// Sets default ticked values i.e. a
+			// subset of the full list
+			mslpInterests.setValues(ins);
 		}
+		//mslpInterests.setPersistent(false);
 
-		Set<String> ins = new HashSet<String>(userCategList);
-
-		mslpInterests.setPersistent(false);
-		// Sets default ticked values i.e. a
-		// subset of the full list
-		mslpInterests.setValues(ins);
 		// Sets the full list to select from
 		mslpInterests.setEntries(mFullCategList
 				.toArray(new CharSequence[mFullCategList.size()]));
@@ -159,30 +194,36 @@ public class fragment_profile extends PreferenceFragment implements
 					@Override
 					public boolean onPreferenceChange(Preference pref,
 							Object newValue) {
-						// TODO Auto-generated method stub
 						Log.d("GC - prefchange", newValue.toString());
 						Log.d("GC - interestedSub", interestedSub);
-						interestedSub = newValue.toString().replace("[", "").replace("]", "");
+						interestedSub = newValue.toString().replace("[", "")
+								.replace("]", "");
 						Log.d("GC - interestedSub - c", interestedSub);
 						userInterestedCategStr = "";
 						userCategList.clear();
 						
-						String[] parts = interestedSub.split(",");
-						if (parts.length != 0) {
-							for (int z = 0; z < parts.length; z++) {
-								String sub = parts[z];
-								userCategList.add(sub);
-								// if (z % 2 == 1) {
-								// userInterestedCategStr += sub + " ";
-								// } else {
-								// userInterestedCategStr += sub + ", ";
-								// }
-								// Log.d("GC - prefchange catgstr:",
-								// userInterestedCategStr);
+						if(interestedSub.equalsIgnoreCase("")){
+							Log.d(TAG, "interestedSub empty");
+							
+							interestedSub = defMsg;
+						}else{
+							String[] parts = interestedSub.split(",");
+							if (parts.length != 0) {
+								for (int z = 0; z < parts.length; z++) {
+									String sub = parts[z];
+									userCategList.add(sub);
+									// if (z % 2 == 1) {
+									// userInterestedCategStr += sub + " ";
+									// } else {
+									// userInterestedCategStr += sub + ", ";
+									// }
+									// Log.d("GC - prefchange catgstr:",
+									// userInterestedCategStr);
+								}
 							}
+							Set<String> ins = new HashSet<String>(userCategList);
+							mslpInterests.setValues(ins);
 						}
-						Set<String> ins = new HashSet<String>(userCategList);
-						mslpInterests.setValues(ins);
 						mslpInterests.setSummary(interestedSub);
 
 						return true;
@@ -193,59 +234,66 @@ public class fragment_profile extends PreferenceFragment implements
 	}
 
 	JSONParser jsonParser = new JSONParser();
-	private static final String CAT_UPD_URL = "";
+	private static final String CAT_UPD_URL = MainActivity.GCLINK
+			+ "menUpdateInterest.php";
 
-	// class createRoom extends AsyncTask<String, String, String> {
-	// @Override
-	// protected String doInBackground(String... args) {
-	// int success;
-	// String pCategory = "";
-	//
-	// try {
-	// // Building Parameters
-	// List<NameValuePair> params = new ArrayList<NameValuePair>();
-	// params.add(new BasicNameValuePair("category", pCategory));
-	//
-	// Log.d("request!", "starting");
-	//
-	// // Posting user data to script
-	// JSONObject json = jsonParser.makeHttpRequest(CAT_UPD_URL,
-	// "POST", params);
-	//
-	// // full json response
-	// Log.d("Post Comment attempt", json.toString());
-	//
-	// // json success element
-	// success = json.getInt(TAG_SUCCESS);
-	// if (success == 1) {
-	// Log.d("Comment Added!", json.toString());
-	//
-	// return json.getString(TAG_MESSAGE);
-	// } else {
-	// Log.d("Comment Failure!", json.getString(TAG_MESSAGE));
-	// successAll = false;
-	// return json.getString(TAG_MESSAGE);
-	//
-	// }
-	// } catch (JSONException e) {
-	// e.printStackTrace();
-	// }
-	//
-	// return null;
-	//
-	// }
-	// }
+	private static final String TAG_SUCCESS = "success";
+	private static final String TAG_MESSAGE = "message";
 
-	// DISTPREF = sp.getInt("DISTPREF", 5000); // DISTPREF_UNIT
-	// DISTPREF_UNIT = sp.getInt("DISTPREF", 0);
+	class MemInterestUpdate extends AsyncTask<String, String, String> {
 
-	// bnSetDist.setOnClickListener(new OnClickListener() {
-	// @Override
-	// public void onClick(View v) {
-	// // show();
-	// }
-	// });
-	// new CompareRoomDistance().execute();
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+		}
+
+		@Override
+		protected String doInBackground(String... args) {
+			// Check for success tag
+			int success;
+			String interest = interestedSub;
+			Log.d(TAG, "New Update Values: "+interest);
+			Log.d(TAG, "Update URL: "+CAT_UPD_URL);
+			try {
+				// Building Parameters
+				List<NameValuePair> params = new ArrayList<NameValuePair>();
+				params.add(new BasicNameValuePair("interestedSub", interest));
+
+				Log.d(TAG, "Attempting Update");
+
+				// Posting user data to script
+				JSONObject json = jsonParser.makeHttpRequest(CAT_UPD_URL,
+						"POST", params);
+
+				// full json response
+				Log.d(TAG, json.toString());
+
+				// json success element
+				success = json.getInt(TAG_SUCCESS);
+				if (success == 1) {
+					Log.d(TAG, json.toString());
+
+					return json.getString(TAG_MESSAGE);
+				} else {
+					Log.d(TAG, json.getString(TAG_MESSAGE));
+					return json.getString(TAG_MESSAGE);
+
+				}
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+
+			return null;
+
+		}
+
+		@Override
+		protected void onPostExecute(String msg) {
+			super.onPostExecute(msg);
+			Toast.makeText(getActivity(), msg, Toast.LENGTH_SHORT).show();
+		}
+
+	}
 
 	Collection<String> union(Collection<String> coll1, Collection<String> coll2) {
 		Set<String> union = new HashSet<String>(coll1);
