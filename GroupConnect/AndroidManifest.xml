@@ -58,17 +58,19 @@
         android:theme="@style/AppTheme" >
 
         <!-- Alfred API KEY -->
-        <!-- <meta-data 
-        	android:name="com.google.android.maps.v2.API_KEY" 
-         	android:value="AIzaSyBgGLaTvaVSmfK7NdMT5rv7_6sBeKDiP40" />-->
-        <!-- Teck Chee API KEY -->
-        <meta-data
-        android:name="com.google.android.maps.v2.API_KEY"
-        android:value="AIzaSyBgCqtWSR8uC54F9oejiOQ8WwwRKln7MtQ" />
-        <!-- Geraldine API KEY -->
         <!-- <meta-data -->
         <!-- android:name="com.google.android.maps.v2.API_KEY" -->
-        <!-- android:value="AIzaSyDMBMbJCOTyWhp08XnGkDSeIF7AxB020AE" /> -->
+        <!-- android:value="AIzaSyDzsd1NAsSuDcNMJbjVFzFA2VO45djKPoA" /> -->
+
+        <!-- Teck Chee API KEY -->
+        <!-- <meta-data -->
+        <!-- android:name="com.google.android.maps.v2.API_KEY" -->
+        <!-- android:value="AIzaSyBgCqtWSR8uC54F9oejiOQ8WwwRKln7MtQ" /> -->
+
+        <!-- Geraldine API KEY -->
+         <meta-data
+     	android:name="com.google.android.maps.v2.API_KEY"
+        android:value="AIzaSyDMBMbJCOTyWhp08XnGkDSeIF7AxB020AE" />
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
@@ -147,6 +149,10 @@
         <activity
             android:name="sg.nyp.groupconnect.room.NearbyRooms"
             android:label="@string/title_activity_nearbyrm" >
+        </activity>
+        <activity
+            android:name="sg.nyp.groupconnect.room.RoomWithoutLocation"
+            android:label="@string/title_activity_room_without_location" >
         </activity>
         <!-- src/utilities/ -->
         <activity android:name="sg.nyp.groupconnect.utilities.BarChartBuilder" />
