@@ -930,14 +930,12 @@ public class CreateRmStep3 extends Activity{
 
 						if (successAll == true)
 						{
-
+							Toast.makeText(CreateRmStep3.this, "Room created successfully." , Toast.LENGTH_LONG).show();
 							//Will kill all activity and go to RoomMap Class
 							Intent intent = new Intent(getApplicationContext(), RoomMap.class);
 							intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 							startActivity(intent);
 						}
-						else
-							Toast.makeText(CreateRmStep3.this, "SuccessAll: " + successAll, Toast.LENGTH_LONG).show();
 					}
 					else //For Update
 					{
@@ -1627,10 +1625,7 @@ public class CreateRmStep3 extends Activity{
 		protected void onPostExecute(String file_url) {
 			// dismiss the dialog once product deleted
 			//pDialog.dismiss();
-			if (file_url != null){
-				Toast.makeText(CreateRmStep3.this, file_url, Toast.LENGTH_LONG).show();
-			}
-
+			
 		}
 
 	}
@@ -2030,7 +2025,7 @@ public class CreateRmStep3 extends Activity{
 		protected void onPostExecute(String file_url) {
 			// dismiss the dialog once product deleted
 			if (file_url != null){
-				Toast.makeText(CreateRmStep3.this, file_url, Toast.LENGTH_LONG).show();
+				Toast.makeText(CreateRmStep3.this, "Room Updated.", Toast.LENGTH_LONG).show();
 			}
 
 		}

@@ -510,8 +510,7 @@ public class RoomDetails extends Activity {
 	private final class CancelOnClickListener implements
 			DialogInterface.OnClickListener {
 		public void onClick(DialogInterface dialog, int which) {
-			Toast.makeText(getApplicationContext(), "Canceled",
-					Toast.LENGTH_LONG).show();
+
 		}
 	}
 

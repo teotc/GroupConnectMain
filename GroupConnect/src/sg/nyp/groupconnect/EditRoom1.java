@@ -32,7 +32,6 @@ import android.widget.RadioGroup;
 import android.widget.RadioGroup.OnCheckedChangeListener;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class EditRoom1 extends Activity {
 	// Variable
@@ -244,14 +243,7 @@ public class EditRoom1 extends Activity {
 				categoryMethod = "Exist";
 
 				dialog.dismiss();
-				Toast.makeText(
-						getApplicationContext(),
-						listDataHeader.get(groupPosition)
-								+ " : "
-								+ listDataChild.get(
-										listDataHeader.get(groupPosition)).get(
-										childPosition), Toast.LENGTH_SHORT)
-						.show();
+
 				return false;
 			}
 		});

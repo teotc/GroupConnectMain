@@ -32,7 +32,6 @@
         <item>KM</item>
         <item>M</item>
     </string-array>
-    
     <string-array name="listOfNo">
         <item>1</item>
         <item>2</item>
@@ -55,9 +54,8 @@
         <item>19</item>
         <item>20</item>
     </string-array>
-    
-    <string name="title_activity_nearbyrm">Nearby Rooms</string>
 
+    <string name="title_activity_nearbyrm">Nearby Rooms</string>
     <string name="activity_room_info_title">Title: </string>
     <string name="activity_room_info_category">Category: </string>
     <string name="activity_room_info_location">Location: </string>
@@ -90,13 +88,14 @@
     <string name="gcm_message">Message: (%1$s)</string>
 
     <!-- Profile Pref -->
-    <string name="frag_title_prof">Profile Settings</string>
-    <string name="diag_ttl_et_interestedSub">Enter an interest category</string>
-    <string name="diag_ttl_et_interestedSub_pos">Add</string>
-    <string name="summ_et_interestedSub">Select to add an interest</string>
-    <string name="ttl_et_interestedSub">Add Interest</string>
-    <string name="ttl_prof_interests">Your Interests</string>
-    <string name="diag_ttl_list_interests">Check to remove an Interest</string>
+    <string name="ppf_ttl_profrel">Your Profile</string>
+    <string name="ppf_diag_ttl_name">Edit your name</string>
+    
+    <!-- Room Pref -->
+    <string name="ppf_ttl_roomrel">Room Related Settings</string>
+    <string name="ppf_ttl_prof_interests">Interests</string>
+    <string name="ppf_diag_interest_posbtn">Update</string>
+    <string name="ppf_diag_ttl_list_interests">Select or Remove Interests</string>
 
     <string-array name="entries_list_preference">
         <item>Alpha Option 01</item>

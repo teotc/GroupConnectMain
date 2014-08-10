@@ -615,8 +615,6 @@ public class RoomMap extends FragmentActivity implements OnInfoWindowClickListen
     {
         public void onClick(DialogInterface dialog, int which) 
         {
-        	Toast.makeText(getApplicationContext(), "Cancel",
-	                  Toast.LENGTH_LONG).show();
         	if (temp != null)
         		temp.remove();
         	
