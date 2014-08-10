@@ -410,6 +410,7 @@ public class RoomDetails extends Activity {
 
 					}
 				}
+				voteMenu.setVisible(true);
 			} else if (joinMenu.getTitle().equals("Leave the Room")) {
 				showDialog(LEAVETHEROOM_ALERT);
 			}
@@ -622,9 +623,6 @@ public class RoomDetails extends Activity {
 
 		new RetrieveRoomVote().execute();
 
-		if (currentMemberId.equals(creatorMemberId))
-			stat = 1;
-
 	}
 
 	public void Vote() {
@@ -634,6 +632,10 @@ public class RoomDetails extends Activity {
 	}
 
 	public void VoteResult() {
+		
+		if (mem_id.equals(creatorId))
+			stat = 1;
+		
 		Intent intent = new Intent(RoomDetails.this,
 				VotingfPieChartBuilder.class);
 		intent.putExtra("CURRENT_ROOM_ID", createdRoomId);
@@ -991,6 +993,7 @@ public class RoomDetails extends Activity {
 		protected void onPostExecute(String file_url) {
 			// dismiss the dialog once product deleted
 			if (file_url != null) {
+				
 			}
 
 		}

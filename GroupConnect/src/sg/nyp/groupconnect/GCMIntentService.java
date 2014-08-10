@@ -201,7 +201,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 			.setSmallIcon(icon)
 			.setWhen(when)
 			//.setContentIntent(resultPendingIntent)
-			.addAction(R.drawable.tohome_notificationicon, "Yes", yesPIntent)
+			.addAction(R.drawable.ok, "Yes", yesPIntent)
 			.addAction(R.drawable.toroom_notificationicon, "To Room", toRoomPendingIntent)
 			.build();
 

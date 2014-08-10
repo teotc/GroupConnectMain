@@ -395,13 +395,6 @@ public class CreateRmStep3 extends Activity{
 			actionBar.setTitle("Update Room Step 3/3");
 		}
 
-		if (!autoCompView.getText().equals(""))
-		{
-			spCenter.setSelection(2); //Selected Location
-			tvLocation.setVisibility(View.VISIBLE);
-			autoCompView.setVisibility(View.VISIBLE);
-		}
-
 		mMap.setOnInfoWindowClickListener(new OnInfoWindowClickListener(){
 
 			@Override
