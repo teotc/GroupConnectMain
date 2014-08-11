@@ -40,6 +40,7 @@ public class fragment_home extends Fragment {
 	BroadcastReceiver dataDone;
 
 	private Intent intent;
+	private String interestedSub;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -98,6 +99,7 @@ public class fragment_home extends Fragment {
 			public void onReceive(Context context, Intent intent) {
 				Log.d(TAG, "Intent Received");
 				Log.d(TAG, "Executing CompareRoomDistance");
+				details.clear();
 				new CompareRoomDistance().execute();
 			}
 		};
@@ -106,6 +108,7 @@ public class fragment_home extends Fragment {
 
 		if (details != null) {
 			Log.d(TAG, "Loading LV");
+			details.clear();
 			new CompareRoomDistance().execute();
 		}
 	}
@@ -117,6 +120,9 @@ public class fragment_home extends Fragment {
 	}
 
 	public void updateLV() {
+		for (GrpRoomListExt x : details) {
+			Log.d(TAG, "details- title: "+x.getRoom_id());
+		}
 		eduSuggestLV.setAdapter(new GrpRoomListExtAdapter(details,
 				getActivity()));
 	}
@@ -131,53 +137,42 @@ public class fragment_home extends Fragment {
 
 	private ArrayList<GrpRoomListExt> details;
 
+	private ArrayList<String> userCategList;
+
 	class CompareRoomDistance extends AsyncTask<String, String, String> {
 
 		@Override
 		protected String doInBackground(String... params) {
 
-			details = new ArrayList<GrpRoomListExt>();
-			Cursor mCursor = mDbHelper.fetchRoomsWDistance(DISTPREF);
-			if (mCursor.getCount() != 0) {
-				// mRMCursor.moveToFirst();
-				Log.d("GrpRmPullService",
-						"filldata(): count: " + mCursor.getCount());
-				// int count = mCursor.getCount() / 3;
-				// int i = 0;
+			Cursor mCursor = null;
+			
+			userCategList = new ArrayList<String>();
 
-				while (mCursor.moveToNext()) {
-					// if (i < count) {
-					room_id = GrpRoomDbAdapter.getLong(mCursor,
-							GrpRoomDbAdapter.KEY_ROOM_ID);
-					title = GrpRoomDbAdapter.getString(mCursor,
-							GrpRoomDbAdapter.KEY_TITLE);
-					category = GrpRoomDbAdapter.getString(mCursor,
-							GrpRoomDbAdapter.KEY_CATEGORY);
-					noOfLearner = GrpRoomDbAdapter.getLong(mCursor,
-							GrpRoomDbAdapter.KEY_NO_OF_LEARNER);
-					location = GrpRoomDbAdapter.getString(mCursor,
-							GrpRoomDbAdapter.KEY_LOCATION);
-					distance = GrpRoomDbAdapter.getLong(mCursor,
-							GrpRoomDbAdapter.KEY_DISTANCE);
+			interestedSub = sp.getString("interestedSub", "No interests");
+			Log.d(TAG, "intrsSub: " + interestedSub);
 
-					lat = GrpRoomDbAdapter.getLong(mCursor,
-							GrpRoomDbAdapter.KEY_LAT);
-					lng = GrpRoomDbAdapter.getLong(mCursor,
-							GrpRoomDbAdapter.KEY_LNG);
-					icon = GrpRoomDbAdapter.getInt(mCursor,
-							GrpRoomDbAdapter.KEY_ICON);
+			if (!interestedSub.equalsIgnoreCase("No interests")) {
+				String[] parts = interestedSub.split(",");
+				if (parts.length != 0) {
+					for (int z = 0; z < parts.length; z++) {
+						String sub = parts[z];
 
-					details.add(new GrpRoomListExt(room_id, title, category,
-							noOfLearner, location, null, new LatLng(lat, lng),
-							distance, icon));
-					// i++;
-					// }
+						userCategList.add(sub.trim());
+					}
 				}
-				Collections.sort(details, new DistanceSorter());
+				for (String interest : userCategList) {
+					Log.d(TAG, "interest: " + interest);
+					mCursor = mDbHelper.fetchRoomsWDistCat(DISTPREF,
+							interest.trim());
+					addCursorResults(mCursor);
+				}
 			} else {
-				Log.d(TAG, "No results in cursor");
-				Log.d(TAG, "Count: " + mCursor.getCount());
+				Log.d(TAG, "No Intrs Fired");
+				mCursor = mDbHelper.fetchRoomsWDistance(DISTPREF);
+				addCursorResults(mCursor);
 			}
+			Collections.sort(details, new DistanceSorter());
+
 			return null;
 		}
 
@@ -186,6 +181,50 @@ public class fragment_home extends Fragment {
 			super.onPostExecute(result);
 			updateLV();
 			Log.d(TAG + " Geocode", "Done");
+		}
+	}
+
+	private void addCursorResults(Cursor mCursor) {
+		details = new ArrayList<GrpRoomListExt>();
+		if (mCursor.getCount() != 0) {
+			// mRMCursor.moveToFirst();
+			Log.d("GrpRmPullService",
+					"filldata(): count: " + mCursor.getCount());
+			// int count = mCursor.getCount() / 3;
+			// int i = 0;
+
+			while (mCursor.moveToNext()) {
+				// if (i < count) {
+				room_id = GrpRoomDbAdapter.getLong(mCursor,
+						GrpRoomDbAdapter.KEY_ROOM_ID);
+				title = GrpRoomDbAdapter.getString(mCursor,
+						GrpRoomDbAdapter.KEY_TITLE);
+				category = GrpRoomDbAdapter.getString(mCursor,
+						GrpRoomDbAdapter.KEY_CATEGORY);
+				noOfLearner = GrpRoomDbAdapter.getLong(mCursor,
+						GrpRoomDbAdapter.KEY_NO_OF_LEARNER);
+				location = GrpRoomDbAdapter.getString(mCursor,
+						GrpRoomDbAdapter.KEY_LOCATION);
+				distance = GrpRoomDbAdapter.getLong(mCursor,
+						GrpRoomDbAdapter.KEY_DISTANCE);
+
+				lat = GrpRoomDbAdapter.getLong(mCursor,
+						GrpRoomDbAdapter.KEY_LAT);
+				lng = GrpRoomDbAdapter.getLong(mCursor,
+						GrpRoomDbAdapter.KEY_LNG);
+				icon = GrpRoomDbAdapter.getInt(mCursor,
+						GrpRoomDbAdapter.KEY_ICON);
+
+				details.add(new GrpRoomListExt(room_id, title, category,
+						noOfLearner, location, null, new LatLng(lat, lng),
+						distance, icon));
+				// i++;
+				// }
+			}
+
+		} else {
+			Log.d(TAG, "No results in cursor");
+			Log.d(TAG, "Count: " + mCursor.getCount());
 		}
 	}
 }

@@ -16,7 +16,10 @@ import sg.nyp.groupconnect.R;
 import sg.nyp.groupconnect.data.CategoriesDbAdapter;
 import sg.nyp.groupconnect.utilities.JSONParser;
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.database.Cursor;
 import android.os.AsyncTask;
@@ -36,11 +39,15 @@ public class fragment_profile extends PreferenceFragment implements
 
 	private String interestedSub;
 	MultiSelectListPreference mslpInterests;
+	private EditTextPreference etpName;
 	EditTextPreference et_interestedSub;
 	CategoriesDbAdapter mDbHelper;
 	private static final String defMsg = "Tap to choose interests";
 
 	private static final String TAG = "fragment_profile";
+
+	SharedPreferences sp;
+	private String name;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -48,33 +55,51 @@ public class fragment_profile extends PreferenceFragment implements
 		// Load the preferences from an XML resource
 		addPreferencesFromResource(R.xml.preferences);
 
-		SharedPreferences sp = PreferenceManager
-				.getDefaultSharedPreferences(getActivity());
-		interestedSub = sp.getString("interestedSub",
-				"No interests");
+		sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
+		interestedSub = sp.getString("interestedSub", "No interests");
+		name = sp.getString("name", "John Doe");
 		Log.d(TAG, "IntrsSub: " + interestedSub);
 
 		mDbHelper = new CategoriesDbAdapter(getActivity());
 		mDbHelper.open();
 
-		
-	}
-	
-	@Override
-	public void onResume() {
-		super.onResume();
-		new LoadCategories().execute();
 	}
 
 	@Override
-	public void onPause() {
-		super.onPause();
-		Log.d(TAG, "onPause Fired");
-		if(!userCategList.isEmpty()){
-			if(!userCategList.equals(userCategListCom)){
-				Log.d(TAG, "Firing MemInterestUpdate");
-				new MemInterestUpdate();
-			}
+	public void onResume() {
+		super.onResume();
+		Log.d(TAG, "onResume Fired");
+		new LoadCategories().execute();
+	}
+
+	// @Override
+	// public void onPause() {
+	// super.onPause();
+	// Log.d(TAG, "onPause Fired");
+	// if (!userCategList.isEmpty()) {
+	// if (!userCategList.equals(userCategListCom)) {
+	// Log.d(TAG, "Firing MemInterestUpdate");
+	// new MemInterestUpdate();
+	// }
+	// }
+	// }
+
+	@Override
+	public void onDestroyView() {
+		super.onDestroyView();
+		Log.d(TAG, "onDestroyView Fired");
+		if (!userCategList.isEmpty()) {
+			Log.d(TAG, "oDV userCategList !Empty");
+			// if (!userCategList.equals(userCategListCom)) {
+			// Log.d(TAG, "oDV userCategList !Empty");
+			// Log.d(TAG, "Firing MemInterestUpdate");
+			// new MemInterestUpdate().execute();
+			// }
+			// if(nonOverLap(userCategList, userCategListCom).size()>1){
+			// Log.d(TAG, "oDV userCategList !Empty");
+			// Log.d(TAG, "Firing MemInterestUpdate");
+			new MemInterestUpdate().execute();
+			// }
 		}
 	}
 
@@ -101,16 +126,18 @@ public class fragment_profile extends PreferenceFragment implements
 	private ArrayList<String> userCategList;
 	private ArrayList<String> userCategListCom;
 	private String userInterestedCategStr;
-	
+
 	private boolean noInterest;
 
 	class LoadCategories extends AsyncTask<String, String, String> {
-		
+
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
 
 			mslpInterests = (MultiSelectListPreference) findPreference("mslp_listSub");
+			etpName = (EditTextPreference) findPreference("ppf_pref_profname");
+			etpName.setText(name);
 			mslpInterests.setEnabled(false);
 		}
 
@@ -133,8 +160,8 @@ public class fragment_profile extends PreferenceFragment implements
 
 				userInterestedCategStr = "";
 				userCategListCom = userCategList = new ArrayList<String>();
-				
-				if(!interestedSub.equalsIgnoreCase("No interests")){
+
+				if (!interestedSub.equalsIgnoreCase("No interests")) {
 					String[] parts = interestedSub.split(",");
 					if (parts.length != 0) {
 						for (int z = 0; z < parts.length; z++) {
@@ -151,7 +178,7 @@ public class fragment_profile extends PreferenceFragment implements
 						}
 						userCategListCom = userCategList;
 					}
-				}else{
+				} else {
 					noInterest = true;
 					userInterestedCategStr = defMsg;
 				}
@@ -170,16 +197,16 @@ public class fragment_profile extends PreferenceFragment implements
 	}
 
 	private void interestSetUp() {
-		
+
 		Set<String> ins = null;
-		
-		if(!noInterest){
+
+		if (!noInterest) {
 			ins = new HashSet<String>(userCategList);
 			// Sets default ticked values i.e. a
 			// subset of the full list
 			mslpInterests.setValues(ins);
 		}
-		//mslpInterests.setPersistent(false);
+		// mslpInterests.setPersistent(false);
 
 		// Sets the full list to select from
 		mslpInterests.setEntries(mFullCategList
@@ -197,21 +224,21 @@ public class fragment_profile extends PreferenceFragment implements
 						Log.d("GC - prefchange", newValue.toString());
 						Log.d("GC - interestedSub", interestedSub);
 						interestedSub = newValue.toString().replace("[", "")
-								.replace("]", "");
+								.replace("]", "").replace(" ", "");
 						Log.d("GC - interestedSub - c", interestedSub);
 						userInterestedCategStr = "";
 						userCategList.clear();
-						
-						if(interestedSub.equalsIgnoreCase("")){
+
+						if (interestedSub.equalsIgnoreCase("")) {
 							Log.d(TAG, "interestedSub empty");
-							
+
 							interestedSub = defMsg;
-						}else{
+						} else {
 							String[] parts = interestedSub.split(",");
 							if (parts.length != 0) {
 								for (int z = 0; z < parts.length; z++) {
 									String sub = parts[z];
-									userCategList.add(sub);
+									userCategList.add(sub.trim());
 									// if (z % 2 == 1) {
 									// userInterestedCategStr += sub + " ";
 									// } else {
@@ -252,8 +279,8 @@ public class fragment_profile extends PreferenceFragment implements
 			// Check for success tag
 			int success;
 			String interest = interestedSub;
-			Log.d(TAG, "New Update Values: "+interest);
-			Log.d(TAG, "Update URL: "+CAT_UPD_URL);
+			Log.d(TAG, "New Update Values: " + interest);
+			Log.d(TAG, "Update URL: " + CAT_UPD_URL);
 			try {
 				// Building Parameters
 				List<NameValuePair> params = new ArrayList<NameValuePair>();
@@ -272,6 +299,14 @@ public class fragment_profile extends PreferenceFragment implements
 				success = json.getInt(TAG_SUCCESS);
 				if (success == 1) {
 					Log.d(TAG, json.toString());
+					
+					Editor edit = sp.edit();
+
+					edit.putString("interestedSub", interest);
+					edit.commit();
+					
+					interestedSub = sp.getString("interestedSub", "No interests");
+					Log.d(TAG, "New IntrsSub: " + interestedSub);
 
 					return json.getString(TAG_MESSAGE);
 				} else {
@@ -282,18 +317,26 @@ public class fragment_profile extends PreferenceFragment implements
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
-
+			
 			return null;
 
 		}
 
 		@Override
-		protected void onPostExecute(String msg) {
-			super.onPostExecute(msg);
-			Toast.makeText(getActivity(), msg, Toast.LENGTH_SHORT).show();
+		protected void onPostExecute(String result) {
+			// TODO Auto-generated method stub
+			super.onPostExecute(result);
+			//broadcastIntent();
 		}
-
 	}
+
+	// public void broadcastIntent() {
+	// Log.d(TAG, "Intent - Categ Update");
+	// Intent intent = new Intent();
+	// intent.setAction("sg.nyp.groupconnect.DATADONE");
+	// Context con = getActivity().getApplication();
+	// con.sendBroadcast(intent);
+	// }
 
 	Collection<String> union(Collection<String> coll1, Collection<String> coll2) {
 		Set<String> union = new HashSet<String>(coll1);
@@ -315,10 +358,12 @@ public class fragment_profile extends PreferenceFragment implements
 		return new ArrayList<String>(intersection);
 	}
 
+	// ArrayList<String> test;
+
 	ArrayList<String> nonOverLap(Collection<String> coll1,
 			Collection<String> coll2) {
 		Collection<String> result = union(coll1, coll2);
-		userCategList = new ArrayList<String>(result);
+		// test = new ArrayList<String>(result);
 		result.removeAll(intersect(coll1, coll2));
 
 		return new ArrayList<String>(result);

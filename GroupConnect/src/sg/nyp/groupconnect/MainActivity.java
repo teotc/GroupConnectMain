@@ -261,6 +261,8 @@ public class MainActivity extends Activity {
 			new RoomMembersPullSvc().execute();
 			new SchoolsPullSvc().execute();
 			new VoteLocationPullSvc().execute();
+			mServiceIntent = new Intent(this, GrpRmPullService.class);
+			startService(mServiceIntent);
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);

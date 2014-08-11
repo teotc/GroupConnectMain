@@ -30,7 +30,7 @@ import android.util.Log;
 import android.view.View;
 
 public class GrpRoomDbAdapter {
-	
+
 	// Public variables - used with getXX() methods below
 	public static final String KEY_ROOM_ID = "room_id";
 	public static final String KEY_TITLE = "title";
@@ -41,7 +41,7 @@ public class GrpRoomDbAdapter {
 	public static final String KEY_LNG = "lng";
 	public static final String KEY_DISTANCE = "distance";
 	public static final String KEY_ICON = "icon";
-	
+
 	// Private variables
 	private final Context mCtx;
 	private static final String DATABASE_NAME = "data";
@@ -221,6 +221,23 @@ public class GrpRoomDbAdapter {
 				KEY_CATEGORY, KEY_NO_OF_LEARNER, KEY_LOCATION, KEY_DISTANCE,
 				KEY_LAT, KEY_LNG, KEY_ICON }, KEY_DISTANCE + "<" + distance,
 				null, null, null, null, null);
+		if (mCursor != null) {
+			mCursor.moveToFirst();
+		}
+		return mCursor;
+
+	}
+
+	public Cursor fetchRoomsWDistCat(long distance, String interest)
+			throws SQLException {
+
+		Cursor mCursor =
+
+		mDb.query(true, DATABASE_TABLE, new String[] { KEY_ROOM_ID, KEY_TITLE,
+				KEY_CATEGORY, KEY_NO_OF_LEARNER, KEY_LOCATION, KEY_DISTANCE,
+				KEY_LAT, KEY_LNG, KEY_ICON }, KEY_DISTANCE + "<" + distance
+				+" AND "+ KEY_CATEGORY + " LIKE " +"'"+interest+"'", null, null, null, null,
+				null);
 		if (mCursor != null) {
 			mCursor.moveToFirst();
 		}

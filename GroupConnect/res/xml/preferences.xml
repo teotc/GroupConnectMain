@@ -5,7 +5,7 @@
         <EditTextPreference
             android:dialogTitle="@string/ppf_diag_ttl_name"
             android:key="ppf_pref_profname"
-            android:title="@string/ppf_ttl_prof_interests" />
+            android:title="@string/ppf_ttl_prof_name" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/ppf_ttl_roomrel" >
         <MultiSelectListPreference
