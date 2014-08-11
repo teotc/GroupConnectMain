@@ -121,7 +121,7 @@ public class fragment_home extends Fragment {
 
 	public void updateLV() {
 		for (GrpRoomListExt x : details) {
-			Log.d(TAG, "details- title: "+x.getRoom_id());
+			Log.d(TAG, "details- id: "+x.getRoom_id());
 		}
 		eduSuggestLV.setAdapter(new GrpRoomListExtAdapter(details,
 				getActivity()));
@@ -140,6 +140,13 @@ public class fragment_home extends Fragment {
 	private ArrayList<String> userCategList;
 
 	class CompareRoomDistance extends AsyncTask<String, String, String> {
+		
+		@Override
+		protected void onPreExecute() {
+			// TODO Auto-generated method stub
+			super.onPreExecute();
+			details = new ArrayList<GrpRoomListExt>();
+		}
 
 		@Override
 		protected String doInBackground(String... params) {
@@ -185,7 +192,7 @@ public class fragment_home extends Fragment {
 	}
 
 	private void addCursorResults(Cursor mCursor) {
-		details = new ArrayList<GrpRoomListExt>();
+		
 		if (mCursor.getCount() != 0) {
 			// mRMCursor.moveToFirst();
 			Log.d("GrpRmPullService",
@@ -214,6 +221,8 @@ public class fragment_home extends Fragment {
 						GrpRoomDbAdapter.KEY_LNG);
 				icon = GrpRoomDbAdapter.getInt(mCursor,
 						GrpRoomDbAdapter.KEY_ICON);
+				
+				Log.d(TAG, "Title: "+title);
 
 				details.add(new GrpRoomListExt(room_id, title, category,
 						noOfLearner, location, null, new LatLng(lat, lng),

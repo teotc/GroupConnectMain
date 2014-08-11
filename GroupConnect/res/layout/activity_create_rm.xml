@@ -76,6 +76,7 @@
             android:layout_height="match_parent"
             android:layout_gravity="right"
             android:background="@drawable/button_okay_white"
+            android:textColor="#FFFFFF"
             android:text="Select" />
 
         <View

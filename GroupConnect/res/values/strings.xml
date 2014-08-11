@@ -6,17 +6,13 @@
     <string-array name="titles">
         <item>Profile</item>
         <item>Home</item>
-        <item>Favourite</item>
-        <item>Setting</item>
-        <item>Help</item>
+        <item>Log Out</item>
     </string-array>
 
     <array name="icons">
         <item>@drawable/profile</item>
         <item>@drawable/home</item>
-        <item>@drawable/favorite</item>
-        <item>@drawable/setting</item>
-        <item>@drawable/help</item>
+        <item>@drawable/logout</item>
     </array>
 
     <string-array name="roles">

@@ -42,7 +42,8 @@ public class ListAdapterOrg extends ArrayAdapter<Model> {
                 ImageView imgView = (ImageView) rowView.findViewById(R.id.item_icon);
                 TextView titleView = (TextView) rowView.findViewById(R.id.item_title);
                 //TextView counterView = (TextView) rowView.findViewById(R.id.item_counter);
- 
+                TextView creatorView = (TextView) rowView.findViewById(R.id.item_creator);
+                creatorView.setVisibility(View.GONE);
                 // 4. Set the text for textView
                 imgView.setImageResource(modelsArrayList.get(position).getIcon());
                 titleView.setText(modelsArrayList.get(position).getTitle());

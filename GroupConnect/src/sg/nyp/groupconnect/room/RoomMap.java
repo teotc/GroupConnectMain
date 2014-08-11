@@ -959,7 +959,7 @@ public class RoomMap extends FragmentActivity implements OnInfoWindowClickListen
 			pDialog = new ProgressDialog(RoomMap.this);
 			pDialog.setMessage("Loading Map...");
 			pDialog.setIndeterminate(false);
-			pDialog.setCancelable(false);
+			pDialog.setCancelable(true);
 			pDialog.show();
 			Log.i("sg.nyp.groupconnect", "LoadRoom - Preexecute");
 		}

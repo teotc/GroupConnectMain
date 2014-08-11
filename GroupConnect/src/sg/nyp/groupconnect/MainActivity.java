@@ -11,6 +11,7 @@ import sg.nyp.groupconnect.item.fragment_home;
 import sg.nyp.groupconnect.item.fragment_organisation;
 import sg.nyp.groupconnect.item.fragment_profile;
 import sg.nyp.groupconnect.item.fragment_setting;
+import sg.nyp.groupconnect.room.RoomDetails;
 import sg.nyp.groupconnect.room.RoomMap;
 import sg.nyp.groupconnect.room.RoomsRetrieve;
 import sg.nyp.groupconnect.service.AvailableLocationPullSvc;
@@ -33,6 +34,7 @@ import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.database.Cursor;
@@ -191,14 +193,19 @@ public class MainActivity extends Activity {
 			}
 			break;
 		case 2:
-			fragment = new fragment_favourite();
+			//fragment = new fragment_favourite();
+			intent = new Intent(getApplicationContext(), Login.class);
+			Editor ed = sp.edit();
+			ed.clear();
+			ed.commit();
+			startActivity(intent);
 			break;
-		case 3:
-			fragment = new fragment_setting();
-			break;
-		case 4:
-			fragment = new fragment_help();
-			break;
+//		case 3:
+//			fragment = new fragment_setting();
+//			break;
+//		case 4:
+//			fragment = new fragment_help();
+//			break;
 		default:
 			break;
 		}

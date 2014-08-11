@@ -184,14 +184,14 @@ public class GCMIntentService extends GCMBaseIntentService {
 			// Adds the Intent that starts the Activity to the top of the stack
 			stackBuilder.addNextIntent(resultIntent);
 
-			PendingIntent toRoomPendingIntent = PendingIntent.getActivity(context, 0, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+			PendingIntent toRoomPendingIntent = PendingIntent.getActivity(context, 2, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
 			Intent toMainIntent = new Intent(context, RoomMap.class);
 			toMainIntent.putExtra("titleToFocus", title);
 			toMainIntent.putExtra("arrive", true);
 			toMainIntent.putExtra("memId", CreateRmStep3.chosenMemberIdList.get(CreateRmStep3.countForMemId));
 			toMainIntent.putExtra("roomId", CreateRmStep3.createdRoomId);
-			PendingIntent yesPIntent = PendingIntent.getActivity(context, 1, toMainIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+			PendingIntent yesPIntent = PendingIntent.getActivity(context, 3, toMainIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 				
 
 			// mId allows you to update the notification later on.

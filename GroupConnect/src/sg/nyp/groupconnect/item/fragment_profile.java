@@ -57,6 +57,7 @@ public class fragment_profile extends PreferenceFragment implements
 
 		sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
 		interestedSub = sp.getString("interestedSub", "No interests");
+		id = sp.getString("id", "0");
 		name = sp.getString("name", "John Doe");
 		Log.d(TAG, "IntrsSub: " + interestedSub);
 
@@ -84,24 +85,24 @@ public class fragment_profile extends PreferenceFragment implements
 	// }
 	// }
 
-	@Override
-	public void onDestroyView() {
-		super.onDestroyView();
-		Log.d(TAG, "onDestroyView Fired");
-		if (!userCategList.isEmpty()) {
-			Log.d(TAG, "oDV userCategList !Empty");
-			// if (!userCategList.equals(userCategListCom)) {
-			// Log.d(TAG, "oDV userCategList !Empty");
-			// Log.d(TAG, "Firing MemInterestUpdate");
-			// new MemInterestUpdate().execute();
-			// }
-			// if(nonOverLap(userCategList, userCategListCom).size()>1){
-			// Log.d(TAG, "oDV userCategList !Empty");
-			// Log.d(TAG, "Firing MemInterestUpdate");
-			new MemInterestUpdate().execute();
-			// }
-		}
-	}
+//	@Override
+//	public void onDestroyView() {
+//		super.onDestroyView();
+//		Log.d(TAG, "onDestroyView Fired");
+//		if (!userCategList.isEmpty()) {
+//			Log.d(TAG, "oDV userCategList !Empty");
+//			// if (!userCategList.equals(userCategListCom)) {
+//			// Log.d(TAG, "oDV userCategList !Empty");
+//			// Log.d(TAG, "Firing MemInterestUpdate");
+//			// new MemInterestUpdate().execute();
+//			// }
+//			// if(nonOverLap(userCategList, userCategListCom).size()>1){
+//			// Log.d(TAG, "oDV userCategList !Empty");
+//			// Log.d(TAG, "Firing MemInterestUpdate");
+//			new MemInterestUpdate().execute();
+//			// }
+//		}
+//	}
 
 	@Override
 	public void onSharedPreferenceChanged(SharedPreferences sp, String key) {
@@ -252,7 +253,7 @@ public class fragment_profile extends PreferenceFragment implements
 							mslpInterests.setValues(ins);
 						}
 						mslpInterests.setSummary(interestedSub);
-
+						new MemInterestUpdate().execute();
 						return true;
 					}
 				});
@@ -266,9 +267,11 @@ public class fragment_profile extends PreferenceFragment implements
 
 	private static final String TAG_SUCCESS = "success";
 	private static final String TAG_MESSAGE = "message";
+	
+	private String id;
 
 	class MemInterestUpdate extends AsyncTask<String, String, String> {
-
+		
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
@@ -281,10 +284,12 @@ public class fragment_profile extends PreferenceFragment implements
 			String interest = interestedSub;
 			Log.d(TAG, "New Update Values: " + interest);
 			Log.d(TAG, "Update URL: " + CAT_UPD_URL);
+			Log.d(TAG, "ID: " + id);
 			try {
 				// Building Parameters
 				List<NameValuePair> params = new ArrayList<NameValuePair>();
 				params.add(new BasicNameValuePair("interestedSub", interest));
+				params.add(new BasicNameValuePair("id", id ));
 
 				Log.d(TAG, "Attempting Update");
 

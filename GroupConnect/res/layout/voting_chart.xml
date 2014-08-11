@@ -5,27 +5,28 @@
     android:background="@android:color/black"
     android:orientation="vertical" >
 
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/headerlayout"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="15dp"
+        android:orientation="vertical"
         android:layout_marginTop="15dp" >
 
         <TextView
             android:id="@+id/Chart_Tittle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
             android:singleLine="false"
             android:textColor="#FFFFFF"
+            android:layout_gravity="center"
             android:textSize="25dp" />
 
         <Button
             android:id="@+id/btnFinal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
+            android:layout_gravity="right"
             android:layout_marginBottom="5dp"
             android:layout_marginLeft="50dp"
             android:layout_marginRight="5dp"
@@ -38,7 +39,7 @@
             android:paddingRight="15dp"
             android:text="Finalize"
             android:textColor="#FFFFFF" />
-    </RelativeLayout>
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/Chart_layout"
