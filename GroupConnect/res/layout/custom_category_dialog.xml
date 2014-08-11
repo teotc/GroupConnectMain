@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="300dp"
+    android:layout_height="300dp"
     android:orientation="vertical" 
     android:padding="10dip">
 
@@ -72,10 +72,11 @@
 	    
 	    <Button
             android:id="@+id/btnConfirm"
-            android:layout_width="wrap_content"
+            android:layout_width="100dp"
             android:layout_height="wrap_content"
             android:text="Confirm"
             android:visibility="gone" 
+            android:layout_gravity="right"
             android:background="@drawable/button_okay_white"/>
         
     </LinearLayout>

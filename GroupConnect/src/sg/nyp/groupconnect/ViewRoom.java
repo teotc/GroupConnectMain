@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 import sg.nyp.groupconnect.data.RoomDbAdapter;
 import sg.nyp.groupconnect.entity.Model;
-import sg.nyp.groupconnect.utilities.ListAdapter;
+import sg.nyp.groupconnect.utilities.ListAdapterOrg;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -16,7 +16,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -59,13 +58,13 @@ public class ViewRoom extends Activity {
 		tvDate = (TextView) findViewById(R.id.tvDate);
 		tvTime = (TextView) findViewById(R.id.tvTime);
 
-		btnJoin = (Button) findViewById(R.id.btnJoin);
-		btnVote = (Button) findViewById(R.id.vote);
-		btnViewResult = (Button) findViewById(R.id.viewResult);
-
-		btnJoin.setVisibility(View.GONE);
-		btnVote.setVisibility(View.GONE);
-		btnViewResult.setVisibility(View.GONE);
+//		btnJoin = (Button) findViewById(R.id.btnJoin);
+//		btnVote = (Button) findViewById(R.id.vote);
+//		btnViewResult = (Button) findViewById(R.id.viewResult);
+//
+//		btnJoin.setVisibility(View.GONE);
+//		btnVote.setVisibility(View.GONE);
+//		btnViewResult.setVisibility(View.GONE);
 
 		memberList = (ListView) findViewById(R.id.memberList);
 
@@ -210,7 +209,7 @@ public class ViewRoom extends Activity {
 			tvDate.setText(dateFrom + " to " + dateTo);
 			tvTime.setText(timeFrom + " to " + timeTo);
 			
-			ListAdapter adapter = new ListAdapter(activity,
+			ListAdapterOrg adapter = new ListAdapterOrg(activity,
 					generateDataE(memberArray, genderArray, totalNoOfLearner));
 			memberList.setAdapter(null);
 			memberList.setAdapter(adapter);

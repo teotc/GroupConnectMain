@@ -50,6 +50,9 @@ public class retrieveRmMem extends AsyncTask<Void, Void, Boolean> {
 	private static final String TAG_DATETO = "dateTo";
 	private static final String TAG_TIMEFROM = "timeFrom";
 	private static final String TAG_TIMETO = "timeTo";
+	private static final String TAG_LOCATION = "location";
+	private static final String TAG_CATEGORY = "category";
+	private static final String TAG_DESC = "description";
 	String createdRoomId;
 	static String totalNoOfLearner;
 	String creatorId;
@@ -69,6 +72,9 @@ public class retrieveRmMem extends AsyncTask<Void, Void, Boolean> {
 	String dateToR = "";
 	String timeFromR = "";
 	String timeToR = "";
+	String locationR = "";
+	String categoryR = "";
+	String descR = "";
 	
 	//For CreateEduMemList()
 	String memId = "";
@@ -156,6 +162,10 @@ public class retrieveRmMem extends AsyncTask<Void, Void, Boolean> {
 				timeFromR = c.getString(TAG_TIMEFROM);
 				timeToR = c.getString(TAG_TIMETO);
 				
+				locationR = c.getString(TAG_LOCATION);
+				categoryR = c.getString(TAG_CATEGORY);
+				descR = c.getString(TAG_DESC);
+				
 				// creating new HashMap and store all data 
 				HashMap<String, String> map = new HashMap<String, String>();
 
@@ -169,6 +179,9 @@ public class retrieveRmMem extends AsyncTask<Void, Void, Boolean> {
 				map.put(TAG_DATETO, dateToR);
 				map.put(TAG_TIMEFROM, timeFromR);
 				map.put(TAG_TIMETO, timeToR);
+				map.put(TAG_LOCATION, locationR);
+				map.put(TAG_CATEGORY, categoryR);
+				map.put(TAG_DESC, descR);
 				
 
 				// adding HashList to ArrayList
@@ -204,6 +217,10 @@ public class retrieveRmMem extends AsyncTask<Void, Void, Boolean> {
 			RoomDetails.tvTime.setText(
 					 mMemberList.get(0).get(TAG_TIMEFROM) + " to " +
 							 mMemberList.get(0).get(TAG_TIMETO));
+			
+			RoomDetails.tvLocation.setText(mMemberList.get(0).get(TAG_LOCATION));
+			RoomDetails.tvCategory.setText(mMemberList.get(0).get(TAG_CATEGORY));
+			RoomDetails.descForDialog = mMemberList.get(0).get(TAG_DESC);
 
 			for (int i = 0; i<mMemberList.size(); i++)
 			{
@@ -217,6 +234,18 @@ public class retrieveRmMem extends AsyncTask<Void, Void, Boolean> {
 
 				Log.i("RoomDetails", memberId);
 				Log.i("RoomDetails", memberType);
+			}
+			
+			//Only allow delete and edit for creator of the room
+			if (!creatorId.equals(RoomDetails.mem_id))
+			{
+				RoomDetails.editMenu.setVisible(false);
+				RoomDetails.deleteMenu.setVisible(false);
+			}
+			else
+			{
+				RoomDetails.editMenu.setVisible(true);
+				RoomDetails.deleteMenu.setVisible(true);
 			}
 
 			//Create the list in the activity
@@ -284,7 +313,7 @@ public class retrieveRmMem extends AsyncTask<Void, Void, Boolean> {
 			}*/
 			
 		}
-		
+		RoomDetails.listOfMemUUID.clear();
 		new usernameRetrieve().execute();
 		
 
@@ -316,13 +345,13 @@ public class retrieveRmMem extends AsyncTask<Void, Void, Boolean> {
 			
 			if (join == true)
 			{
-				RoomDetails.btnJoin.setVisibility(View.GONE);
-				rmd.joinMenu.setVisible(false);
+				//RoomDetails.btnJoin.setVisibility(View.GONE);
+				rmd.joinMenu.setTitle("Leave the Room");
 			}
 			else if (join == false)
 			{
-				RoomDetails.btnJoin.setVisibility(View.VISIBLE);
-				rmd.joinMenu.setVisible(true);
+				//RoomDetails.btnJoin.setVisibility(View.VISIBLE);
+				rmd.joinMenu.setTitle("Join");
 			}
 		}
 }

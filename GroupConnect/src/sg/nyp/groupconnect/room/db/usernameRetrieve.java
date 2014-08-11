@@ -57,6 +57,8 @@ public class usernameRetrieve extends AsyncTask<String, String, String> {
 	ArrayList<String> listOfMemUUID = new ArrayList<String>();
 	String uuidR;
 	String memNameR = "";
+	String educatorId = "";
+	ArrayList<String> learnerIdList = new ArrayList<String>();
 	
 	@Override
 	protected void onPreExecute() {
@@ -115,7 +117,11 @@ public class usernameRetrieve extends AsyncTask<String, String, String> {
 			
 			String [] content = file_url.split("/");
 			String memNameR1 = content[0];
-			String device = content[1];
+			String device;
+			if (content.length == 2)
+				device = content[1];
+			else
+				device = "";
 			
 			Log.i("RoomDetails", "UsernameRetrieve currentType: " + retrieveRmMem.tempListType.get(retrieveRmMem.currentCount));
 			Log.i("RoomDetails", file_url);
@@ -128,14 +134,14 @@ public class usernameRetrieve extends AsyncTask<String, String, String> {
 				Log.i("RoomDetails","EMemNameR From usernameRetrieve: " + memNameR1);
 				
 				
-				
+				educatorId = retrieveRmMem.tempListId.get(retrieveRmMem.currentCount);
 				//CustomList adapter = new CustomList(RoomDetails.this, educatorArray, imageId);
 				
 				//retrieveRmMem.educatorlist.setAdapter(null); //Since this will be run more than once, clear the listview everytime
 												// before setting the new data to avoid repeated list
 				//educatorlist.setAdapter(adapter);
-				
-				RoomDetails.listOfMemUUID.add(uuidR);
+				if (!memNameR1.equals(RoomDetails.mem_username))
+					RoomDetails.listOfMemUUID.add(uuidR);
 				
 			}
 			else if (retrieveRmMem.tempListType.get(retrieveRmMem.currentCount).equals("Learner"))
@@ -148,13 +154,14 @@ public class usernameRetrieve extends AsyncTask<String, String, String> {
 				
 				
 				
-				
+				learnerIdList.add(retrieveRmMem.tempListId.get(retrieveRmMem.currentCount));
 				//CustomList adapter1 = new CustomList(RoomDetails.this, memberArray, imageId);
 				
 				//learnerlist.setAdapter(null);
 				//learnerlist.setAdapter(adapter1);
 	
-				RoomDetails.listOfMemUUID.add(uuidR);
+				if (!memNameR1.equals(RoomDetails.mem_username))
+					RoomDetails.listOfMemUUID.add(uuidR);
 				//listOfMemUUID.add(uuidR);
 				//Log.i("RoomDetails", "UserRetrieveL uuidR" + uuidR);
 			}
@@ -185,9 +192,11 @@ public class usernameRetrieve extends AsyncTask<String, String, String> {
 				//RoomDetails.educatorlist.setAdapter(adapter);
 				//RoomDetails.tvNoOfEducator.setText(retrieveRmMem.educatorArray.size() + "/1");
 				
-				ListAdapter adapter3 = new ListAdapter(RoomDetails.activity, generateDataE(retrieveRmMem.educatorArray, retrieveRmMem.memberArray));
+				ListAdapter adapter3 = new ListAdapter(RoomDetails.activity, generateDataE(retrieveRmMem.educatorArray, retrieveRmMem.memberArray), educatorId, learnerIdList);
 				RoomDetails.memberList.setAdapter(null);
 				RoomDetails.memberList.setAdapter(adapter3);
+				
+				RoomDetails.learnerInGrpList = retrieveRmMem.memberArray;
 				
 				//CustomList adapter1 = new CustomList(RoomDetails.activity, retrieveRmMem.memberArray, retrieveRmMem.imageId);
 				//RoomDetails.learnerlist.setAdapter(null);
@@ -220,9 +229,12 @@ public class usernameRetrieve extends AsyncTask<String, String, String> {
         for (int i = 0; i< array.size(); i++)
         {
 	        models.add(new Model(R.drawable.user, array.get(i).toString(), null));
+
         }
         //For learner
         models.add(new Model("Learner: " + retrieveRmMem.memberArray.size() + "/" + retrieveRmMem.totalNoOfLearner));
+
+        
         for (int i = 0; i< array1.size(); i++)
         {
 	        models.add(new Model(R.drawable.user,array1.get(i).toString(), null));

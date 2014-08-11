@@ -34,6 +34,7 @@ import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
 import android.app.Fragment;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -43,6 +44,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.LevelListDrawable;
@@ -55,6 +57,7 @@ import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -63,6 +66,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnKeyListener;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
@@ -71,9 +75,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Filter;
 import android.widget.Filterable;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
+import android.widget.SlidingDrawer;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.os.Build;
 import android.preference.PreferenceManager;
@@ -103,12 +112,14 @@ public class RoomMap extends FragmentActivity implements OnInfoWindowClickListen
 	Marker homeMarker = null;
 	//To know the center of singapore
 	static final LatLng singapore = new LatLng(1.352083, 103.819836);
-	
+	AutoCompleteTextView autoCompView;
 
 	//Dialog Method
 	AlertDialog dialog;
 	private static final int CREATERM_ALERT = 1;
 	private static final int MAIN = 2;
+	private static final int CREATESEARCH_ALERT = 3;
+	private static final int ROOMJOIN_ALERT = 4;
 	
 	//onActivityResult
 	private static final int CREATE_RM_RESULT_CODE = 100;
@@ -136,6 +147,7 @@ public class RoomMap extends FragmentActivity implements OnInfoWindowClickListen
 	private static final String TAG_LOCATION = "location";
 	private static final String TAG_LATLNG = "latLng";
 	private static final String TAG_TYPENAME = "typeName";
+	private static final String TAG_STATUS = "status";
 
 	/// An array of all of our comments
 	private JSONArray mComments = null;
@@ -143,10 +155,11 @@ public class RoomMap extends FragmentActivity implements OnInfoWindowClickListen
 	private ArrayList<HashMap<String, String>> mCommentList;
 	 
 	///LoadRoom Variables
-    String roomIdR, titleR, locationR, categoryR, noOfLearnerR, latLngR, usernameR, typeNameR;
+    String roomIdR, titleR, locationR, categoryR, noOfLearnerR, latLngR, usernameR, typeNameR, statusR;
     double latR, lngR;
     LatLng retrievedLatLng;
     Marker retrievedMarker = null;
+    List<Marker> listOfMarker = new ArrayList<Marker>(); //to save all the marker
 	 
 
 	//setupMap()
@@ -166,11 +179,61 @@ public class RoomMap extends FragmentActivity implements OnInfoWindowClickListen
     
     public static final String MyPREFERENCES = "MyPrefs" ;
 	SharedPreferences sharedpreferences;
+	
+	//For Slide Drawer
+	public static SlidingDrawer slide;
+	public static RadioGroup rgCategory;
+	public static ArrayList <String> schSubList = new ArrayList<String>();
+	public static ArrayList <String> musicList = new ArrayList<String>();
+	public static ArrayList <String> computerList = new ArrayList<String>();
+	public static ArrayList <String> othersList = new ArrayList<String>();
+	public static ArrayList <String> categoryList = new ArrayList<String>();
+	int countForRbtnId = 0;
+	String searchCategory = "";
+
+	//Retrieve All Sub
+	private static final String RETRIEVE_ALL_SUB_URL = "http://www.it3197Project.3eeweb.com/grpConnect/retrieveSubjectsWithTypeAll.php";
+	private JSONArray mCategory = null;
+	private ArrayList<HashMap<String, String>> mCategoryList;
+	private static final String TAG_NAME = "name";
+	String name, typeName;
+	
+	//Retrieve Rooms according to category
+	private static final String RETRIEVE_ROOM_WITH_CATEGORY_URL = "http://www.it3197Project.3eeweb.com/grpConnect/roomRetrieveWithCategory.php";
+	private JSONArray mSearch = null;
+	private ArrayList<HashMap<String, String>> mSearchList;
     
+	public static ArrayList<Integer> resourceForIconArr = new ArrayList<Integer>();
+	public static int count = 0;
+	
+	//Current Location Marker
+	Marker myLocation;
+	
+	public void setImageIcon(int resource)
+	{
+		resourceForIconArr.add(resource);
+	}
+
+	public void resetCount()
+	{
+		count = 0;
+	}
+	
+	//For when notification arrive
+	boolean notificationArrive = false;
+	String titleToFocus = "";
+	
+	//CreateYesMember - AsyncTask
+	String roomIdForYes;
+	private static final String CREATE_ROOM_MEM_URL = "http://www.it3197Project.3eeweb.com/grpConnect/rmMemCreate.php"; 
+	String yesMemId = "";
+	JSONParser jsonParser = new JSONParser();
+	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_room_map);
+
         
         Geocoder geocoder = new Geocoder(this, Locale.ENGLISH);
  
@@ -178,10 +241,18 @@ public class RoomMap extends FragmentActivity implements OnInfoWindowClickListen
         
         
         //To use custom infowindow
-        mMap.setInfoWindowAdapter(new PopupAdapter(getLayoutInflater()));
-        mMap.setOnInfoWindowClickListener(this);
         Log.i("sg.nyp.groupconnect", "onCreate");
         
+       //When user agree to join the room (Invite from CreateRmStep3)
+		Intent intent1 = getIntent();
+        Bundle extras = intent1.getExtras();
+        if (extras != null) {
+        	
+        	roomIdForYes = extras.getString("roomId");
+        	yesMemId = extras.getString("memId");
+    		Log.i("CreateRmStep3", "YesMemId" + yesMemId + roomIdForYes);
+    		new CreateYesMember().execute();
+        }
         
         RelativeLayout rLayout = (RelativeLayout) findViewById(R.id.rLayout);
         rLayout.setVisibility(View.VISIBLE);
@@ -189,25 +260,29 @@ public class RoomMap extends FragmentActivity implements OnInfoWindowClickListen
         btnFind = (ImageView) findViewById(R.id.btnFind);
         
         
-        final AutoCompleteTextView autoCompView = (AutoCompleteTextView) findViewById(R.id.autoComplete);
+        autoCompView = (AutoCompleteTextView) findViewById(R.id.autoComplete);
         autoCompView.setAdapter(new PlacesAutoCompleteAdapter(this, R.layout.list_item_autocomplete));
-        /*autoCompView.setOnItemClickListener(new OnItemClickListener(){
+        autoCompView.setOnItemClickListener(new OnItemClickListener(){
 
 			@Override
 			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
 					long arg3) {
 				// TODO Auto-generated method stub
-				String str = (String) arg0.getItemAtPosition(arg2);
-	            //Toast.makeText(this, str, Toast.LENGTH_SHORT).show();
-				Log.i("Special", "AutoComplete: " + str);
-			}});*/
+				//Log.i("Special", "AutoComplete: " + str);
+				// Getting user input location
+				String location = autoCompView.getText().toString();
 
-
-       // getCurrentUserLocation = false;
+				if(location!=null && !location.equals("")){
+					new GeocoderTask().execute(location);
+				}
+			}});
         
         ActionBar actionBar = getActionBar();
 		actionBar.setIcon(R.drawable.back);
 		actionBar.setHomeButtonEnabled(true);
+        
+		//ForSlideDrawer
+		sildeDrawerSetup();
         
 		btnFind.setOnClickListener(new OnClickListener(){
 
@@ -220,7 +295,7 @@ public class RoomMap extends FragmentActivity implements OnInfoWindowClickListen
 				if(location!=null && !location.equals("")){
 					new GeocoderTask().execute(location);
 				}
-			}});
+		}});
         
         
     }
@@ -245,7 +320,17 @@ public class RoomMap extends FragmentActivity implements OnInfoWindowClickListen
 		Log.i("sg.nyp.groupconnect", "onOptionsItemSelected");
 		int id = item.getItemId();
 		if (id == android.R.id.home)
-			RoomMap.this.finish();
+		{
+			if (notificationArrive == false)
+				RoomMap.this.finish();
+			else
+			{
+				notificationArrive = false;
+				RoomMap.this.finish();
+				Intent intent = new Intent(this, MainActivity.class);
+				startActivity(intent);
+			}
+		}
 		if (id == R.id.refresh) {
 			mMap.clear();
 			new LoadRooms().execute();
@@ -268,23 +353,28 @@ public class RoomMap extends FragmentActivity implements OnInfoWindowClickListen
     //Once the infowindow is clicked
     public void onInfoWindowClick(Marker marker) {
     	Log.i("sg.nyp.groupconnect", "onInfoWindowClick");
-        //Toast.makeText(this, marker.getTitle(), Toast.LENGTH_LONG).show();
-    	
-    	//Split the content to get the location and category
-    	String content = marker.getSnippet();
-    	String [] split = content.split("\n"); // NOTE: Null Pointer --TC
-    	String[] category = split[0].split(":");
-    	String[] location  = split[1].split(":");
-    	
-    	//There is a extra space in front.
-    	String locationDetails = location[1].substring(1);
-    	String categoryDetails = category[1].substring(1);
-    	
-        Intent myIntent1 = new Intent(RoomMap.this,RoomDetails.class);
-      	myIntent1.putExtra("title", marker.getTitle());
-      	myIntent1.putExtra("location", locationDetails);
-      	myIntent1.putExtra("category", categoryDetails);
-      	startActivity(myIntent1);
+    	if (!marker.getTitle().equals("Search Location") && !marker.getTitle().equals("Home") && !marker.getTitle().equals("Your Location"))
+    	{
+    		//Split the content to get the location and category
+    		String content = marker.getSnippet();
+    		String [] split = content.split("\n"); // NOTE: Null Pointer --TC
+    		String[] category = split[0].split(":");
+    		String[] location  = split[1].split(":");
+
+    		//There is a extra space in front.
+    		String locationDetails = location[1].substring(1);
+    		String categoryDetails = category[1].substring(1);
+
+    		Intent myIntent1 = new Intent(RoomMap.this,RoomDetails.class);
+    		myIntent1.putExtra("title", marker.getTitle());
+    		myIntent1.putExtra("location", locationDetails);
+    		myIntent1.putExtra("category", categoryDetails);
+    		startActivity(myIntent1);
+    	}
+    	else if (marker.getTitle().equals("Search Location"))
+    	{
+    		showDialog(CREATESEARCH_ALERT);
+    	}
       }
 
 
@@ -302,6 +392,14 @@ public class RoomMap extends FragmentActivity implements OnInfoWindowClickListen
         	
     }
     
+    
+
+	@Override
+	protected void onStop() {
+		// TODO Auto-generated method stub
+		super.onStop();
+		
+	}
 
 	private void setUpMapIfNeeded() {
     	Log.i("sg.nyp.groupconnect", "setUpMapIfNeeded");
@@ -352,7 +450,48 @@ public class RoomMap extends FragmentActivity implements OnInfoWindowClickListen
   	    	
             }
     }
-	    
+    
+    //Slide Drawer START
+    
+       private void sildeDrawerSetup() {
+    	rgCategory = (RadioGroup) findViewById(R.id.rgCategory);
+    	
+    	new retrieveAllSubWithType().execute();
+
+    	slide = (SlidingDrawer) findViewById(R.id.slideDrawer);
+    	
+    }
+
+    public void RoomWithNoLocation(View v)
+    {
+    	Intent i = new Intent(RoomMap.this, RoomWithoutLocation.class);
+    	startActivity(i);
+    }
+    
+    
+    public void Search(View v) {
+
+    	int radioButtonID = rgCategory.getCheckedRadioButtonId();
+    	
+    	RadioButton rbtn = (RadioButton) findViewById(radioButtonID);
+    	Log.i("RoomMap", rbtn.getText().toString());
+    	searchCategory = rbtn.getText().toString();
+    	
+    	//View radioButton = rgSchSub.findViewById(radioButtonID);
+    	//int idx = rgSchSub.indexOfChild(radioButton);
+    	
+    	//Log.i("RoomMap", String.valueOf(radioButtonID)); //0123
+    	//Log.i("RoomMap", String.valueOf(idx));// 1234
+    	
+    	//Clear the map and close the slidedrawer
+    	mMap.clear();
+    	slide.close();
+    	new LoadRoomsAccToCategory().execute();
+
+    }
+    
+    //Slide Drawer END
+    
     //Current Location START
 	private void updateWithNewLocation(Location loc)
 	{
@@ -360,10 +499,14 @@ public class RoomMap extends FragmentActivity implements OnInfoWindowClickListen
 		
 		if (loc != null)
 		{
+			if (myLocation != null)
+			{
+				myLocation.remove();
+			}
 			double lat = loc.getLatitude();
 			double lon = loc.getLongitude();
 			LatLng currentLocation = new LatLng(lat, lon);
-			Marker myLocation = mMap.addMarker(new MarkerOptions()
+			myLocation = mMap.addMarker(new MarkerOptions()
             .position(currentLocation)
             .title("Your Location")
             .icon(BitmapDescriptorFactory
@@ -409,8 +552,8 @@ public class RoomMap extends FragmentActivity implements OnInfoWindowClickListen
     protected Dialog onCreateDialog(int id) {
     	Log.i("sg.nyp.groupconnect", "onCreateDialog");
     	
-        switch (id) {
-          case CREATERM_ALERT:
+        if (id == CREATERM_ALERT)
+        {
         	  Log.i("sg.nyp.groupconnect", "onCreateDialog - CREATERM_ALERT");
         	  
             	Builder builder = new AlertDialog.Builder(this);
@@ -420,11 +563,33 @@ public class RoomMap extends FragmentActivity implements OnInfoWindowClickListen
 	            builder.setNegativeButton("Cancel", new CancelOnClickListener());
 	            dialog = builder.create();
 	            dialog.show();
-	           
-	        	  
-          case MAIN:
-             //temp.remove();
+        }    
+        	  
+        else if (id == CREATESEARCH_ALERT)
+        {
+        	  Log.i("sg.nyp.groupconnect", "onCreateDialog - CREATERM_ALERT");
+        	  
+            	Builder builder1 = new AlertDialog.Builder(this);
+	            builder1.setMessage("Do you want to create a room at \n" + addressString + "?");
+	            builder1.setCancelable(true);
+	            builder1.setPositiveButton("Okay", new OkSearchOnClickListener());
+	            builder1.setNegativeButton("Cancel", new CancelOnClickListener());
+	            dialog = builder1.create();
+	            dialog.show();
         }
+        
+        else if (id == ROOMJOIN_ALERT)
+        {
+        	  Log.i("sg.nyp.groupconnect", "onCreateDialog - CREATERM_ALERT");
+        	  
+            	Builder builder2 = new AlertDialog.Builder(this);
+	            builder2.setMessage("You have successfully joined the room");
+	            builder2.setCancelable(true);
+	            builder2.setPositiveButton("Okay", new CancelOnClickListener());
+	            dialog = builder2.create();
+	            dialog.show();
+        }
+        
         
         return super.onCreateDialog(id);
       }
@@ -434,14 +599,6 @@ public class RoomMap extends FragmentActivity implements OnInfoWindowClickListen
     {
     	public void onClick(DialogInterface dialog, int which) 
     	{
-	      	//Toast.makeText(getApplicationContext(), addressString,Toast.LENGTH_LONG).show();
-	      	//startActivity(new Intent(getApplicationContext(), CreateRm.class));
-	      	/*Intent myIntent = new Intent(MainActivity.this,CreateRm.class);
-	      	
-	      	myIntent.putExtra("location", addressString);
-	      	myIntent.putExtra("lat", String.valueOf(lat));
-	      	myIntent.putExtra("lng", String.valueOf(lng));
-	      	startActivityForResult(myIntent,CREATE_RM_RESULT_CODE);*/
     		
     		Intent output = new Intent();
 			output.putExtra("location", addressString);
@@ -458,35 +615,30 @@ public class RoomMap extends FragmentActivity implements OnInfoWindowClickListen
     {
         public void onClick(DialogInterface dialog, int which) 
         {
-        	Toast.makeText(getApplicationContext(), "Cancel",
-	                  Toast.LENGTH_LONG).show();
-        	temp.remove();
+        	if (temp != null)
+        		temp.remove();
         	
         }
     }
+    
+    private final class OkSearchOnClickListener implements DialogInterface.OnClickListener 
+    {
+    	public void onClick(DialogInterface dialog, int which) 
+    	{
+    		
+    		Intent intent = new Intent(RoomMap.this, CreateRm.class);
+			intent.putExtra("location", autoCompView.getText().toString());
+			Log.i("CreateRmStep3", autoCompView.getText().toString());
+			startActivityForResult(intent,CREATE_RM_RESULT_CODE);
+    	}
+    } 
     
     
     String result = null;
     protected void onActivityResult (int requestCode, int resultCode, Intent data)
     {
 	    if (requestCode == CREATE_RM_RESULT_CODE ) {
-		    /*if(resultCode == RESULT_CANCELED){
-		    	String result = "";
-		    	result = data.getStringExtra("Cancel");
-		    	
-		    	if (result.equals("Canceled"))
-		    	{
-		    		//temp.remove();
-		    	}
-		    	Log.i("sg.nyp.groupconnect", "onActivityResult - Cancel");
-		    	
-		    }
-		    else*/ 
-	    	/*if (resultCode == RESULT_OK)
-		    {
-		    	Log.i("sg.nyp.groupconnect", "onActivityResult - Ok");
-		    	Toast.makeText(getApplicationContext(), "Okay", Toast.LENGTH_LONG).show();
-		    }*/
+
 	    }
     }
     
@@ -673,6 +825,7 @@ public class RoomMap extends FragmentActivity implements OnInfoWindowClickListen
 				noOfLearnerR = c.getString(TAG_NOOFLEARNER);
 				categoryR = c.getString(TAG_CATEGORY);
 				latLngR = c.getString(TAG_LATLNG);
+				statusR = c.getString(TAG_STATUS);
 				typeNameR = c.getString(TAG_TYPENAME);
 		
 				// creating new HashMap and store all data 
@@ -684,6 +837,7 @@ public class RoomMap extends FragmentActivity implements OnInfoWindowClickListen
 				map.put(TAG_NOOFLEARNER, noOfLearnerR);
 				map.put(TAG_LATLNG, latLngR);
 				map.put(TAG_CATEGORY, categoryR);
+				map.put(TAG_STATUS, statusR);
 				map.put(TAG_TYPENAME, typeNameR);
 
 				// adding HashList to ArrayList
@@ -699,6 +853,7 @@ public class RoomMap extends FragmentActivity implements OnInfoWindowClickListen
 	private void updateMap() 
 	{
 		Log.i("sg.nyp.groupconnect", "updateMap");
+		PopupAdapter pop = new PopupAdapter();
 		// To retrieve everything from Hashmap (mCommentList) and display all rooms
 		if (mCommentList != null)
 		{
@@ -707,7 +862,7 @@ public class RoomMap extends FragmentActivity implements OnInfoWindowClickListen
 				
 				String latLng = mCommentList.get(i).get(TAG_LATLNG);
 				String typeName = mCommentList.get(i).get(TAG_TYPENAME);
-				if (!latLng.equals("") && !latLng.equals("undefined"))
+				if (!latLng.equals("") && !latLng.equals("undefined") && !latLng.equals(null))
 				{
 					//Spliting the lat Lng 
 					String[] parts = latLng.split(",");
@@ -718,9 +873,15 @@ public class RoomMap extends FragmentActivity implements OnInfoWindowClickListen
 					BitmapDescriptor icon = null;
 					Log.i("RoomMap", "TypeName:" + typeName);
 					if (typeName.equals("School Subjects"))
+					{
 						icon = BitmapDescriptorFactory.fromResource(R.drawable.school_mapicon);
+						setImageIcon(R.drawable.school_mapicon);
+					}
 					else if (typeName.equals("Music"))
+					{
 						icon = BitmapDescriptorFactory.fromResource(R.drawable.music_mapicon);
+						setImageIcon(R.drawable.music_mapicon);
+					}
 					else if (typeName.equals("Computer-related"))
 						icon = BitmapDescriptorFactory.fromResource(R.drawable.computer_mapicon);
 					else if (typeName.equals("Others"))
@@ -729,12 +890,17 @@ public class RoomMap extends FragmentActivity implements OnInfoWindowClickListen
 					retrievedMarker = mMap.addMarker(new MarkerOptions()
 						.position(retrievedLatLng)
 						.title(mCommentList.get(i).get(TAG_TITLE))
-						.snippet("Category: " + mCommentList.get(i).get(TAG_CATEGORY) + "\n" + "Location: " + mCommentList.get(i).get(TAG_LOCATION))
+						.snippet("Category: " + mCommentList.get(i).get(TAG_CATEGORY) + "\n" + "Location: " + mCommentList.get(i).get(TAG_LOCATION) + "\n" + "Status: " + mCommentList.get(i).get(TAG_STATUS))
 						.icon(icon));
+					
+					
+					listOfMarker.add(retrievedMarker);
+					
 				}
 			}
 			
-			
+		
+	        resetCount();
 		}
 		
 		//To get the home location
@@ -765,40 +931,24 @@ public class RoomMap extends FragmentActivity implements OnInfoWindowClickListen
         updateWithNewLocation(loc);
 
         locManager.requestLocationUpdates(provider, 2000, 10, locationListener);
-		
-       /* String homeLocation = mem_home;
-
-        if(homeLocation==null || homeLocation.equals("")){
-            Toast.makeText(getBaseContext(), "No Place is entered", Toast.LENGTH_SHORT).show();
-            return;
+        
+		Intent intent1 = getIntent();
+        Bundle extras = intent1.getExtras();
+        if (extras != null) {
+            notificationArrive = extras.getBoolean("arrive");
+            titleToFocus = extras.getString("titleToFocus");
+        	Log.i("NotiticationTest", notificationArrive + titleToFocus);
+            
+            for(Marker m : listOfMarker) {
+                if(m.getTitle().equals(titleToFocus)) {
+                    // do something with the marker
+                	mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(m.getPosition(), 12)); 
+                	m.showInfoWindow();
+                    break; // stop the loop
+                }
+            }
         }
 
-        String url = "https://maps.googleapis.com/maps/api/geocode/json?";
-
-        try {
-            // encoding special characters like space in the user input place
-        	homeLocation = URLEncoder.encode(homeLocation, "utf-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-
-        String address = "address=" + homeLocation;
-
-        String sensor = "sensor=false";
-
-        // url , from where the geocoding data is fetched
-        url = url + address + "&" + sensor;
-
-        // Instantiating DownloadTask to get places from Google Geocoding service
-        // in a non-ui thread
-        DownloadTask downloadTask = new DownloadTask();
-
-        // Start downloading the geocoding places
-        downloadTask.execute(url);*/
-		
-		
-		
-		
 	}
     
 	public class LoadRooms extends AsyncTask<Void, Void, Boolean> {
@@ -829,6 +979,334 @@ public class RoomMap extends FragmentActivity implements OnInfoWindowClickListen
 			pDialog.dismiss();
 			updateMap();
 		}
+	}
+	
+		public class retrieveAllSubWithType extends AsyncTask<Void, Void, Boolean> {
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			Log.i("sg.nyp.groupconnect", "LoadRoom - Preexecute");
+		}
+
+		@Override
+		protected Boolean doInBackground(Void... arg0) {
+
+			mCategoryList = new ArrayList<HashMap<String, String>>();
+
+			JSONParser jParser = new JSONParser();
+			JSONObject json = jParser.getJSONFromUrl(RETRIEVE_ALL_SUB_URL);
+
+			try {
+
+				mCategory = json.getJSONArray(TAG_POSTS);
+
+				for (int i = 0; i < mCategory.length(); i++) {
+					JSONObject c = mCategory.getJSONObject(i);
+
+					name = c.getString(TAG_NAME);
+					typeName = c.getString(TAG_TYPENAME);
+			
+					HashMap<String, String> map = new HashMap<String, String>();
+					
+					map.put(TAG_NAME, name);
+					map.put(TAG_TYPENAME, typeName);
+
+					mCategoryList.add(map); 
+				}
+
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+			
+			return null;
+
+		}
+
+		@Override
+		protected void onPostExecute(Boolean result) {
+			Log.i("sg.nyp.groupconnect", "LoadRoom - onPostExecute");
+			super.onPostExecute(result);
+			Log.i("sg.nyp.groupconnect", "updateMap");
+			
+			schSubList.clear();
+			musicList.clear();
+			computerList.clear();
+			othersList.clear();
+			categoryList.clear();
+
+			if (mCategoryList != null)
+			{
+				for (int i = 0; i<mCategoryList.size(); i++)
+				{
+
+					name = mCategoryList.get(i).get(TAG_NAME);
+					typeName = mCategoryList.get(i).get(TAG_TYPENAME);
+					
+					categoryList.add(name); 
+					
+					//For PopupAdapter
+					if (typeName.equals("School Subjects"))
+					{
+						schSubList.add(name);
+					}
+					else if (typeName.equals("Music"))
+					{
+						musicList.add(name);
+					}
+					else if (typeName.equals("Computer-related"))
+					{
+						computerList.add(name);
+					}
+					else if (typeName.equals("Others"))
+					{
+						othersList.add(name);
+					}
+					
+				}
+			
+
+				for (int i = 0; i < categoryList.size(); i++) {
+					RadioButton rdbtn = new RadioButton(RoomMap.this);
+					rdbtn.setId(countForRbtnId);
+					rdbtn.setText(categoryList.get(i));
+					rdbtn.setTextColor(Color.WHITE);
+					rdbtn.setTextSize(20f);
+					rgCategory.addView(rdbtn);
+					
+					if (countForRbtnId == 0) //For some reason the id 1,2,3 does not work
+						countForRbtnId = 4;
+					else
+						countForRbtnId++;
+					
+				}
+				
+				
+			}
+			countForRbtnId = 0;
+			mMap.setInfoWindowAdapter(new PopupAdapter(getLayoutInflater()));
+	        mMap.setOnInfoWindowClickListener(RoomMap.this);
+		}
+	}
+	
+	
+	public class LoadRoomsAccToCategory extends AsyncTask<Void, Void, Boolean> {
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			pDialog = new ProgressDialog(RoomMap.this);
+			pDialog.setMessage("Loading Map...");
+			pDialog.setIndeterminate(false);
+			pDialog.setCancelable(false);
+			pDialog.show();
+			Log.i("sg.nyp.groupconnect", "LoadRoom - Preexecute");
+		}
+
+		@Override
+		protected Boolean doInBackground(Void... arg0) {
+
+			mSearchList = new ArrayList<HashMap<String, String>>();
+			String post_category = searchCategory;
+
+			List<NameValuePair> params = new ArrayList<NameValuePair>();
+			params.add(new BasicNameValuePair("category", post_category));
+
+			Log.d("request!", "starting");
+			JSONParser jsonParser = new JSONParser();
+			JSONObject json = jsonParser.makeHttpRequest(
+					RETRIEVE_ROOM_WITH_CATEGORY_URL, "POST", params);
+
+			try {
+
+				mSearch = json.getJSONArray(TAG_POSTS);
+
+				for (int i = 0; i < mSearch.length(); i++) {
+					JSONObject c = mSearch.getJSONObject(i);
+
+					roomIdR = c.getString(TAG_ROOMID);
+					titleR = c.getString(TAG_TITLE);
+					locationR = c.getString(TAG_LOCATION);
+					noOfLearnerR = c.getString(TAG_NOOFLEARNER);
+					categoryR = c.getString(TAG_CATEGORY);
+					latLngR = c.getString(TAG_LATLNG);
+					statusR = c.getString(TAG_STATUS);
+					typeNameR = c.getString(TAG_TYPENAME);
+			
+					HashMap<String, String> map = new HashMap<String, String>();
+					
+					map.put(TAG_ROOMID, roomIdR);
+					map.put(TAG_TITLE, titleR);
+					map.put(TAG_LOCATION, locationR);
+					map.put(TAG_NOOFLEARNER, noOfLearnerR);
+					map.put(TAG_LATLNG, latLngR);
+					map.put(TAG_CATEGORY, categoryR);
+					map.put(TAG_STATUS, statusR);
+					map.put(TAG_TYPENAME, typeNameR);
+
+					mSearchList.add(map); 
+
+				}
+
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+			return null;
+
+		}
+
+		@Override
+		protected void onPostExecute(Boolean result) {
+			Log.i("sg.nyp.groupconnect", "LoadRoom - onPostExecute");
+			super.onPostExecute(result);
+			pDialog.dismiss();
+			Log.i("sg.nyp.groupconnect", "updateMap");
+			PopupAdapter pop = new PopupAdapter();
+			// To retrieve everything from Hashmap (mCommentList) and display all rooms
+			if (mSearchList != null)
+			{
+				for (int i = 0; i<mSearchList.size(); i++)
+				{
+					
+					String latLng = mSearchList.get(i).get(TAG_LATLNG);
+					String typeName = mSearchList.get(i).get(TAG_TYPENAME);
+					if (!latLng.equals("") && !latLng.equals("undefined") && !latLng.equals(null))
+					{
+						//Spliting the lat Lng 
+						String[] parts = latLng.split(",");
+						latR = Double.parseDouble(parts[0]); 
+						lngR = Double.parseDouble(parts[1]);
+						
+						retrievedLatLng = new LatLng(latR , lngR);
+						BitmapDescriptor icon = null;
+						Log.i("RoomMap", "TypeName:" + typeName);
+						if (typeName.equals("School Subjects"))
+						{
+							icon = BitmapDescriptorFactory.fromResource(R.drawable.school_mapicon);
+							setImageIcon(R.drawable.school_mapicon);
+						}
+						else if (typeName.equals("Music"))
+						{
+							icon = BitmapDescriptorFactory.fromResource(R.drawable.music_mapicon);
+							setImageIcon(R.drawable.music_mapicon);
+						}
+						else if (typeName.equals("Computer-related"))
+							icon = BitmapDescriptorFactory.fromResource(R.drawable.computer_mapicon);
+						else if (typeName.equals("Others"))
+							icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN);
+
+						retrievedMarker = mMap.addMarker(new MarkerOptions()
+							.position(retrievedLatLng)
+							.title(mSearchList.get(i).get(TAG_TITLE))
+							.snippet("Category: " + mSearchList.get(i).get(TAG_CATEGORY) + "\n" + "Location: " + mSearchList.get(i).get(TAG_LOCATION) + "\n" + "Status: " + mSearchList.get(i).get(TAG_STATUS))
+							.icon(icon));
+						
+						
+						
+						
+					}
+				}
+				
+				mMap.setInfoWindowAdapter(new PopupAdapter(getLayoutInflater()));
+		        resetCount();
+			}
+			
+			//To get the home location
+	    	SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(RoomMap.this);
+	        Double mem_home_lat = Double.parseDouble(sp.getString("homeLat", ""));
+	        Double mem_home_lng = Double.parseDouble(sp.getString("homeLng", ""));
+	        
+	        homeMarker = mMap.addMarker(new MarkerOptions()
+	        .position(new LatLng(mem_home_lat,mem_home_lng))
+	        .title("Home")
+	        .icon(BitmapDescriptorFactory.fromResource(R.drawable.home_mapicon)));
+
+	        //Get the current location
+	        LocationManager locManager;
+	        String context = Context.LOCATION_SERVICE;
+	        locManager = (LocationManager) getSystemService(context);
+
+	        Criteria c = new Criteria();
+	        c.setAccuracy(Criteria.ACCURACY_FINE);
+	        c.setAltitudeRequired(false);
+	        c.setBearingRequired(false);
+	        c.setCostAllowed(true);
+	        c.setPowerRequirement(Criteria.POWER_LOW);
+
+	        String provider = LocationManager.NETWORK_PROVIDER;
+	        Location loc = locManager.getLastKnownLocation(provider);
+
+	        updateWithNewLocation(loc);
+
+	        locManager.requestLocationUpdates(provider, 2000, 10, locationListener);
+		}
+	}
+	
+	
+	class CreateYesMember extends AsyncTask<String, String, String> {
+
+		@Override
+	    protected void onPreExecute() {
+	        super.onPreExecute();
+	        
+	    }
+		
+		@Override
+		protected String doInBackground(String... args) {
+			// TODO Auto-generated method stub
+			 // Check for success tag
+	        int success;
+	        String post_roomId = roomIdForYes;
+	        String post_memberId = yesMemId;
+	        String type = "Learner";
+
+	        try {
+	            // Building Parameters
+	            List<NameValuePair> params = new ArrayList<NameValuePair>();
+	            params.add(new BasicNameValuePair("room_id", post_roomId));
+	            params.add(new BasicNameValuePair("memberId", post_memberId));
+	            params.add(new BasicNameValuePair("memberType", type));
+
+	            Log.d("request!", "starting");
+	            
+	            //Posting user data to script 
+	            JSONObject json = jsonParser.makeHttpRequest(
+	            		CREATE_ROOM_MEM_URL, "POST", params);
+
+	            // full json response
+	            Log.d("Post Comment attempt", json.toString());
+
+	            // json success element
+	            success = json.getInt(TAG_SUCCESS);
+	            if (success == 1) {
+	            	Log.d("Comment Added!", json.toString());    
+	            	
+	            	return json.getString(TAG_MESSAGE);
+	            }else{
+	            	Log.d("Comment Failure!", json.getString(TAG_MESSAGE));
+	            	//successAll= false;
+	            	return json.getString(TAG_MESSAGE);
+	            	
+	            }
+	        } catch (JSONException e) {
+	            e.printStackTrace();
+	        }
+
+	        
+	        return null;
+			
+		}
+		
+	    protected void onPostExecute(String file_url) {
+
+	       Log.i("CreateRmStep3", file_url);
+	       
+	       NotificationManager manager = (NotificationManager) RoomMap.this.getSystemService(Context.NOTIFICATION_SERVICE);
+	        manager.cancel(1);
+	       
+	       showDialog(ROOMJOIN_ALERT);
+	    }
+
 	}
 	
 	private class GeocoderTask extends AsyncTask<String, Void, List<Address>>{
@@ -871,18 +1349,14 @@ public class RoomMap extends FragmentActivity implements OnInfoWindowClickListen
                 String addressText = String.format("%s, %s",
                 		address.getMaxAddressLineIndex() > 0 ? address.getAddressLine(0) : "",
                 				address.getCountryName());
- 
-                //markerOptions = new MarkerOptions();
-                //markerOptions.position(latLng);
-                //markerOptions.title(addressText);
                 
                 searchMarker = mMap.addMarker(new MarkerOptions()
 	                .position(latLng)
 	                .title("Search Location")
-	                .snippet(addressText)
+	                .snippet(addressText + " \nClick Here to create a room with this address")
 	                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW)));
- 
-                //mMap.addMarker(markerOptions);
+                
+                searchMarker.showInfoWindow();
                 
                 // Locate the first location
                 if(i==0)

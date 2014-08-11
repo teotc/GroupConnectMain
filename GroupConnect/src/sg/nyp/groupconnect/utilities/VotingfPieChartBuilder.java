@@ -357,7 +357,11 @@ public class VotingfPieChartBuilder extends Activity {
 			pDialog.dismiss();
 
 			if (num != 0) {
-				if (confirm == 1) {
+				if(num == 1){
+					btnFinal.setVisibility(View.GONE);
+				}
+				
+				else if (confirm == 1) {
 					btnFinal.setVisibility(View.GONE);
 				}
 

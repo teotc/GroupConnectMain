@@ -23,6 +23,7 @@ import org.json.JSONObject;
 
 import sg.nyp.groupconnect.custom.CustomCategoryList;
 import sg.nyp.groupconnect.custom.CustomList;
+import sg.nyp.groupconnect.room.CreateRm.RetrieveRoomById;
 import sg.nyp.groupconnect.room.db.retrieveRmMem;
 import sg.nyp.groupconnect.utilities.ExpandableListAdapter;
 import sg.nyp.groupconnect.utilities.JSONParser;
@@ -87,6 +88,7 @@ public class CreateRmStep2 extends Activity {
 	
 	//Get data from CreateRm
 	String title, category, categoryType, desc, maxLearner, categoryMethod;
+	String location = ""; //From RoomMap By Search
     
     //Dialog Method
     AlertDialog dialog;
@@ -108,14 +110,17 @@ public class CreateRmStep2 extends Activity {
     // declare  the variables to Show/Set the date and time when Time and  Date Picker Dialog first appears
     private int mYear, mMonth, mDay,mHour,mMinute; 
     
-    
+    //For Update
+    boolean update = false;
+    String roomId, dateFrom, dateTo, timeFrom, timeTo, lat, lng;
+    ArrayList<String> learnerInGrpList = new ArrayList<String>();
     
     public CreateRmStep2()
     {
     	// Assign current Date and Time Values to Variables
     	final Calendar c = Calendar.getInstance();
     	mYear = c.get(Calendar.YEAR);
-    	mMonth = c.get(Calendar.MONTH);
+    	mMonth = c.get(Calendar.MONTH)-1;
     	mDay = c.get(Calendar.DAY_OF_MONTH);
     	mHour = c.get(Calendar.HOUR_OF_DAY);
     	mMinute = c.get(Calendar.MINUTE);
@@ -143,14 +148,49 @@ public class CreateRmStep2 extends Activity {
         	desc = this.getIntent().getStringExtra("desc");
         	maxLearner = this.getIntent().getStringExtra("maxLearner");
         	categoryMethod = this.getIntent().getStringExtra("categoryMethod");
+        	update = this.getIntent().getBooleanExtra("update", false);
+        	if (update == true)
+        	{
+        		roomId = this.getIntent().getStringExtra("roomId");
+        		dateFrom = this.getIntent().getStringExtra("dateFrom");
+        		dateTo = this.getIntent().getStringExtra("dateTo");
+        		timeFrom = this.getIntent().getStringExtra("timeFrom");
+        		timeTo = this.getIntent().getStringExtra("timeTo");
+        		
+        		learnerInGrpList = this.getIntent().getStringArrayListExtra("memList");
+        		
+        		//Put the data into the view in this activity
+        		btnDateFrom.setText(dateFrom);
+        		btnDateTo.setText(dateTo);
+        		btnTimeFrom.setText(timeFrom);
+        		btnTimeTo.setText(timeTo);
+        		
+        		lat = this.getIntent().getStringExtra("lat");
+        		lng = this.getIntent().getStringExtra("lng");
+        		
+        	}
+        	//To get location for both searchCreate and update
+        	location = this.getIntent().getStringExtra("location");
             
         }
         
-        //Set the suggested date and time according to current date and time
-        btnDateFrom.setText(mDay + "/" + mMonth + "/" + mYear);
-        btnDateTo.setText((mDay+1) + "/" + (mMonth) + "/" + (mYear));
-        btnTimeFrom.setText(convertTime(mHour, mMinute));
-        btnTimeTo.setText(convertTime(mHour+1, mMinute));
+        if (update == false)
+        {
+	        //Set the suggested date and time according to current date and time
+	        btnDateFrom.setText(mDay + "/" + mMonth + "/" + mYear);
+	        btnDateTo.setText((mDay+1) + "/" + (mMonth) + "/" + (mYear));
+	        btnTimeFrom.setText(convertTime(mHour, mMinute));
+	        btnTimeTo.setText(convertTime(mHour+1, mMinute));
+	        
+	        ActionBar actionBar = getActionBar();
+			actionBar.setTitle("Create Room Step 2/3");
+        }
+        else
+        {
+        	ActionBar actionBar = getActionBar();
+			actionBar.setTitle("Update Room Step 2/3");
+        }
+        	
        
         btnDateFrom.setOnClickListener(new View.OnClickListener() {
            
@@ -204,9 +244,10 @@ public class CreateRmStep2 extends Activity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle action bar item clicks here. The action bar will
-		// automatically handle clicks on the Home/Up button, so long
-		// as you specify a parent activity in AndroidManifest.xml.
+		// auto
 		int id = item.getItemId();
+		// matically handle clicks on the Home/Up button, so long
+		// as you specify a parent activity in AndroidManifest.xml.
 		if (id == R.id.next) {
 			
     		boolean success = true;
@@ -225,6 +266,18 @@ public class CreateRmStep2 extends Activity {
             	myIntent.putExtra("timeFrom", btnTimeFrom.getText().toString());
             	myIntent.putExtra("timeTo", btnTimeTo.getText().toString());
             	myIntent.putExtra("categoryMethod", categoryMethod);
+            	Log.i("CreateRmStep3", location);
+            	myIntent.putExtra("location", location);
+            	myIntent.putExtra("update", update);
+            	if (update == true)
+            	{
+            		myIntent.putExtra("roomId", roomId);
+            		myIntent.putExtra("lat", lat);
+            		myIntent.putExtra("lng", lng);
+            		myIntent.putStringArrayListExtra("memList", learnerInGrpList);
+            		Log.i("UpdateTest", lat + "," + lng);
+            	}
+            	
             	startActivity(myIntent);
             	//finish();
             	
@@ -264,24 +317,60 @@ public class CreateRmStep2 extends Activity {
 	            
           case DATEFROM_DIALOG_ID:
               // create a new DatePickerDialog with values you want to show
-             return new DatePickerDialog(this,
-                         mDateSetListenerFrom,
-                         mYear, mMonth, mDay);
+        	  if (update == false)
+        	  {
+        		  return new DatePickerDialog(this,
+        				  mDateSetListenerFrom,
+        				  mYear, mMonth, mDay);
+        	  }
+        	  else
+        	  {
+        		  setDate(btnDateFrom.getText().toString());
+        		  return new DatePickerDialog(this,
+        				  mDateSetListenerFrom,
+        				  mYear, mMonth, mDay);
+        	  }
              
           case DATETO_DIALOG_ID:
               // create a new DatePickerDialog with values you want to show
-             return new DatePickerDialog(this,
-                         mDateSetListenerTo,
-                         mYear, mMonth, mDay+1);
+        	  if (update == false)
+        	  {
+        		  return new DatePickerDialog(this,
+        				  mDateSetListenerTo,
+        				  mYear, mMonth, mDay+1);
+        	  }
+        	  else
+        	  {
+        		  setDate(btnDateTo.getText().toString());
+        		  return new DatePickerDialog(this,
+        				  mDateSetListenerTo,
+        				  mYear, mMonth, mDay);
+        	  }
              // create a new TimePickerDialog with values you want to show
           case TIMEFROM_DIALOG_ID:
-             return new TimePickerDialog(this,
-                     mTimeSetListenerFrom, mHour, mMinute, false);
-             
+        	  if (update == false)
+        	  {
+        		  return new TimePickerDialog(this,
+        				  mTimeSetListenerFrom, mHour, mMinute, false);
+        	  }
+        	  else
+        	  {
+        		  setTime(btnTimeFrom.getText().toString());
+        		  return new TimePickerDialog(this,
+        				  mTimeSetListenerFrom, mHour, mMinute, false);
+        	  }
           case TIMETO_DIALOG_ID:
-              return new TimePickerDialog(this,
-                      mTimeSetListenerTo, mHour+1, mMinute, false);
-
+        	  if (update == false)
+        	  {
+        		  return new TimePickerDialog(this,
+        				  mTimeSetListenerTo, mHour+1, mMinute, false);
+        	  }
+        	  else
+        	  {
+        		  setTime(btnTimeTo.getText().toString());
+        		  return new TimePickerDialog(this,
+        				  mTimeSetListenerTo, mHour, mMinute, false);
+        	  }
         }
         
         return super.onCreateDialog(id);
@@ -304,7 +393,7 @@ public class CreateRmStep2 extends Activity {
     			int monthOfYear, int dayOfMonth) {
     		
     		year = yearSelected;
-    		month = monthOfYear;
+    		month = monthOfYear+1;
     		day = dayOfMonth;
     		// Set the Selected Date in Select date Button
     		btnDateFrom.setText(day +"/" +month + "/" +year);
@@ -317,7 +406,7 @@ public class CreateRmStep2 extends Activity {
     			int monthOfYear, int dayOfMonth) {
     		
     		year = yearSelected;
-    		month = monthOfYear;
+    		month = monthOfYear+1;
     		day = dayOfMonth;
     		// Set the Selected Date in Select date Button
     		btnDateTo.setText(day +"/" +month + "/" +year);
@@ -382,5 +471,25 @@ public class CreateRmStep2 extends Activity {
 	    return result;
     }
     
+    
+    public void setDate(String date)
+    {
+    	if (date != null)
+    	{
+    		String[] content = date.split("/");
+        	mDay = Integer.parseInt(content[0]);
+        	mMonth = Integer.parseInt(content[1])-1;
+        	mYear = Integer.parseInt(content[2]);
+    	}
+
+    }
+    
+    public void setTime(String time)
+    {
+    	String [] content = time.split(" ");
+    	String [] timeWithoutAMPM = content[0].split(":");
+    	mHour = Integer.parseInt(timeWithoutAMPM[0]);
+    	mMinute = Integer.parseInt(timeWithoutAMPM[1]);
+    }
  
 }

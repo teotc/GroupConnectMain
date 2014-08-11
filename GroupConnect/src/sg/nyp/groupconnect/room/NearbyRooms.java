@@ -59,6 +59,11 @@ public class NearbyRooms extends FragmentActivity {
 		ActionBar actionBar = getActionBar();
 		actionBar.setIcon(R.drawable.back);
 		actionBar.setHomeButtonEnabled(true);
+
+		coder = new Geocoder(getApplicationContext());
+		getAddress();
+
+		new CompareRoomDistance().execute();
 	}
 
 	private void getAddress() {
@@ -98,11 +103,7 @@ public class NearbyRooms extends FragmentActivity {
 	protected void onResume() {
 		super.onResume();
 		setUpMapIfNeeded();
-		
-		coder = new Geocoder(getApplicationContext());
-		getAddress();
 
-		new CompareRoomDistance().execute();
 	}
 
 	@Override

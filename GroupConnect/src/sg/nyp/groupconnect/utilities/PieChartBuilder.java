@@ -80,7 +80,7 @@ public class PieChartBuilder extends Activity {
 		setContentView(R.layout.chart);
 
 		setTitle("View Statistics");
-		
+
 		context = this;
 
 		SharedPreferences sp = PreferenceManager
@@ -314,7 +314,7 @@ public class PieChartBuilder extends Activity {
 		private static final String TAG_GENDER = "gender";
 		private static final String TAG_OLDGRADE = "oldGrade";
 		private static final String TAG_NEWGRADE = "newGrade";
-		
+
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
@@ -340,32 +340,46 @@ public class PieChartBuilder extends Activity {
 			if (mCursor.getCount() != 0) {
 				mCursor.moveToFirst();
 
-				Member m = new Member(mCursor.getInt(mCursor.getColumnIndex(TAG_ID)),
-						mCursor.getString(mCursor.getColumnIndex(TAG_NAME)), mCursor.getString(mCursor.getColumnIndex(TAG_LOCATION)),
+				Member m = new Member(
+						mCursor.getInt(mCursor.getColumnIndex(TAG_ID)),
+						mCursor.getString(mCursor.getColumnIndex(TAG_NAME)),
+						mCursor.getString(mCursor.getColumnIndex(TAG_LOCATION)),
 						mCursor.getDouble(mCursor.getColumnIndex(TAG_LATITUDE)),
 						mCursor.getDouble(mCursor.getColumnIndex(TAG_LONGITUDE)),
-						mCursor.getString(mCursor.getColumnIndex(TAG_GENDER)), schoolId, "", "", "", "");
+						mCursor.getString(mCursor.getColumnIndex(TAG_GENDER)),
+						schoolId, "", "", "", "");
 				arrayMember.add(m);
 
 				MemberGrades mg = new MemberGrades(Integer.toString(mCursor
-						.getInt(mCursor.getColumnIndex(TAG_ID))), Integer.toString(subjectId),
-						mCursor.getDouble(mCursor.getColumnIndex(TAG_OLDGRADE)),
+						.getInt(mCursor.getColumnIndex(TAG_ID))),
+						Integer.toString(subjectId), mCursor.getDouble(mCursor
+								.getColumnIndex(TAG_OLDGRADE)),
 						mCursor.getDouble(mCursor.getColumnIndex(TAG_NEWGRADE)));
 				arrayMemberGrade.add(mg);
 
 				while (mCursor.moveToNext()) {
 
-					m = new Member(mCursor.getInt(mCursor.getColumnIndex(TAG_ID)),
-							mCursor.getString(mCursor.getColumnIndex(TAG_NAME)), mCursor.getString(mCursor.getColumnIndex(TAG_LOCATION)),
-							mCursor.getDouble(mCursor.getColumnIndex(TAG_LATITUDE)),
-							mCursor.getDouble(mCursor.getColumnIndex(TAG_LONGITUDE)),
-							mCursor.getString(mCursor.getColumnIndex(TAG_GENDER)), schoolId, "", "", "", "");
+					m = new Member(mCursor.getInt(mCursor
+							.getColumnIndex(TAG_ID)), mCursor.getString(mCursor
+							.getColumnIndex(TAG_NAME)),
+							mCursor.getString(mCursor
+									.getColumnIndex(TAG_LOCATION)),
+							mCursor.getDouble(mCursor
+									.getColumnIndex(TAG_LATITUDE)),
+							mCursor.getDouble(mCursor
+									.getColumnIndex(TAG_LONGITUDE)),
+							mCursor.getString(mCursor
+									.getColumnIndex(TAG_GENDER)), schoolId, "",
+							"", "", "");
 					arrayMember.add(m);
 
 					mg = new MemberGrades(Integer.toString(mCursor
-							.getInt(mCursor.getColumnIndex(TAG_ID))), Integer.toString(subjectId),
-							mCursor.getDouble(mCursor.getColumnIndex(TAG_OLDGRADE)),
-							mCursor.getDouble(mCursor.getColumnIndex(TAG_NEWGRADE)));
+							.getInt(mCursor.getColumnIndex(TAG_ID))),
+							Integer.toString(subjectId),
+							mCursor.getDouble(mCursor
+									.getColumnIndex(TAG_OLDGRADE)),
+							mCursor.getDouble(mCursor
+									.getColumnIndex(TAG_NEWGRADE)));
 					arrayMemberGrade.add(mg);
 				}
 			}
@@ -523,17 +537,20 @@ public class PieChartBuilder extends Activity {
 																				public void onClick(
 																						DialogInterface dialog,
 																						int id) {
-																					StudIds.clear();
-																					for (int i = 0; i < seletedItems
-																							.size(); i++) {
-																						StudIds.add(arrayMember
-																								.get(seletedItems
-																										.get(i))
-																								.getId());
+																					if (seletedItems
+																							.size() > 0) {
+																						StudIds.clear();
+																						for (int i = 0; i < seletedItems
+																								.size(); i++) {
+																							StudIds.add(arrayMember
+																									.get(seletedItems
+																											.get(i))
+																									.getId());
+																						}
+																						count = 0;
+																						new retrieveRoomDetail()
+																								.execute();
 																					}
-																					count = 0;
-																					new retrieveRoomDetail()
-																							.execute();
 																				}
 																			})
 																	.setNegativeButton(
@@ -618,15 +635,17 @@ public class PieChartBuilder extends Activity {
 									@Override
 									public void onClick(DialogInterface dialog,
 											int id) {
-										StudIds.clear();
-										for (int i = 0; i < seletedItems.size(); i++) {
-											StudIds.add(arrayMember.get(
-													seletedItems.get(i))
-													.getId());
+										if (seletedItems.size() > 0) {
+											StudIds.clear();
+											for (int i = 0; i < seletedItems
+													.size(); i++) {
+												StudIds.add(arrayMember.get(
+														seletedItems.get(i))
+														.getId());
+											}
+											count = 0;
+											new retrieveRoomDetail().execute();
 										}
-										count = 0;
-										new retrieveRoomDetail().execute();
-
 									}
 								})
 						.setNegativeButton("Cancel",
@@ -679,11 +698,11 @@ public class PieChartBuilder extends Activity {
 		@Override
 		protected String doInBackground(String... args) {
 
-			RoomDbAdapter mDbHelper = new RoomDbAdapter(
-					PieChartBuilder.this);
+			RoomDbAdapter mDbHelper = new RoomDbAdapter(PieChartBuilder.this);
 			mDbHelper.open();
 
-			Cursor mCursor = mDbHelper.fetchCreatedRoom(currentMemberId, category);
+			Cursor mCursor = mDbHelper.fetchCreatedRoom(currentMemberId,
+					category);
 
 			roomId.clear();
 			roomNames.clear();
@@ -692,12 +711,15 @@ public class PieChartBuilder extends Activity {
 				mCursor.moveToFirst();
 
 				roomId.add(mCursor.getInt(mCursor.getColumnIndex(TAG_ROOM_ID)));
-				roomNames.add(mCursor.getString(mCursor.getColumnIndex(TAG_TITLE)));
+				roomNames.add(mCursor.getString(mCursor
+						.getColumnIndex(TAG_TITLE)));
 
 				while (mCursor.moveToNext()) {
 
-					roomId.add(mCursor.getInt(mCursor.getColumnIndex(TAG_ROOM_ID)));
-					roomNames.add(mCursor.getString(mCursor.getColumnIndex(TAG_TITLE)));
+					roomId.add(mCursor.getInt(mCursor
+							.getColumnIndex(TAG_ROOM_ID)));
+					roomNames.add(mCursor.getString(mCursor
+							.getColumnIndex(TAG_TITLE)));
 				}
 			}
 
@@ -761,11 +783,11 @@ public class PieChartBuilder extends Activity {
 
 		@Override
 		protected String doInBackground(String... args) {
-			RoomDbAdapter mDbHelper = new RoomDbAdapter(
-					PieChartBuilder.this);
+			RoomDbAdapter mDbHelper = new RoomDbAdapter(PieChartBuilder.this);
 			mDbHelper.open();
 
-			Cursor mCursor = mDbHelper.fetchRoom(Integer.toString(createdRoomId));
+			Cursor mCursor = mDbHelper.fetchRoom(Integer
+					.toString(createdRoomId));
 
 			member.clear();
 			memberId.clear();
@@ -774,16 +796,23 @@ public class PieChartBuilder extends Activity {
 			if (mCursor.getCount() != 0) {
 				mCursor.moveToFirst();
 
-				if (mCursor.getString(mCursor.getColumnIndex(TAG_MEMBERTYPE)).equals("Learner")) {
-					member.add(mCursor.getString(mCursor.getColumnIndex(TAG_MEMBERNAME)));
-					memberId.add(Integer.toString(mCursor.getInt(mCursor.getColumnIndex(TAG_MEMBERID))));
+				if (mCursor.getString(mCursor.getColumnIndex(TAG_MEMBERTYPE))
+						.equals("Learner")) {
+					member.add(mCursor.getString(mCursor
+							.getColumnIndex(TAG_MEMBERNAME)));
+					memberId.add(Integer.toString(mCursor.getInt(mCursor
+							.getColumnIndex(TAG_MEMBERID))));
 				}
 
 				while (mCursor.moveToNext()) {
 
-					if (mCursor.getString(mCursor.getColumnIndex(TAG_MEMBERTYPE)).equals("Learner")) {
-						member.add(mCursor.getString(mCursor.getColumnIndex(TAG_MEMBERNAME)));
-						memberId.add(Integer.toString(mCursor.getInt(mCursor.getColumnIndex(TAG_MEMBERID))));
+					if (mCursor.getString(
+							mCursor.getColumnIndex(TAG_MEMBERTYPE)).equals(
+							"Learner")) {
+						member.add(mCursor.getString(mCursor
+								.getColumnIndex(TAG_MEMBERNAME)));
+						memberId.add(Integer.toString(mCursor.getInt(mCursor
+								.getColumnIndex(TAG_MEMBERID))));
 					}
 				}
 
@@ -840,8 +869,7 @@ public class PieChartBuilder extends Activity {
 			@Override
 			protected String doInBackground(String... args) {
 				int success;
-				String post_roomId = Integer
-						.toString(createdRoomId);
+				String post_roomId = Integer.toString(createdRoomId);
 				String post_member = members.get(count);
 
 				try {
@@ -863,15 +891,18 @@ public class PieChartBuilder extends Activity {
 					success = json.getInt(TAG_SUCCESS);
 
 					if (success == 1) {
-						
+
 						RoomMembersDbAdapter mDbHelper = new RoomMembersDbAdapter(
 								PieChartBuilder.this);
 						mDbHelper.open();
 
-						mDbHelper.createRoomMembers(createdRoomId, Integer.parseInt(members.get(count)), "Learner");
+						mDbHelper
+								.createRoomMembers(createdRoomId,
+										Integer.parseInt(members.get(count)),
+										"Learner");
 
 						mDbHelper.close();
-						
+
 						return json.getString(TAG_MESSAGE);
 					} else {
 						return json.getString(TAG_MESSAGE);
@@ -896,12 +927,10 @@ public class PieChartBuilder extends Activity {
 							"Members added to group.", Toast.LENGTH_LONG)
 							.show();
 
-					Intent i = new Intent(
-							PieChartBuilder.this,
-							ViewRoom.class);
-					i.putExtra("createdRoomId",	createdRoomId);
+					Intent i = new Intent(PieChartBuilder.this, ViewRoom.class);
+					i.putExtra("createdRoomId", createdRoomId);
 					startActivity(i);
-					
+
 				}
 			}
 		}

@@ -69,12 +69,13 @@
     <string name="hello_world">Hello world!</string>
     <!-- Alfred -->
     <string name="title_activity_room_info">RoomInfo</string>
-    <string name="title_activity_create_rm">CreateRm</string>
+    <string name="title_activity_create_rm">Create Room Step 1/3</string>
     <string name="title_activity_room_details">Room Details</string>
-    <string name="title_activity_manage_room">ManageRoom</string>
-    <string name="title_activity_notification_display">NotificationDisplay</string>
-    <string name="title_activity_create_rm_step2">CreateRmStep2</string>
-    <string name="title_activity_create_rm_step3">CreateRmStep3</string>
+    <string name="title_activity_manage_room">Manage Room</string>
+    <string name="title_activity_notification_display">Notifications</string>
+    <string name="title_activity_create_rm_step2">Create Room Step 2/3</string>
+    <string name="title_activity_create_rm_step3">Create Room Step 3/3</string>
+    <string name="title_activity_room_without_location">Room Without Locations</string>
 
     <!-- Push Notification -->
     <string name="send_notification">Send myself a Notification</string>
@@ -85,16 +86,16 @@
     <string name="gcm_unregistered">Device Unregistered: (%1$s).</string>
     <string name="gcm_alert_title">Message</string>
     <string name="gcm_message">Message: (%1$s)</string>
-    
+
     <!-- Profile Pref -->
     <string name="ppf_ttl_profrel">Your Profile</string>
-    <string name="ppf_ttl_prof_name">Your Name</string>
-    <string name="ppf_diag_ttl_name">Edit your name</string>
+	    <string name="ppf_ttl_prof_name">Your Name</string>
+	    <string name="ppf_diag_ttl_name">Edit your name</string>
+    
     <!-- Room Pref -->
     <string name="ppf_ttl_roomrel">Room Related Settings</string>
     <string name="ppf_ttl_prof_interests">Interests</string>
     <string name="ppf_diag_interest_posbtn">Update</string>
     <string name="ppf_diag_ttl_list_interests">Select or Remove Interests</string>
-
 
 </resources>

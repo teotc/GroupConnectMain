@@ -25,6 +25,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
 
@@ -65,7 +66,7 @@ public class VoteMap extends FragmentActivity {
 		setContentView(R.layout.vote_map);
 
 		setTitle("Vote Location");
-		
+
 		SharedPreferences sp = PreferenceManager
 				.getDefaultSharedPreferences(VoteMap.this);
 		currentMemberId = sp.getString("id", null);
@@ -83,14 +84,15 @@ public class VoteMap extends FragmentActivity {
 		// Managed by Geraldine
 
 		extras = getIntent().getExtras();
+		
 		if (extras != null) {
 			currentRoomId = extras.getString("CURRENT_ROOM_ID");
 		}
-
+		
 		ActionBar actionBar = getActionBar();
 		actionBar.setIcon(R.drawable.back);
 		actionBar.setHomeButtonEnabled(true);
-
+		
 		new RetrieveLocation().execute();
 
 	}
@@ -168,7 +170,8 @@ public class VoteMap extends FragmentActivity {
 			mMap.addMarker(new MarkerOptions()
 					.position(myLocation)
 					.title(home)
-					.icon(BitmapDescriptorFactory.fromResource(R.drawable.home_mapicon)));
+					.icon(BitmapDescriptorFactory
+							.fromResource(R.drawable.home_mapicon)));
 
 			CircleOptions circleOptions = new CircleOptions()
 					.center(myLocation)
@@ -215,6 +218,9 @@ public class VoteMap extends FragmentActivity {
 															.getName()
 															.equals(marker
 																	.getTitle())) {
+														Log.e("test", marker.getTitle() + " " + availableLocationArray
+																.get(i)
+																.getId());
 														locationId = Integer
 																.toString(availableLocationArray
 																		.get(i)
@@ -296,7 +302,7 @@ public class VoteMap extends FragmentActivity {
 
 			mCursor.close();
 			mDbHelper.close();
-			
+
 			return null;
 
 		}
@@ -447,7 +453,6 @@ public class VoteMap extends FragmentActivity {
 				success = json.getInt(TAG_SUCCESS);
 
 				if (success == 1) {
-					
 					VoteLocationDbAdapter mDbHelper = new VoteLocationDbAdapter(
 							VoteMap.this);
 					mDbHelper.open();

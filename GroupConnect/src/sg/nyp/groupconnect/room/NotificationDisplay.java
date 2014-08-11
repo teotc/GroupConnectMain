@@ -10,6 +10,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import sg.nyp.groupconnect.MainActivity;
 import sg.nyp.groupconnect.R;
 import sg.nyp.groupconnect.R.drawable;
 import sg.nyp.groupconnect.R.id;
@@ -18,14 +19,19 @@ import sg.nyp.groupconnect.R.menu;
 import sg.nyp.groupconnect.custom.NotificationCustomList;
 import sg.nyp.groupconnect.utilities.JSONParser;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.preference.PreferenceManager;
 
@@ -34,22 +40,7 @@ public class NotificationDisplay extends Activity {
 	ListView notificationList;
 	String userId = "";
 	
-	Integer[] imageId = {
-			R.drawable.ic_launcher,
-			R.drawable.ic_launcher,
-			R.drawable.ic_launcher,
-			R.drawable.ic_launcher,
-			R.drawable.ic_launcher,
-			R.drawable.ic_launcher,
-			R.drawable.ic_launcher,
-			R.drawable.ic_launcher,
-			R.drawable.ic_launcher,
-			R.drawable.ic_launcher,
-			R.drawable.ic_launcher,
-			R.drawable.ic_launcher,
-			R.drawable.ic_launcher
-			
-	};
+	ArrayList<Integer> imageId = new ArrayList<Integer>();
 	
 	// Progress Dialog
 	private ProgressDialog pDialog;
@@ -66,73 +57,74 @@ public class NotificationDisplay extends Activity {
 	// manages all of our comments in a list.
 	private ArrayList<HashMap<String, String>> mCommentList;
 	
+	public static Activity activity;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_notification_display);
 
+		activity = NotificationDisplay.this;
+		
 		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(NotificationDisplay.this);
 		userId = sp.getString("id", "No ID");
 		
 		notificationList = (ListView) findViewById(R.id.notificationList);
 		
+		
+		
 		new LoadComments().execute();
+		
+		ActionBar actionBar = getActionBar();
+		actionBar.setIcon(R.drawable.back);
+		actionBar.setHomeButtonEnabled(true);
+		
+		notificationList.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
+					long arg3) {
+				// TODO Auto-generated method stub
+				Intent i = new Intent(NotificationDisplay.this, RoomDetails.class);
+				
+				String []content = messageArray.get(arg2).split("\n");
+			    String titleWithBracket = content[1].replace("(", "");
+			    String titleForRoom = titleWithBracket.replace(")", "");
+				
+				i.putExtra("title", titleForRoom);
+				startActivity(i);
+			}
+		});
 		
 	}
 	
 	public void updateJSONdata() {
 
-		// Instantiate the arraylist to contain all the JSON data.
-		// we are going to use a bunch of key-value pairs, referring
-		// to the json element name, and the content, for example,
-		// message it the tag, and "I'm awesome" as the content..
-
 		mCommentList = new ArrayList<HashMap<String, String>>();
 
-		// Bro, it's time to power up the J parser
-		//JSONParser jParser = new JSONParser();
-		// Feed the beast our comments url, and it spits us
-		// back a JSON object. Boo-yeah Jerome.
-		//JSONObject json = jParser.getJSONFromUrl(NOTIFICATION_RETRIEVE_URL);
-		
-		
 		List<NameValuePair> params = new ArrayList<NameValuePair>();
 		params.add(new BasicNameValuePair("userId", userId));
 
 		Log.d("request!", "starting");
-		// getting product details by making HTTP request
 		JSONObject json = jsonParser.makeHttpRequest(NOTIFICATION_RETRIEVE_URL, "POST",
 				params);
 
-		// when parsing JSON stuff, we should probably
-		// try to catch any exceptions:
 		try {
 
-			// I know I said we would check if "Posts were Avail." (success==1)
-			// before we tried to read the individual posts, but I lied...
-			// mComments will tell us how many "posts" or comments are
-			// available
 			mComments = json.getJSONArray(TAG_POSTS);
 
-			// looping through all posts according to the json object returned
 			for (int i = 0; i < mComments.length(); i++) {
 				JSONObject c = mComments.getJSONObject(i);
 
-				// gets the content of each tag
 				String title = c.getString("title");
 				String message = c.getString("message");
 
-				// creating new HashMap
 				HashMap<String, String> map = new HashMap<String, String>();
 
 				map.put("title", title);
 				map.put("message", message);
 
-				// adding HashList to ArrayList
 				mCommentList.add(map);
 
-				// annndddd, our JSON data is up to date same with our array
-				// list
 			}
 
 		} catch (JSONException e) {
@@ -156,8 +148,10 @@ public class NotificationDisplay extends Activity {
 				
 				titleArray.add(mCommentList.get(i).get("title"));
 				messageArray.add(mCommentList.get(i).get("message"));
-				
+				imageId.add(R.drawable.ic_launcher);
 			}
+			
+			
 			
 			
 			NotificationCustomList adapter = new NotificationCustomList(NotificationDisplay.this, titleArray, messageArray, imageId);
@@ -190,6 +184,17 @@ public class NotificationDisplay extends Activity {
 			pDialog.dismiss();
 			updateList();
 		}
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// TODO Auto-generated method stub
+		int id = item.getItemId();
+		if (id == android.R.id.home)
+		{
+			finish();
+		}
+		return super.onOptionsItemSelected(item);
 	}
 
 

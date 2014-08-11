@@ -1,43 +1,134 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:orientation="vertical" >
-    
-   <RelativeLayout
-       	android:id="@+id/rLayout"
+    android:layout_height="fill_parent" >
+
+    <fragment
+        android:id="@+id/map"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        class="com.google.android.gms.maps.SupportMapFragment" />
+
+    <RelativeLayout
+        android:id="@+id/rLayout"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
+        android:background="#FFFFFF"
         android:orientation="horizontal" >
- 
-       <!--<Button
-            android:id="@+id/btnFind"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Find"
-            android:layout_alignParentRight="true" /> --> 
+
         <ImageView
             android:id="@+id/btnFind"
             android:layout_width="37dp"
             android:layout_height="37dp"
-            android:src="@drawable/search" 
-            android:layout_alignParentRight="true"/>
+            android:layout_alignParentRight="true"
+            android:contentDescription=""
+            android:src="@drawable/search" />
 
-       	<AutoCompleteTextView
+        <AutoCompleteTextView
             android:id="@+id/autoComplete"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:layout_toLeftOf="@id/btnFind"
             android:ems="10"
-            android:hint="Search"
-            android:layout_toLeftOf="@id/btnFind" >
-
+            android:hint="Search" >
         </AutoCompleteTextView>
- 
     </RelativeLayout>
-    
-    <fragment 
-    		  android:id="@+id/map"
-    		  android:layout_width="match_parent"
-    		  android:layout_height="match_parent"
-    		  class="com.google.android.gms.maps.SupportMapFragment"/>
 
-</LinearLayout>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <SlidingDrawer
+            android:id="@+id/slideDrawer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:layout_centerVertical="true"
+            android:content="@+id/content"
+            android:handle="@+id/btn"
+            android:orientation="horizontal" >
+
+            <Button
+                android:id="@+id/btn"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/right"
+                android:gravity="center_vertical|center_horizontal|top" />
+
+            <ScrollView
+                android:id="@id/content"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#1C1C1C" >
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:padding="10dp" >
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="Sort Rooms"
+                        android:textColor="#FFFFFF"
+                        android:textSize="26dp" />
+                    
+                    
+                    <Button
+                        android:id="@+id/btnRoomWithNoLocation"
+                        android:layout_width="250dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginTop="10dp"
+                        android:background="@drawable/button_okay_white"
+                        android:onClick="RoomWithNoLocation"
+                        android:text="Room With No Location"
+                        android:textColor="#FFFFFF" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="15dp"
+                        android:gravity="left"
+                        android:text="Category:"
+                        android:textColor="#FFFFFF"
+                        android:textSize="23dp" />
+
+                    <RadioGroup
+                        android:id="@+id/rgCategory"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="#FFFFFF"
+                        android:textSize="20dp" />
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" >
+
+                        <Button
+                            android:id="@+id/btnSearch"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentRight="true"
+                            android:layout_marginRight="5dp"
+                            android:layout_marginTop="15dp"
+                            android:background="@drawable/button_okay_white"
+                            android:drawableLeft="@drawable/search2"
+                            android:drawablePadding="10dp"
+                            android:onClick="Search"
+                            android:paddingLeft="10dp"
+                            android:paddingRight="15dp"
+                            android:text="Search"
+                            android:textColor="#FFFFFF" />
+                    </RelativeLayout>
+
+                    
+                </LinearLayout>
+            </ScrollView>
+        </SlidingDrawer>
+    </RelativeLayout>
+
+</RelativeLayout>

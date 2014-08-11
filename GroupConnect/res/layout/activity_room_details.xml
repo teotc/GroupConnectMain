@@ -1,261 +1,179 @@
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/scrollView1"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:padding="5dp" >
 
-	<LinearLayout
-	    android:layout_width="fill_parent"
-	    android:layout_height="fill_parent"
-	    android:orientation="vertical"
-	    android:padding="5dp" >
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
 
-	    <LinearLayout
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content" >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="4dp"
+            android:layout_marginLeft="5dp"
+            android:gravity="center_vertical"
+            android:text="Title of the Room"
+            android:textSize="19dp"
+            android:textStyle="bold" />
 
-	        <TextView
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:layout_alignParentBottom="true"
-	            android:layout_marginBottom="4dp"
-	            android:layout_marginLeft="5dp"
-	            android:gravity="center_vertical"
-	            android:text="Title of the Room"
-	            android:textSize="16dp" />
+        <TextView
+            android:id="@+id/tvStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="3dp"
+            android:background="@drawable/rectangle"
+            android:padding="3dp"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+    </LinearLayout>
 
-	        <TextView
-	            android:id="@+id/tvStatus"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:layout_marginLeft="3dp"
-	            android:background="@drawable/rectangle"
-	            android:padding="3dp"
-	            android:textColor="#FFFFFF"
-	            android:textSize="12sp"
-	            android:textStyle="bold" />
-	    </LinearLayout>
+    <!-- divider -->
 
-	    <!-- divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="1dp"
+        android:background="#DADADC" >
+    </View>
 
-	    <View
-	        android:layout_width="match_parent"
-	        android:layout_height="1dp"
-	        android:layout_alignParentBottom="true"
-	        android:layout_marginBottom="1dp"
-	        android:background="#DADADC" >
-	    </View>
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="5dp"
+        android:text=""
+        android:textSize="15dp" />
 
-	    <TextView
-	        android:id="@+id/tvTitle"
-	        android:layout_width="fill_parent"
-	        android:layout_height="wrap_content"
-	        android:layout_marginBottom="10dp"
-	        android:layout_marginLeft="5dp"
-	        android:text="" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="4dp"
+        android:layout_marginLeft="5dp"
+        android:gravity="center_vertical"
+        android:text="Category"
+        android:textSize="19dp"
+        android:textStyle="bold" />
 
-	    <TextView
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:layout_alignParentBottom="true"
-	        android:layout_marginBottom="4dp"
-	        android:layout_marginLeft="5dp"
-	        android:gravity="center_vertical"
-	        android:text="Category"
-	        android:textSize="16dp" />
+    <!-- divider -->
 
-	    <!-- divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="1dp"
+        android:background="#DADADC" >
+    </View>
 
-	    <View
-	        android:layout_width="match_parent"
-	        android:layout_height="1dp"
-	        android:layout_alignParentBottom="true"
-	        android:layout_marginBottom="1dp"
-	        android:background="#DADADC" >
-	    </View>
+    <TextView
+        android:id="@+id/tvCategory"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="5dp"
+        android:text=""
+        android:textSize="15dp" />
 
-	    <TextView
-	        android:id="@+id/tvCategory"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:layout_marginBottom="10dp"
-	        android:layout_marginLeft="5dp"
-	        android:text="" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="4dp"
+        android:layout_marginLeft="5dp"
+        android:gravity="center_vertical"
+        android:text="Location"
+        android:textSize="19dp"
+        android:textStyle="bold" />
 
-	    <TextView
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:layout_alignParentBottom="true"
-	        android:layout_marginBottom="4dp"
-	        android:layout_marginLeft="5dp"
-	        android:gravity="center_vertical"
-	        android:text="Location"
-	        android:textSize="16dp" />
+    <!-- divider -->
 
-	    <!-- divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="1dp"
+        android:background="#DADADC" >
+    </View>
 
-	    <View
-	        android:layout_width="match_parent"
-	        android:layout_height="1dp"
-	        android:layout_alignParentBottom="true"
-	        android:layout_marginBottom="1dp"
-	        android:background="#DADADC" >
-	    </View>
+    <TextView
+        android:id="@+id/tvLocation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="5dp"
+        android:text=""
+        android:textSize="15dp" />
 
-	    <TextView
-	        android:id="@+id/tvLocation"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:layout_marginBottom="10dp"
-	        android:layout_marginLeft="5dp"
-	        android:text="" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="4dp"
+        android:layout_marginLeft="5dp"
+        android:gravity="center_vertical"
+        android:text="Date"
+        android:textSize="19dp"
+        android:textStyle="bold" />
 
-	    <TextView
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:layout_alignParentBottom="true"
-	        android:layout_marginBottom="4dp"
-	        android:layout_marginLeft="5dp"
-	        android:gravity="center_vertical"
-	        android:text="Date"
-	        android:textSize="16dp" />
+    <!-- divider -->
 
-	    <!-- divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="1dp"
+        android:background="#DADADC" >
+    </View>
 
-	    <View
-	        android:layout_width="match_parent"
-	        android:layout_height="1dp"
-	        android:layout_alignParentBottom="true"
-	        android:layout_marginBottom="1dp"
-	        android:background="#DADADC" >
-	    </View>
+    <TextView
+        android:id="@+id/tvDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="5dp"
+        android:text=""
+        android:textSize="15dp" />
 
-	    <TextView
-	        android:id="@+id/tvDate"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:layout_marginBottom="10dp"
-	        android:layout_marginLeft="5dp"
-	        android:text="" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="4dp"
+        android:layout_marginLeft="5dp"
+        android:gravity="center_vertical"
+        android:text="Time"
+        android:textSize="19dp"
+        android:textStyle="bold" />
 
-	    <TextView
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:layout_alignParentBottom="true"
-	        android:layout_marginBottom="4dp"
-	        android:layout_marginLeft="5dp"
-	        android:gravity="center_vertical"
-	        android:text="Time"
-	        android:textSize="16dp" />
+    <!-- divider -->
 
-	    <!-- divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="1dp"
+        android:background="#DADADC" >
+    </View>
 
-	    <View
-	        android:layout_width="match_parent"
-	        android:layout_height="1dp"
-	        android:layout_alignParentBottom="true"
-	        android:layout_marginBottom="1dp"
-	        android:background="#DADADC" >
-	    </View>
+    <TextView
+        android:id="@+id/tvTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="5dp"
+        android:text=""
+        android:textSize="15dp" />
 
-	    <TextView
-	        android:id="@+id/tvTime"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:layout_marginBottom="10dp"
-	        android:layout_marginLeft="5dp"
-	        android:text="" />
+    <ListView
+        android:id="@+id/memberList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+    </ListView>
 
-	    <!--
-        <LinearLayout
-	        android:layout_width="fill_parent"
-	        android:layout_height="wrap_content" 
-	        android:layout_marginBottom="10dp"
-	        android:orientation="horizontal">
-	
-		<TextView
-		        android:layout_width="wrap_content"
-		        android:layout_height="wrap_content"
-		        android:text="Educator: " />
-		
-		<TextView
-		        android:id="@+id/tvNoOfEducator"
-		        android:layout_width="wrap_content"
-		        android:layout_height="wrap_content"
-		        android:text="" />
-		
-		</LinearLayout>
-	
-		<ListView
-		    android:id="@+id/educatorList"
-		    android:layout_width="match_parent" 
-		    android:layout_height="wrap_content">
-		</ListView>
-		
-		<LinearLayout
-	        android:layout_width="fill_parent"
-	        android:layout_height="wrap_content" 
-	        android:layout_marginBottom="10dp"
-	        android:orientation="horizontal">
-	
-		    <TextView
-		        android:layout_width="wrap_content"
-		        android:layout_height="wrap_content"
-		        android:text="No. of Learner: " />
-	
-		     <TextView
-		        android:id="@+id/tvNoOfLearner"
-		        android:layout_width="wrap_content"
-		        android:layout_height="wrap_content"
-		        android:text="" />
-	        
-	    </LinearLayout>
-	    -->
-
-	    <ListView
-	        android:id="@+id/memberList"
-	        android:layout_width="match_parent"
-	        android:layout_height="320dp" >
-	    </ListView>
-
-	    <!--
-        <ListView
-		    android:id="@+id/educatorList"
-		    android:layout_width="match_parent" 
-		    android:layout_height="wrap_content">
-		</ListView>
-		
-		<ListView
-		    android:id="@+id/learnerList"
-		    android:layout_width="match_parent"
-		    android:layout_height="wrap_content" >
-		</ListView>
-	    -->
-
-	    <Button
-	        android:id="@+id/btnJoin"
-	        android:layout_width="fill_parent"
-	        android:layout_height="wrap_content"
-	        android:text="Join"
-	        android:visibility="gone" />
-
-	    <Button
-	        android:id="@+id/vote"
-	        android:layout_width="fill_parent"
-	        android:layout_height="wrap_content"
-	        android:layout_gravity="right"
-	        android:onClick="Vote"
-	        android:text="Vote" />
-
-	    <Button
-	        android:id="@+id/viewResult"
-	        android:layout_width="fill_parent"
-	        android:layout_height="wrap_content"
-	        android:layout_gravity="right"
-	        android:onClick="VoteResult"
-	        android:text="View Vote Result" />
-
-	</LinearLayout>
-	
-</ScrollView>
-	
-	
+</LinearLayout>
